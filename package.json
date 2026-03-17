@@ -1,0 +1,23 @@
+{
+    "name": "auto-wp-publisher",
+    "private": true,
+    "scripts": {
+        "dev": "dotenv -e .env -- turbo run dev",
+        "build": "dotenv -e .env -- turbo run build",
+        "db:generate": "pnpm -F @repo/database db:generate",
+        "db:push": "pnpm -F @repo/database db:push",
+        "lint": "turbo run lint",
+        "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+        "check-types": "turbo run check-types"
+    },
+    "devDependencies": {
+        "dotenv-cli": "^11.0.0",
+        "prettier": "^3.7.4",
+        "turbo": "^2.8.17",
+        "typescript": "5.9.2"
+    },
+    "packageManager": "pnpm@9.0.0",
+    "engines": {
+        "node": ">=18"
+    }
+}

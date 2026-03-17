@@ -1,0 +1,41 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  @@map("iam_users")
+}
+
+model Product {
+  id          String    @id @default(uuid())
+  name        String
+  description String?   @db.Text
+  rawContent  String?   @db.Text
+  aiContent   String?   @db.Text
+  imageUrl    String?
+  wpPostId    Int?
+
+  status      JobStatus @default(PENDING)
+  errorLog    String?   @db.Text
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("catalog_products")
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
