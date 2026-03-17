@@ -22,6 +22,7 @@ services:
     restart: always
     ports:
       - "3000:3000"
+      - "5555:5555"
     environment:
       DATABASE_URL: postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin_password}@database:5432/${DB_NAME:-wp_publisher_db}?schema=public
       PORT: 3000
