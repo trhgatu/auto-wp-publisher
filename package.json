@@ -11,7 +11,9 @@
         "lint": "turbo run lint",
         "format": "prettier --write \"**/*.{ts,tsx,md}\"",
         "check-types": "turbo run check-types",
-        "prepare": "husky"
+        "prepare": "husky",
+        "db:migrate": "docker exec -it wp-auto-api sh -c \"cd packages/database && ../../apps/server/node_modules/.bin/prisma migrate dev\"",
+        "db:studio": "docker exec -it wp-auto-api sh -c \"cd packages/database && ../../apps/server/node_modules/.bin/prisma studio --port 5555 --browser none\""
     },
     "lint-staged": {
         "apps/server/src/**/*.ts": [

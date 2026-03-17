@@ -39,16 +39,16 @@ A production-ready NestJS boilerplate with **Domain-Driven Design (DDD)**, **Hex
 
 ## 🛠 Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | [NestJS](https://nestjs.com/) |
-| Language | TypeScript |
-| ORM | [Prisma](https://www.prisma.io/) |
-| Runtime | Node.js |
-| Container | Docker / Docker Compose |
-| Linter | ESLint (flat config) |
-| Formatter | Prettier |
-| Git Hooks | Husky |
+| Layer     | Technology                       |
+| --------- | -------------------------------- |
+| Framework | [NestJS](https://nestjs.com/)    |
+| Language  | TypeScript                       |
+| ORM       | [Prisma](https://www.prisma.io/) |
+| Runtime   | Node.js                          |
+| Container | Docker / Docker Compose          |
+| Linter    | ESLint (flat config)             |
+| Formatter | Prettier                         |
+| Git Hooks | Husky                            |
 
 ---
 
@@ -108,13 +108,13 @@ This starter combines **Domain-Driven Design (DDD)** with **Hexagonal Architectu
 
 ### Ports & Adapters in This Project
 
-| Concept | Role | Example |
-|---|---|---|
-| **Port** | Interface defined in the domain layer | `user.repository.ts` |
-| **Adapter (Driven)** | Infrastructure implementation of a Port | `prisma-user.repository.ts` |
-| **Mapper** | Translates between DB models and domain entities | `user.mapper.ts` |
-| **Value Object** | Strongly-typed domain primitive with built-in validation | `user-id.vo.ts`, `base-id.vo.ts` |
-| **Bounded Context** | Self-contained domain module | `contexts/iam/` |
+| Concept              | Role                                                     | Example                          |
+| -------------------- | -------------------------------------------------------- | -------------------------------- |
+| **Port**             | Interface defined in the domain layer                    | `user.repository.ts`             |
+| **Adapter (Driven)** | Infrastructure implementation of a Port                  | `prisma-user.repository.ts`      |
+| **Mapper**           | Translates between DB models and domain entities         | `user.mapper.ts`                 |
+| **Value Object**     | Strongly-typed domain primitive with built-in validation | `user-id.vo.ts`, `base-id.vo.ts` |
+| **Bounded Context**  | Self-contained domain module                             | `contexts/iam/`                  |
 
 ### Key Design Decisions
 
@@ -155,10 +155,10 @@ Copy the example env file and fill in your values:
 cp .env.example .env
 ```
 
-| Variable | Description | Example |
-|---|---|---|
-| `DATABASE_URL` | Prisma connection string | `postgresql://user:pass@localhost:5432/mydb` |
-| `PORT` | HTTP port the app listens on | `3000` |
+| Variable       | Description                  | Example                                      |
+| -------------- | ---------------------------- | -------------------------------------------- |
+| `DATABASE_URL` | Prisma connection string     | `postgresql://user:pass@localhost:5432/mydb` |
+| `PORT`         | HTTP port the app listens on | `3000`                                       |
 
 > See `.env.example` for the full list of required variables.
 

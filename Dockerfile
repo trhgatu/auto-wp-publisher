@@ -1,8 +1,6 @@
 FROM node:20-alpine AS builder
 RUN npm install -g pnpm turbo
-
 WORKDIR /app
-
 COPY . .
 RUN turbo prune @repo/server --docker
 
@@ -20,13 +18,15 @@ COPY turbo.json turbo.json
 RUN pnpm -F @repo/database db:generate
 RUN pnpm turbo run build --filter=@repo/server
 
-RUN ls -R apps/server/dist | grep .js
-
 FROM node:20-alpine AS runner
 WORKDIR /app
+
+RUN npm install -g prisma pnpm
 
 COPY --from=installer /app .
 
 EXPOSE 3000
+EXPOSE 5555
 
+# Lệnh chạy chính
 CMD ["node", "apps/server/dist/main"]
