@@ -2,8 +2,10 @@
     "name": "auto-wp-publisher",
     "private": true,
     "scripts": {
-        "dev": "dotenv -e .env -- turbo run dev",
-        "build": "dotenv -e .env -- turbo run build",
+        "dev": "turbo run dev",
+        "build": "turbo run build",
+        "clean": "turbo run clean && pnpm dlx rimraf node_modules",
+    "clean:all": "turbo run clean && pnpm dlx rimraf node_modules **/node_modules",
         "db:generate": "pnpm -F @repo/database db:generate",
         "db:push": "pnpm -F @repo/database db:push",
         "lint": "turbo run lint",
