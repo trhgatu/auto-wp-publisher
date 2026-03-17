@@ -1,0 +1,19 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: installer
+    volumes:
+      - .:/app:cached
+      - /app/node_modules
+      - /app/apps/server/node_modules
+      - /app/apps/server/dist
+      - /app/packages/database/node_modules
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+    command: >
+      sh -c "pnpm -F @repo/database db:generate &&
+             pnpm -F @repo/server dev"
