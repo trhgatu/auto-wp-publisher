@@ -1,7 +1,7 @@
 services:
   - type: web
     name: wp-auto-api
-    env: docker
+    env: image
     region: oregon 
     plan: free
     image:
@@ -23,7 +23,9 @@ services:
     name: wp-auto-redis
     region: oregon
     plan: free
-    ipAllowList: []
+    ipAllowList:
+      - cidr: 0.0.0.0/0
+        description: Allow all inclusive for testing
 
 databases:
   - name: wp-auto-db
