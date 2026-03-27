@@ -25,17 +25,6 @@ services:
       - key: WP_APP_PASSWORD
         sync: false
 
-  - type: web
-    name: wp-auto-web
-    env: static
-    region: oregon
-    plan: free
-    buildCommand: pnpm install && pnpm -F @repo/shared build && pnpm -F @repo/web build
-    staticPublishPath: apps/web/dist
-    envVars:
-      - key: VITE_API_URL
-        value: https://wp-auto-api.onrender.com
-
   - type: redis
     name: wp-auto-redis
     region: oregon
