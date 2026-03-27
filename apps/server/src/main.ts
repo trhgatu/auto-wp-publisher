@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { DomainExceptionFilter } from './shared/infrastructure/filters/domain-exception.filter';
 
 async function bootstrap() {
@@ -12,12 +13,15 @@ async function bootstrap() {
   const globalPrefix = 'api/v1';
   app.setGlobalPrefix(globalPrefix);
 
+  const server = app.getHttpAdapter();
+  server.get('/', (req: Request, res: Response) => res.status(200).send('OK'));
+
   const port = process.env.PORT ?? 3000;
 
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 
   logger.log(
-    `🚀 8eyond Infinite Backend is running on: http://localhost:${port}/${globalPrefix}`,
+    `🚀 8eyond Infinite Backend is running on: http://0.0.0.0:${port}/${globalPrefix}`,
   );
 }
 
