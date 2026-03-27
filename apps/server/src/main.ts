@@ -8,6 +8,13 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
+  // Mở CORS cho Frontend Vite (hoặc bất kỳ Domain hợp lệ nào khác sau này)
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
+
   app.useGlobalFilters(new DomainExceptionFilter());
 
   const globalPrefix = 'api/v1';

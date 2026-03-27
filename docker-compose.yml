@@ -28,6 +28,9 @@ services:
       PORT: 3000
       JWT_SECRET: ${JWT_SECRET}
       REDIS_URL: redis://cache:6379
+      WP_API_URL: ${WP_API_URL}
+      WP_USERNAME: ${WP_USERNAME}
+      WP_APP_PASSWORD: ${WP_APP_PASSWORD}
     depends_on:
       - database
       - cache

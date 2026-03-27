@@ -7,17 +7,17 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#09090b', // zinc-950
-        foreground: '#fafafa', // zinc-50
-        card: '#18181b', // zinc-900
-        'card-foreground': '#fafafa', // zinc-50
-        border: '#27272a', // zinc-800
+        background: '#f8fafc', // slate-50
+        foreground: '#0f172a', // slate-900
+        card: '#ffffff', // white
+        'card-foreground': '#0f172a', // slate-900
+        border: '#e2e8f0', // slate-200
         primary: {
-          DEFAULT: '#6366f1', // indigo-500
+          DEFAULT: '#4f46e5', // indigo-600
           foreground: '#ffffff',
         },
-        muted: '#27272a', // zinc-800
-        'muted-foreground': '#a1a1aa', // zinc-400
+        muted: '#f1f5f9', // slate-100
+        'muted-foreground': '#64748b', // slate-500
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
