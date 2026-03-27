@@ -2,10 +2,10 @@ services:
   - type: web
     name: wp-auto-api
     env: image
-    region: oregon 
+    region: oregon
     plan: free
     image:
-      url: docker.io/YOUR_DOCKERHUB_USERNAME/wp-publisher-api:latest
+      url: docker.io/trhgatu/wp-publisher-api:latest
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -21,7 +21,7 @@ services:
 
   - type: redis
     name: wp-auto-redis
-    region: oregon 
+    region: oregon
     plan: free
     ipAllowList:
       - source: 0.0.0.0/0
