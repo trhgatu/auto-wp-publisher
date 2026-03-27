@@ -1,11 +1,22 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, PlusCircle, Settings, Send } from "lucide-react";
+import {
+  LayoutDashboard,
+  PlusCircle,
+  Settings,
+  Send,
+  Globe,
+  Bot,
+  History,
+} from "lucide-react";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/" },
+  { icon: LayoutDashboard, label: "Danh sách Bài viết", path: "/" },
   { icon: PlusCircle, label: "Tạo Bài Viết", path: "/create" },
+  { icon: Globe, label: "Quản lý Website WP", path: "/websites" },
+  { icon: Bot, label: "Cấu hình AI Prompt", path: "/ai-settings" },
+  { icon: History, label: "Nhật ký Lỗi", path: "/logs" },
 ];
 
 export const Sidebar = () => {

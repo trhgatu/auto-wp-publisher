@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { ImportProductSchema } from "@repo/shared";
 import type { ImportProductDto } from "@repo/shared";
-import { z } from "zod";
 import { createJob } from "../api/createJob";
 
 export const CreateJob = () => {
@@ -41,23 +40,35 @@ export const CreateJob = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setErrors({});
+
+    const payload = {
+      title: formData.title,
+      baseDescription: formData.baseDescription,
+      category: formData.category,
+      ...(formData.sku ? { sku: formData.sku } : {}),
+      ...(formData.sourceUrl ? { sourceUrl: formData.sourceUrl } : {}),
+    };
+
+    // Thay vì bắt Exception, sử dụng safeParse để tránh lỗi lệch ZodError Class ở Monorepo
+    const result = ImportProductSchema.safeParse(payload);
+
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((e) => {
+        if (e.path[0]) fieldErrors[e.path[0].toString()] = e.message;
+      });
+      setErrors(fieldErrors);
+      setLoading(false);
+      return;
+    }
+
     try {
-      setLoading(true);
-      ImportProductSchema.parse(formData);
-      await createJob(formData);
+      await createJob(payload as ImportProductDto);
       navigate("/");
-    } catch (err: unknown) {
-      if (err instanceof z.ZodError) {
-        const fieldErrors: Record<string, string> = {};
-        (err as unknown as { errors: z.ZodIssue[] }).errors.forEach(
-          (e: z.ZodIssue) => {
-            if (e.path[0]) fieldErrors[e.path[0].toString()] = e.message;
-          },
-        );
-        setErrors(fieldErrors);
-      } else {
-        alert("Có lỗi xảy ra khi tạo Job kết nối máy chủ.");
-      }
+    } catch {
+      alert("Có lỗi xảy ra khi gọi máy chủ API.");
     } finally {
       setLoading(false);
     }

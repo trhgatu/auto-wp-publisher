@@ -8,12 +8,6 @@ export const JobsList = () => {
   const [jobs, setJobs] = useState<JobItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchJobs();
-    const interval = setInterval(fetchJobs, 5000); // Polling mỗi 5s
-    return () => clearInterval(interval);
-  }, []);
-
   const fetchJobs = async () => {
     try {
       const data = await getJobs();
@@ -21,9 +15,15 @@ export const JobsList = () => {
     } catch (err) {
       console.error("Failed to fetch jobs", err);
     } finally {
-      if (loading) setLoading(false);
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchJobs();
+    const interval = setInterval(fetchJobs, 5000); // Polling mỗi 5s
+    return () => clearInterval(interval);
+  }, []);
 
   if (loading) {
     return (
