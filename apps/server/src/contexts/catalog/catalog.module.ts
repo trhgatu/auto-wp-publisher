@@ -7,6 +7,7 @@ import { CreateProductHandler } from './products/application/commands/create-pro
 import { GetProductsHandler } from './products/application/queries/get-products/get-products.handler';
 import { ProductRepository } from './products/domain/product.repository';
 import { PrismaProductRepository } from './products/infrastructure/repositories/prisma-product.repository';
+import { WordPressService } from './jobs/services/wordpress.service';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { PrismaProductRepository } from './products/infrastructure/repositories/
   ],
   controllers: [ProductsController],
   providers: [
+    WordPressService,
     PublisherProcessor,
     CreateProductHandler,
     GetProductsHandler,

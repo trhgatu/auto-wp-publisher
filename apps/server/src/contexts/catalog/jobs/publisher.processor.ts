@@ -1,6 +1,9 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
+import { ProductRepository } from '../products/domain/product.repository';
+import { WordPressService } from './services/wordpress.service';
+import { ProductId } from '../products/domain/value-objects/product-id.vo';
 
 export interface PublishProductJobData {
   productId: string;
@@ -10,13 +13,67 @@ export interface PublishProductJobData {
 export class PublisherProcessor extends WorkerHost {
   private readonly logger = new Logger(PublisherProcessor.name);
 
+  constructor(
+    private readonly productRepo: ProductRepository,
+    private readonly wpService: WordPressService,
+  ) {
+    super();
+  }
+
   async process(job: Job<PublishProductJobData, void, string>): Promise<void> {
-    this.logger.log(
-      `Processing job ${job.id} for product ${job.data.productId}`,
-    );
+    const { productId } = job.data;
+    this.logger.log(`🚀 Worker Picked Job ${job.id} for Product ${productId}`);
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      // FIX: Cần tạo Value Object ProductId thay vì truyền string thô
+      const productIdVo = ProductId.create(productId);
+      const product = await this.productRepo.findById(productIdVo);
 
-    this.logger.log(`Job ${job.id} handle completed`);
+      if (!product) {
+        this.logger.error(`❌ Product ${productId} not found!`);
+        return;
+      }
+
+      this.logger.log(`🔄 Processing product: ${product.name}`);
+      product.markAsProcessing();
+      await this.productRepo.save(product);
+
+      const postUrl = await this.wpService.publishPost(
+        product.name,
+        product.rawContent,
+      );
+
+      product.markAsCompleted(
+        Math.floor(Math.random() * 10000),
+        `<p>Bài viết đã lên sóng: <a href="${postUrl}" target="_blank">${postUrl}</a></p>`,
+      );
+      await this.productRepo.save(product);
+
+      this.logger.log(`✅ Job ${job.id} completed successfully!`);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      const errorStack = err instanceof Error ? err.stack : '';
+      this.logger.error(
+        `💥 Job ${job.id} CRITICAL ERROR: ${errorMessage}`,
+        errorStack,
+      );
+
+      // Cố gắng báo lỗi về Database
+      try {
+        const product = await this.productRepo.findById(
+          ProductId.create(productId),
+        );
+        if (product) {
+          product.markAsFailed(errorMessage);
+          await this.productRepo.save(product);
+        }
+      } catch (innerErr: unknown) {
+        const innerMessage =
+          innerErr instanceof Error ? innerErr.message : String(innerErr);
+        this.logger.error(`Failed to record error to DB: ${innerMessage}`);
+      }
+
+      throw err;
+    }
   }
 }
