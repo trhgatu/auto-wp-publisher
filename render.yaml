@@ -21,8 +21,11 @@ services:
 
   - type: redis
     name: wp-auto-redis
-    region: oregon
+    region: oregon 
     plan: free
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: Allow all inclusive for testing
 
 databases:
   - name: wp-auto-db
@@ -30,3 +33,6 @@ databases:
     user: admin_wp
     region: oregon
     plan: free
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: Allow all inclusive for testing
