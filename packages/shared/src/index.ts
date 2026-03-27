@@ -10,9 +10,11 @@ export const ImportProductSchema = z.object({
 
 export type ImportProductDto = z.infer<typeof ImportProductSchema>;
 
-export enum JobStatus {
-  PENDING = "PENDING",
-  PROCESSING = "PROCESSING",
-  COMPLETED = "COMPLETED",
-  FAILED = "FAILED",
-}
+export const JobStatus = {
+  PENDING: "PENDING",
+  PROCESSING: "PROCESSING",
+  COMPLETED: "COMPLETED",
+  FAILED: "FAILED",
+} as const;
+
+export type JobStatus = (typeof JobStatus)[keyof typeof JobStatus];
