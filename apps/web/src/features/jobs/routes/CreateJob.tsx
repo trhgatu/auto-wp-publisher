@@ -28,11 +28,12 @@ export const CreateJob = () => {
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >,
   ) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    if (errors[e.target.name]) {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
       setErrors((prev) => {
         const newErrs = { ...prev };
-        delete newErrs[e.target.name];
+        delete newErrs[name];
         return newErrs;
       });
     }
