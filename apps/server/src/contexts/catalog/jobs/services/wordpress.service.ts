@@ -49,6 +49,7 @@ export class WordPressService {
           name: title,
           type: 'simple',
           regular_price: numericPrice,
+          sku: sku || undefined,
           description:
             rawContent ||
             `<p>Sản phẩm "${title}" vừa được khởi tạo bởi Auto Publisher.</p>`,
