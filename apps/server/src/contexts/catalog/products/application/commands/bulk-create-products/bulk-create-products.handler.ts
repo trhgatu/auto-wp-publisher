@@ -40,6 +40,14 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
           null, // description
           htmlContent,
           null, // imageUrl
+          data.price ? String(data.price) : null,
+          data.partNumbers ? String(data.partNumbers) : null,
+          data.material ? String(data.material) : null,
+          data.carModels ? String(data.carModels) : null,
+          data.shopeeLink ? String(data.shopeeLink) : null,
+          data.lazadaLink ? String(data.lazadaLink) : null,
+          data.tiktokLink ? String(data.tiktokLink) : null,
+          data.video ? String(data.video) : null,
         );
 
         product.markAsCreated();
@@ -56,7 +64,6 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
             backoff: { type: 'exponential', delay: 2000 },
           },
         );
-
         ids.push(id);
       } catch (err) {
         this.logger.error(`Failed to import product: ${data.title}`, err.stack);
@@ -91,33 +98,6 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
       }
     });
     html += `</table>`;
-
-    if (data.video) {
-      html += `<h3>Video Sản phẩm</h3>`;
-      // Hỗ trợ cả Youtube Shorts lồng vào iframe
-      const videoId = data.video.split('/').pop()?.split('?')[0];
-      html += `
-          <div style="margin-bottom: 20px;">
-            <iframe width="100%" height="400" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
-          </div>
-        `;
-    }
-
-    html += `<div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">`;
-
-    if (data.shopeeLink) {
-      html += `<a href="${data.shopeeLink}" target="_blank" style="background: #ee4d2d; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Mua trên Shopee</a>`;
-    }
-
-    if (data.lazadaLink) {
-      html += `<a href="${data.lazadaLink}" target="_blank" style="background: #00008b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Mua trên Lazada</a>`;
-    }
-
-    if (data.tiktokLink) {
-      html += `<a href="${data.tiktokLink}" target="_blank" style="background: #000000; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Mua trên Tiktok</a>`;
-    }
-
-    html += `</div>`;
 
     return html;
   }

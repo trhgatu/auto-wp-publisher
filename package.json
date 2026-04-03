@@ -3,9 +3,10 @@
     "private": true,
     "scripts": {
         "dev": "turbo run dev",
+        "docker:dev": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
         "build": "turbo run build",
         "clean": "turbo run clean && pnpm dlx rimraf node_modules",
-    "clean:all": "turbo run clean && pnpm dlx rimraf node_modules **/node_modules",
+        "clean:all": "turbo run clean && pnpm dlx rimraf node_modules **/node_modules",
         "db:generate": "pnpm -F @repo/database db:generate",
         "db:push": "pnpm -F @repo/database db:push",
         "lint": "turbo run lint",

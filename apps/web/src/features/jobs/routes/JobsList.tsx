@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { getJobs } from "../api/getJobs";
 import type { JobItem } from "../api/getJobs";
@@ -122,7 +123,9 @@ export const JobsList = () => {
                     className="border-b border-border/50 hover:bg-muted/10 transition-colors"
                   >
                     <td className="px-6 py-4 font-medium text-foreground max-w-md truncate">
-                      {job.name}
+                      <Link to={`/${job.id}`} className="hover:underline text-blue-600">
+                        {job.name}
+                      </Link>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <JobStatusBadge status={job.status} />
