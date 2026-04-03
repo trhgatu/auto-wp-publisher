@@ -10,6 +10,7 @@ services:
       - /app/apps/server/node_modules
       - /app/apps/server/dist
       - /app/packages/database/node_modules
+      - /app/packages/shared/node_modules
     environment:
       - NODE_ENV=development
       - WATCHPACK_POLLING=true
