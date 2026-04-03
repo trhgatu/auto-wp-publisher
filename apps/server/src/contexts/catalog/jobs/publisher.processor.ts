@@ -25,7 +25,6 @@ export class PublisherProcessor extends WorkerHost {
     this.logger.log(`🚀 Worker Picked Job ${job.id} for Product ${productId}`);
 
     try {
-      // FIX: Cần tạo Value Object ProductId thay vì truyền string thô
       const productIdVo = ProductId.create(productId);
       const product = await this.productRepo.findById(productIdVo);
 
@@ -34,18 +33,26 @@ export class PublisherProcessor extends WorkerHost {
         return;
       }
 
-      this.logger.log(`🔄 Processing product: ${product.name}`);
+      this.logger.log(`🔄 Processing WooCommerce product: ${product.name}`);
       product.markAsProcessing();
       await this.productRepo.save(product);
 
-      const postUrl = await this.wpService.publishPost(
+      const productUrl = await this.wpService.publishProduct(
         product.name,
         product.rawContent,
+        product.price,
+        product.sku,
+        product.material,
+        product.carModels,
+        product.shopeeLink,
+        product.lazadaLink,
+        product.tiktokLink,
+        product.videoUrl,
       );
 
       product.markAsCompleted(
         Math.floor(Math.random() * 10000),
-        `<p>Bài viết đã lên sóng: <a href="${postUrl}" target="_blank">${postUrl}</a></p>`,
+        `<p>Sản phẩm đã lên sóng: <a href="${productUrl}" target="_blank">${productUrl}</a></p>`,
       );
       await this.productRepo.save(product);
 
@@ -57,8 +64,6 @@ export class PublisherProcessor extends WorkerHost {
         `💥 Job ${job.id} CRITICAL ERROR: ${errorMessage}`,
         errorStack,
       );
-
-      // Cố gắng báo lỗi về Database
       try {
         const product = await this.productRepo.findById(
           ProductId.create(productId),

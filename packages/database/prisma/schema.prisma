@@ -23,6 +23,14 @@ model Product {
   aiContent   String?   @db.Text
   imageUrl    String?
   wpPostId    Int?
+  price       String?
+  sku         String?
+  material    String?
+  carModels   String?
+  shopeeLink  String?
+  lazadaLink  String?
+  tiktokLink  String?
+  videoUrl    String?
 
   status      JobStatus @default(PENDING)
   errorLog    String?   @db.Text

@@ -1,8 +1,9 @@
-import { Controller, Post, Get, Body, Query } from '@nestjs/common';
+import { Controller, Post, Get, Body, Query, Param } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateProductCommand } from '../../../application/commands/create-product/create-product.command';
 import { BulkCreateProductsCommand } from '../../../application/commands/bulk-create-products/bulk-create-products.command';
 import { GetProductsQuery } from '../../../application/queries/get-products/get-products.query';
+import { GetProductByIdQuery } from '../../../application/queries/get-product-by-id/get-product-by-id.query';
 import { ProductResponse } from '../responses/product.response';
 import {
   ImportProductSchema,
@@ -33,6 +34,11 @@ export class ProductsController {
         status,
       ),
     );
+  }
+
+  @Get(':id')
+  async getProductById(@Param('id') id: string): Promise<unknown> {
+    return this.queryBus.execute(new GetProductByIdQuery(id));
   }
 
   @Post()
