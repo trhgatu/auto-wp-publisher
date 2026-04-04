@@ -1,16 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply bg-background text-foreground antialiased font-sans selection:bg-primary selection:text-primary-foreground;
+    @apply bg-[#f8fafc] text-slate-800 antialiased font-sans isolate selection:bg-indigo-500/30;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400;
   }
 }
 
 /* Custom Utilities for elegant UI */
 @layer utilities {
   .glass {
-    @apply bg-card/80 backdrop-blur-lg border border-border;
+    @apply bg-white/70 backdrop-blur-xl border border-white/50;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+  }
+  .glass-card {
+    @apply bg-white rounded-2xl border border-slate-100/80 transition-all duration-300 hover:-translate-y-1;
+    box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08);
+  }
+  .glass-card:hover {
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
   }
 }
