@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Clock, AlertCircle, CheckCircle2, RefreshCw } from "lucide-react";
+import {
+  ArrowLeft,
+  Clock,
+  AlertCircle,
+  CheckCircle2,
+  RefreshCw,
+} from "lucide-react";
 import { getJobById } from "../api/getJobById";
 import type { JobDetailItem } from "../api/getJobById";
 
@@ -86,9 +92,7 @@ export function JobDetail() {
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {job.name}
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900">{job.name}</h1>
         </div>
         {getStatusBadge(job.status)}
       </div>
@@ -113,7 +117,9 @@ export function JobDetail() {
               </div>
               <div className="flex justify-between">
                 <dt className="text-gray-500">Giá:</dt>
-                <dd className="font-medium text-gray-900">{job.price || "-"}</dd>
+                <dd className="font-medium text-gray-900">
+                  {job.price || "-"}
+                </dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-gray-500">Chất liệu:</dt>
@@ -122,8 +128,16 @@ export function JobDetail() {
                 </dd>
               </div>
               <div className="flex justify-between">
+                <dt className="text-gray-500">Dòng xe:</dt>
+                <dd className="font-medium text-gray-900 truncate pl-4">
+                  {job.carModels || "-"}
+                </dd>
+              </div>
+              <div className="flex justify-between">
                 <dt className="text-gray-500">WP Post ID:</dt>
-                <dd className="font-medium text-gray-900">{job.wpPostId || "-"}</dd>
+                <dd className="font-medium text-gray-900">
+                  {job.wpPostId || "-"}
+                </dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-gray-500">Tạo lúc:</dt>
@@ -140,10 +154,13 @@ export function JobDetail() {
             </dl>
           </div>
 
-          {(job.shopeeLink || job.lazadaLink || job.tiktokLink) && (
+          {(job.shopeeLink ||
+            job.lazadaLink ||
+            job.tiktokLink ||
+            job.videoUrl) && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">
-                Liên kết Affiliate
+                Liên kết Mở Rộng
               </h3>
               <div className="space-y-3">
                 {job.shopeeLink && (
@@ -151,7 +168,7 @@ export function JobDetail() {
                     href={job.shopeeLink}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex justify-between items-center text-sm text-blue-600 hover:underline"
+                    className="flex justify-between items-center text-sm text-orange-600 hover:underline"
                   >
                     <span>Shopee</span>
                     <span className="text-gray-400">↗</span>
@@ -173,16 +190,27 @@ export function JobDetail() {
                     href={job.tiktokLink}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex justify-between items-center text-sm text-blue-600 hover:underline"
+                    className="flex justify-between items-center text-sm text-black hover:underline"
                   >
                     <span>TikTok Shop</span>
+                    <span className="text-gray-400">↗</span>
+                  </a>
+                )}
+                {job.videoUrl && (
+                  <a
+                    href={job.videoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex justify-between items-center text-sm text-red-600 hover:underline"
+                  >
+                    <span>Video YouTube</span>
                     <span className="text-gray-400">↗</span>
                   </a>
                 )}
               </div>
             </div>
           )}
-          
+
           {job.status === "FAILED" && job.errorLog && (
             <div className="bg-red-50 rounded-xl shadow-sm border border-red-100 p-6">
               <h3 className="text-lg font-semibold text-red-900 mb-2 flex items-center">
@@ -200,14 +228,14 @@ export function JobDetail() {
         <div className="lg:col-span-2 space-y-6">
           {job.imageUrl && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-               <img 
-                 src={job.imageUrl} 
-                 alt={job.name} 
-                 className="w-full max-h-96 object-cover bg-gray-50"
-               />
+              <img
+                src={job.imageUrl}
+                alt={job.name}
+                className="w-full max-h-96 object-cover bg-gray-50"
+              />
             </div>
           )}
-        
+
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">
               Mô tả / Nội dung gốc
@@ -216,14 +244,22 @@ export function JobDetail() {
               <div className="prose prose-sm max-w-none text-gray-700 space-y-4">
                 {job.description && (
                   <div>
-                    <h4 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-1">Description</h4>
-                    <div className="whitespace-pre-wrap leading-relaxed">{job.description}</div>
+                    <h4 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-1">
+                      Description
+                    </h4>
+                    <div className="whitespace-pre-wrap leading-relaxed">
+                      {job.description}
+                    </div>
                   </div>
                 )}
                 {job.rawContent && (
                   <div>
-                    <h4 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-1 mt-4">Raw Content</h4>
-                    <div className="whitespace-pre-wrap leading-relaxed bg-gray-50 p-4 rounded-lg text-xs font-mono">{job.rawContent}</div>
+                    <h4 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-1 mt-4">
+                      Raw Content
+                    </h4>
+                    <div className="whitespace-pre-wrap leading-relaxed bg-gray-50 p-4 rounded-lg text-xs font-mono">
+                      {job.rawContent}
+                    </div>
                   </div>
                 )}
               </div>
@@ -243,7 +279,6 @@ export function JobDetail() {
             </div>
           )}
         </div>
-
       </div>
     </div>
   );
