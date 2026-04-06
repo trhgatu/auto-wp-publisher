@@ -2,15 +2,13 @@ import React, { useState } from "react";
 import * as XLSX from "xlsx";
 import type { ImportProductDto } from "@repo/shared";
 import { Loader2, Upload, X, Check } from "lucide-react";
-import axios from "axios";
+import { useBulkCreateJobs } from "../hooks/useBulkCreateJobs";
 
 interface ExcelImportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
 
 export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
   isOpen,
@@ -18,8 +16,8 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
   onSuccess,
 }) => {
   const [data, setData] = useState<ImportProductDto[]>([]);
-  const [loading, setLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const mutation = useBulkCreateJobs();
 
   if (!isOpen) return null;
 
@@ -135,16 +133,13 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
 
   const handleImport = async () => {
     if (data.length === 0) return;
-    setLoading(true);
     try {
-      await axios.post(`${API_URL}/products/bulk`, data);
-      onSuccess();
+      await mutation.mutateAsync(data);
+      onSuccess?.();
       onClose();
     } catch (err) {
       console.error(err);
       alert("Lỗi khi import dữ liệu hàng loạt.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -288,11 +283,11 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
             Hủy
           </button>
           <button
-            disabled={data.length === 0 || loading}
+            disabled={data.length === 0 || mutation.isPending}
             onClick={handleImport}
             className="px-8 py-2 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-indigo-200 shadow-xl flex items-center"
           >
-            {loading ? (
+            {mutation.isPending ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Đang đẩy lên hàng đợi...

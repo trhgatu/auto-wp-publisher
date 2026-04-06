@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -7,36 +6,14 @@ import {
   CheckCircle2,
   RefreshCw,
 } from "lucide-react";
-import { getJobById } from "../api/getJobById";
+import { useJob } from "../hooks/useJob";
 import type { JobDetailItem } from "../api/getJobById";
 
 export function JobDetail() {
   const { id } = useParams<{ id: string }>();
-  const [job, setJob] = useState<JobDetailItem | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: job, isLoading, error } = useJob(id);
 
-  useEffect(() => {
-    async function fetchJob() {
-      if (!id) return;
-      try {
-        setLoading(true);
-        const data = await getJobById(id);
-        setJob(data);
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("Failed to load job details.");
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchJob();
-  }, [id]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <RefreshCw className="w-8 h-8 text-blue-500 animate-spin" />
@@ -48,7 +25,7 @@ export function JobDetail() {
     return (
       <div className="bg-red-50 text-red-600 p-4 rounded-lg flex items-center shadow-sm">
         <AlertCircle className="w-5 h-5 mr-2" />
-        {error || "Job not found"}
+        {(error as any)?.message || "Job not found"}
       </div>
     );
   }
@@ -87,7 +64,7 @@ export function JobDetail() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Link
-            to="/"
+            to="/jobs"
             className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500"
           >
             <ArrowLeft className="w-5 h-5" />
