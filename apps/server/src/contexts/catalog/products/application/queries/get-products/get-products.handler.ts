@@ -9,8 +9,11 @@ export class GetProductsHandler implements IQueryHandler<GetProductsQuery> {
 
   async execute(
     query: GetProductsQuery,
-  ): Promise<{ items: any[]; total: number }> {
-    const where: any = {};
+  ): Promise<{ items: unknown[]; total: number }> {
+    const where: {
+      status?: JobStatus;
+      name?: { contains: string; mode: 'insensitive' };
+    } = {};
 
     if (query.status) {
       where.status = query.status as JobStatus;
