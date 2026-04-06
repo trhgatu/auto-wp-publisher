@@ -25,7 +25,7 @@ export function JobDetail() {
     return (
       <div className="bg-red-50 text-red-600 p-4 rounded-lg flex items-center shadow-sm">
         <AlertCircle className="w-5 h-5 mr-2" />
-        {(error as any)?.message || "Job not found"}
+        {(error as { message?: string })?.message || "Job not found"}
       </div>
     );
   }
