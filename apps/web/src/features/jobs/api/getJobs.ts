@@ -16,13 +16,14 @@ export const getJobs = async (
     page?: number;
     limit?: number;
     status?: string;
+    search?: string;
   } = {},
 ): Promise<{ items: JobItem[]; total: number }> => {
-  const { page = 1, limit = 10, status } = params;
+  const { page = 1, limit = 10, status, search } = params;
   const offset = (page - 1) * limit;
 
   const response = await axios.get(`${API_URL}/products`, {
-    params: { limit, offset, status },
+    params: { limit, offset, status, search },
   });
 
   return response.data;

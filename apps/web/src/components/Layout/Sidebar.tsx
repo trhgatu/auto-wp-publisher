@@ -51,7 +51,7 @@ export const Sidebar = () => {
               to={item.path}
               className={twMerge(
                 clsx(
-                  "flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 group relative overflow-hidden",
+                  "flex items-center px-4 py-3 text-sm font-medium transition-all duration-300 group relative overflow-hidden",
                   isActive
                     ? "text-indigo-700 bg-indigo-50/50"
                     : "text-slate-500 hover:bg-slate-50 hover:text-slate-800",
@@ -59,7 +59,7 @@ export const Sidebar = () => {
               )}
             >
               {isActive && (
-                <span className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-600 rounded-r-full"></span>
+                <span className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-600"></span>
               )}
               <item.icon
                 className={clsx(

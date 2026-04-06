@@ -26,12 +26,14 @@ export class ProductsController {
     @Query('limit') limit?: number,
     @Query('offset') offset?: number,
     @Query('status') status?: string,
+    @Query('search') search?: string,
   ): Promise<unknown> {
     return this.queryBus.execute(
       new GetProductsQuery(
         limit ? Number(limit) : 10,
         offset ? Number(offset) : 0,
         status,
+        search,
       ),
     );
   }
@@ -46,7 +48,6 @@ export class ProductsController {
     @Body(new ZodValidationPipe(ImportProductSchema as unknown as z.ZodSchema))
     data: ImportProductDto,
   ): Promise<ProductResponse> {
-    // Kích hoạt Use Case: Lưu Pending Product & Bắn BullMQ Job
     const productId = await this.commandBus.execute<
       CreateProductCommand,
       string

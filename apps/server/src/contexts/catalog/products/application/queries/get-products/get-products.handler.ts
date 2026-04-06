@@ -9,8 +9,22 @@ export class GetProductsHandler implements IQueryHandler<GetProductsQuery> {
 
   async execute(
     query: GetProductsQuery,
-  ): Promise<{ items: any[]; total: number }> {
-    const where = query.status ? { status: query.status as JobStatus } : {};
+  ): Promise<{ items: unknown[]; total: number }> {
+    const where: {
+      status?: JobStatus;
+      name?: { contains: string; mode: 'insensitive' };
+    } = {};
+
+    if (query.status) {
+      where.status = query.status as JobStatus;
+    }
+
+    if (query.search) {
+      where.name = {
+        contains: query.search,
+        mode: 'insensitive',
+      };
+    }
 
     const [items, total] = await this.prisma.$transaction([
       this.prisma.product.findMany({
