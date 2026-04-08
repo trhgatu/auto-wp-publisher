@@ -6,7 +6,6 @@ export const ImportProductSchema = z.object({
   baseDescription: z.string().optional(),
   category: z.string().default("Uncategorized"),
   sourceUrl: z.string().url().optional(),
-  // Các trường mở rộng cho Excel
   dimensions: z.string().optional(),
   material: z.string().optional(),
   price: z.union([z.number(), z.string()]).optional(),
@@ -17,6 +16,8 @@ export const ImportProductSchema = z.object({
   shopeeLink: z.string().optional(),
   lazadaLink: z.string().optional(),
   tiktokLink: z.string().optional(),
+  imageUrl: z.string().optional(),
+  galleryImageUrls: z.string().optional(),
 });
 
 export type ImportProductDto = z.infer<typeof ImportProductSchema>;

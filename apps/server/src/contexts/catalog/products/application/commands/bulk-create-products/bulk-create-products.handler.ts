@@ -39,7 +39,8 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
           data.title,
           null, // description
           htmlContent,
-          null, // imageUrl
+          data.imageUrl || null,
+          data.galleryImageUrls || null,
           data.price ? String(data.price) : null,
           data.partNumbers ? String(data.partNumbers) : null,
           data.material ? String(data.material) : null,
@@ -50,6 +51,7 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
           data.video ? String(data.video) : null,
         );
 
+        this.logger.log(`Importing product: ${data.title} - Image: ${data.imageUrl}`);
         product.markAsCreated();
         await this.productRepository.save(product);
         this.publisher.mergeObjectContext(product).commit();

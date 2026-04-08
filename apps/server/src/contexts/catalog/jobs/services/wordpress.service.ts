@@ -15,6 +15,8 @@ export class WordPressService {
     lazadaLink: string | null = null,
     tiktokLink: string | null = null,
     videoUrl: string | null = null,
+    imageUrl: string | null = null,
+    galleryImageUrls: string | null = null,
   ): Promise<string> {
     const wpBaseUrl =
       process.env.WP_API_URL || 'https://phutungoto123.vn/wp-json';
@@ -49,7 +51,6 @@ export class WordPressService {
           name: title,
           type: 'simple',
           regular_price: numericPrice,
-          sku: sku || undefined,
           description:
             rawContent ||
             `<p>Sản phẩm "${title}" vừa được khởi tạo bởi Auto Publisher.</p>`,
@@ -116,6 +117,15 @@ export class WordPressService {
                   { key: '_product_video_placement', value: 'lightbox' },
                   { key: '_dt_product_video_placement', value: 'lightbox' },
                 ]
+              : []),
+          ],
+          images: [
+            ...(imageUrl ? [{ src: imageUrl }] : []),
+            ...(galleryImageUrls
+              ? galleryImageUrls
+                  .split(',')
+                  .map((url) => ({ src: url.trim() }))
+                  .filter((img) => img.src !== '')
               : []),
           ],
           status: 'publish',

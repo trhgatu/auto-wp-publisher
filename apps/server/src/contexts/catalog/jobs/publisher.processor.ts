@@ -48,6 +48,8 @@ export class PublisherProcessor extends WorkerHost {
         product.lazadaLink,
         product.tiktokLink,
         product.videoUrl,
+        product.imageUrl,
+        product.galleryImageUrls,
       );
 
       product.markAsCompleted(
