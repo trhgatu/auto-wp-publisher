@@ -54,28 +54,37 @@ export const Select: React.FC<SelectProps> = ({
   };
 
   return (
-    <div className={cn("relative w-full min-w-[200px]", className)} ref={dropdownRef}>
+    <div
+      className={cn("relative w-full min-w-[200px]", className)}
+      ref={dropdownRef}
+    >
       {/* Trigger Button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center justify-between w-full px-4 py-2.5 text-sm bg-white border border-slate-200 rounded-xl transition-all duration-300 text-left hover:border-indigo-400 hover:shadow-soft focus:outline-none focus:ring-4 focus:ring-indigo-500/10 group",
-          isOpen && "border-indigo-600 ring-4 ring-indigo-500/10",
+          "flex items-center justify-between w-full px-4 py-2 text-sm bg-white border border-slate-200 rounded-xl transition-all duration-300 text-left hover:border-red-400 hover:shadow-soft focus:outline-none focus:ring-4 focus:ring-red-500/10 group",
+          isOpen && "border-red-600 ring-4 ring-red-500/10",
         )}
       >
         <div className="flex items-center gap-2.5 truncate">
-          {leftIcon && <span className="text-slate-400 group-hover:text-indigo-500 transition-colors">{leftIcon}</span>}
+          {leftIcon && (
+            <span className="text-slate-400 group-hover:text-red-500 transition-colors">
+              {leftIcon}
+            </span>
+          )}
           {selectedOption ? (
-            <span className="font-medium text-slate-700 truncate">{selectedOption.label}</span>
+            <span className="font-medium text-slate-700 truncate">
+              {selectedOption.label}
+            </span>
           ) : (
             <span className="text-slate-400">{placeholder}</span>
           )}
         </div>
         <ChevronDown
           className={cn(
-            "w-4 h-4 text-slate-400 transition-transform duration-300 group-hover:text-indigo-500",
-            isOpen && "rotate-180 text-indigo-600",
+            "w-4 h-4 text-slate-400 transition-transform duration-300 group-hover:text-red-500",
+            isOpen && "rotate-180 text-red-600",
           )}
         />
       </button>
@@ -92,16 +101,18 @@ export const Select: React.FC<SelectProps> = ({
                 className={cn(
                   "flex items-center justify-between w-full px-3 py-2.5 text-sm font-medium rounded-[10px] transition-all duration-200 group text-left",
                   option.value === value
-                    ? "bg-indigo-600/10 text-indigo-700"
+                    ? "bg-red-600/10 text-red-700"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                 )}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                   {option.icon && <span className="flex-shrink-0 text-lg">{option.icon}</span>}
-                   <span className="truncate">{option.label}</span>
+                  {option.icon && (
+                    <span className="flex-shrink-0 text-lg">{option.icon}</span>
+                  )}
+                  <span className="truncate">{option.label}</span>
                 </div>
                 {option.value === value && (
-                  <Check className="w-4 h-4 text-indigo-600 animate-in zoom-in duration-300" />
+                  <Check className="w-4 h-4 text-red-600 animate-in zoom-in duration-300" />
                 )}
               </button>
             ))}

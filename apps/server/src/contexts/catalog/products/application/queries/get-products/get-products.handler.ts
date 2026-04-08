@@ -13,6 +13,7 @@ export class GetProductsHandler implements IQueryHandler<GetProductsQuery> {
     const where: {
       status?: JobStatus;
       name?: { contains: string; mode: 'insensitive' };
+      createdAt?: { gte?: Date; lte?: Date };
     } = {};
 
     if (query.status) {
@@ -26,6 +27,19 @@ export class GetProductsHandler implements IQueryHandler<GetProductsQuery> {
       };
     }
 
+    if (query.startDate || query.endDate) {
+      where.createdAt = {};
+      if (query.startDate) {
+        where.createdAt.gte = new Date(query.startDate);
+      }
+      if (query.endDate) {
+        // Set to end of day
+        const endDay = new Date(query.endDate);
+        endDay.setHours(23, 59, 59, 999);
+        where.createdAt.lte = endDay;
+      }
+    }
+
     const [items, total] = await this.prisma.$transaction([
       this.prisma.product.findMany({
         where,
@@ -37,6 +51,9 @@ export class GetProductsHandler implements IQueryHandler<GetProductsQuery> {
           name: true,
           status: true,
           errorLog: true,
+          imageUrl: true,
+          price: true,
+          sku: true,
           createdAt: true,
           updatedAt: true,
         },

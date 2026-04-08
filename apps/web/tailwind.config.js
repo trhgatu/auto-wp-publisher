@@ -13,8 +13,8 @@ export default {
         'card-foreground': '#0f172a', 
         border: '#e2e8f0', // slate-200
         primary: {
-          DEFAULT: '#4f46e5', // indigo-600
-          hover: '#4338ca', // indigo-700
+          DEFAULT: '#dc2626', // red-600
+          hover: '#b91c1c', // red-700
           foreground: '#ffffff',
         },
         muted: '#f1f5f9', // slate-100

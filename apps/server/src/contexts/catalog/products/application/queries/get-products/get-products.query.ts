@@ -4,5 +4,7 @@ export class GetProductsQuery {
     public readonly offset: number = 0,
     public readonly status?: string,
     public readonly search?: string,
+    public readonly startDate?: Date,
+    public readonly endDate?: Date,
   ) {}
 }

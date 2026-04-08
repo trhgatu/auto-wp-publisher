@@ -9,8 +9,8 @@ interface JobsFilterProps {
 const statusOptions = [
   { label: "Tất cả trạng thái", value: "" },
   { label: "Đang chờ", value: "PENDING" },
-  { label: "Đang xử lý", value: "PROCESSING" },
-  { label: "Thành công", value: "COMPLETED" },
+  { label: "Đang đăng bài", value: "PROCESSING" },
+  { label: "Hoàn tất", value: "COMPLETED" },
   { label: "Thất bại", value: "FAILED" },
 ];
 

@@ -10,10 +10,12 @@ import { GetProductByIdHandler } from './products/application/queries/get-produc
 import { ProductRepository } from './products/domain/product.repository';
 import { PrismaProductRepository } from './products/infrastructure/repositories/prisma-product.repository';
 import { WordPressService } from './jobs/services/wordpress.service';
+import { ApiLogsModule } from './api-logs/api-logs.module';
 
 @Module({
   imports: [
     CqrsModule,
+    ApiLogsModule,
     BullModule.registerQueue({
       name: 'wp-publisher',
     }),

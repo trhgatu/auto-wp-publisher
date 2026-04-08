@@ -1,12 +1,16 @@
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { getJobs } from "../api/getJobs";
 
-export const useJobs = (params: {
-  page?: number;
-  limit?: number;
-  status?: string;
-  search?: string;
-} = {}) => {
+export const useJobs = (
+  params: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    search?: string;
+    startDate?: string;
+    endDate?: string;
+  } = {},
+) => {
   return useQuery({
     queryKey: ["jobs", params],
     queryFn: () => getJobs(params),
@@ -16,11 +20,11 @@ export const useJobs = (params: {
       // Chỉ refetch nếu có bất kỳ job nào đang ở trạng thái PROCESSING hoặc PENDING
       const data = query.state.data;
       if (!data) return false;
-      
+
       const hasActiveJobs = data.items.some(
-        (job) => job.status === "PENDING" || job.status === "PROCESSING"
+        (job) => job.status === "PENDING" || job.status === "PROCESSING",
       );
-      
+
       return hasActiveJobs ? 5000 : false;
     },
   });

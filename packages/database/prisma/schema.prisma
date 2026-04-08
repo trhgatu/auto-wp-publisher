@@ -42,6 +42,21 @@ model Product {
   @@map("catalog_products")
 }
 
+model ApiLog {
+  id             String   @id @default(uuid())
+  method         String
+  endpoint       String
+  requestHeader  String?  @db.Text
+  requestBody    String?  @db.Text
+  responseBody   String?  @db.Text
+  statusCode     Int
+  duration       Int      // in ms
+  errorMessage   String?  @db.Text
+  createdAt      DateTime @default(now())
+
+  @@map("system_api_logs")
+}
+
 enum JobStatus {
   PENDING
   PROCESSING
