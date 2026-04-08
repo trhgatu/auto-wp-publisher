@@ -80,6 +80,8 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
             shopeeLink: getVal(["shopee"]),
             lazadaLink: getVal(["lzd", "lazada"]),
             tiktokLink: getVal(["tiktok"]),
+            imageUrl: getVal(["ảnh đại diện", "ảnh chính", "image", "avatar", "main image"]),
+            galleryImageUrls: getVal(["thư viện ảnh", "thư viện", "gallery", "images"]),
             category: "Phụ tùng ô tô",
           };
 
@@ -218,6 +220,12 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                   <thead>
                     <tr className="bg-gray-50 border-bottom border-gray-100">
                       <th className="p-3 text-sm font-semibold text-gray-600">
+                        Ảnh
+                      </th>
+                      <th className="p-3 text-sm font-semibold text-gray-600">
+                        Thư viện
+                      </th>
+                      <th className="p-3 text-sm font-semibold text-gray-600">
                         Tiêu đề (WP)
                       </th>
                       <th className="p-3 text-sm font-semibold text-gray-600">
@@ -243,7 +251,33 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                         key={idx}
                         className="border-bottom border-gray-50 hover:bg-gray-50/50"
                       >
-                        <td className="p-3 text-sm font-medium text-gray-900 truncate max-w-xs">
+                        <td className="p-3 text-sm text-gray-500">
+                          {row.imageUrl && (
+                            <img
+                              src={row.imageUrl}
+                              alt="preview"
+                              className="w-10 h-10 object-cover rounded shadow-sm border border-gray-200"
+                            />
+                          )}
+                        </td>
+                        <td className="p-3 text-sm text-gray-500">
+                          {row.galleryImageUrls && (
+                            <div className="flex -space-x-3 hover:space-x-1 transition-all">
+                              {row.galleryImageUrls
+                                .split(",")
+                                .slice(0, 4)
+                                .map((url, i) => (
+                                  <img
+                                    key={i}
+                                    src={url.trim()}
+                                    alt="gallery"
+                                    className="w-8 h-8 object-cover rounded-full border-2 border-white shadow-sm"
+                                  />
+                                ))}
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-3 text-sm font-medium text-gray-900 truncate max-w-[200px]">
                           {row.title}
                         </td>
                         <td className="p-3 text-sm text-gray-500">
@@ -252,13 +286,13 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                         <td className="p-3 text-sm text-gray-500">
                           {row.price}
                         </td>
-                        <td className="p-3 text-sm text-gray-500 truncate max-w-xs">
+                        <td className="p-3 text-sm text-gray-500 truncate max-w-[150px]">
                           {row.carModels}
                         </td>
-                        <td className="p-3 text-sm text-gray-500 truncate max-w-xs">
+                        <td className="p-3 text-sm text-gray-500 truncate max-w-[100px]">
                           {row.shopeeLink}
                         </td>
-                        <td className="p-3 text-sm text-gray-500 truncate max-w-xs">
+                        <td className="p-3 text-sm text-gray-500 truncate max-w-[100px]">
                           {row.lazadaLink}
                         </td>
                       </tr>

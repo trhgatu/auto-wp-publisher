@@ -11,6 +11,7 @@ export class Product extends AggregateRoot<IEvent> {
     public rawContent: string | null,
     public aiContent: string | null,
     public imageUrl: string | null,
+    public galleryImageUrls: string | null,
     public wpPostId: number | null,
     public price: string | null,
     public sku: string | null,
@@ -34,6 +35,7 @@ export class Product extends AggregateRoot<IEvent> {
     description: string | null,
     rawContent: string | null,
     imageUrl: string | null,
+    galleryImageUrls: string | null = null,
     price: string | null = null,
     sku: string | null = null,
     material: string | null = null,
@@ -50,6 +52,7 @@ export class Product extends AggregateRoot<IEvent> {
       rawContent,
       null, // aiContent
       imageUrl,
+      galleryImageUrls,
       null, // wpPostId
       price,
       sku,
