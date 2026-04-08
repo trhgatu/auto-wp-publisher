@@ -51,7 +51,9 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
           data.video ? String(data.video) : null,
         );
 
-        this.logger.log(`Importing product: ${data.title} - Image: ${data.imageUrl}`);
+        this.logger.log(
+          `Importing product: ${data.title} - Image: ${data.imageUrl}`,
+        );
         product.markAsCreated();
         await this.productRepository.save(product);
         this.publisher.mergeObjectContext(product).commit();
@@ -67,8 +69,12 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
           },
         );
         ids.push(id);
-      } catch (err) {
-        this.logger.error(`Failed to import product: ${data.title}`, err.stack);
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        this.logger.error(
+          `Failed to import product: ${data.title}`,
+          errorMessage,
+        );
       }
     }
 

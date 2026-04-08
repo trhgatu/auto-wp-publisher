@@ -41,7 +41,6 @@ export class PublisherProcessor extends WorkerHost {
         product.name,
         product.rawContent,
         product.price,
-        product.sku,
         product.material,
         product.carModels,
         product.shopeeLink,

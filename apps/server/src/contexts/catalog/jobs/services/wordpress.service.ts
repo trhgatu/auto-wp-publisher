@@ -8,7 +8,6 @@ export class WordPressService {
     title: string,
     rawContent: string | null,
     price: string | null = null,
-    sku: string | null = null,
     material: string | null = null,
     carModels: string | null = null,
     shopeeLink: string | null = null,

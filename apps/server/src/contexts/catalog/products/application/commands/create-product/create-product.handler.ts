@@ -25,7 +25,8 @@ export class CreateProductHandler implements ICommandHandler<CreateProductComman
   ) {}
 
   async execute(command: CreateProductCommand): Promise<string> {
-    const { title, baseDescription, sourceUrl, imageUrl, galleryImageUrls } = command.data;
+    const { title, baseDescription, sourceUrl, imageUrl, galleryImageUrls } =
+      command.data;
     const id = this.uuidGenerator.generate();
 
     // Khởi tạo Aggregate Root
