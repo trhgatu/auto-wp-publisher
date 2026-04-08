@@ -185,10 +185,11 @@ export const JobsList = () => {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-3 max-w-xs xl:max-w-md">
+                    <td className="px-6 py-3 max-w-[180px] xl:max-w-[250px]">
                       <Link
                         to={`/jobs/${job.id}`}
                         className="font-bold text-slate-700 hover:text-red-600 transition-colors block truncate uppercase tracking-tight text-xs"
+                        title={job.name}
                       >
                         {job.name}
                       </Link>

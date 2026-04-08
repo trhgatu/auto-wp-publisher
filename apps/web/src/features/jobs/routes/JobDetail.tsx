@@ -210,6 +210,30 @@ export function JobDetail() {
                 alt={job.name}
                 className="w-full max-h-96 object-cover bg-gray-50"
               />
+
+              {/* Gallery */}
+              {job.galleryImageUrls &&
+                job.galleryImageUrls.trim().length > 0 && (
+                  <div className="p-4 border-t border-gray-50 bg-white">
+                    <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-3">
+                      Thư viện ảnh
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {job.galleryImageUrls.split(",").map((url, idx) => (
+                        <div
+                          key={idx}
+                          className="w-20 h-20 rounded-lg border border-slate-100 overflow-hidden bg-slate-50 relative group cursor-zoom-in"
+                        >
+                          <img
+                            src={url.trim()}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            alt={`Gallery ${idx + 1}`}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
             </div>
           )}
 
