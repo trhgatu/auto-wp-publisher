@@ -8,6 +8,7 @@ import {
   ArrowRightLeft,
 } from "lucide-react";
 import { useApiLogs } from "../hooks/useApiLogs";
+import { ApiLogItem } from "../api/getApiLogs";
 import { Pagination } from "../../../components/shared/Pagination";
 import { clsx } from "clsx";
 
