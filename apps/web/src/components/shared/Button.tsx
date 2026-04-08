@@ -8,7 +8,13 @@ function cn(...inputs: ClassValue[]) {
 }
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "emerald" | "danger" | "ghost" | "outline";
+  variant?:
+    | "primary"
+    | "secondary"
+    | "emerald"
+    | "danger"
+    | "ghost"
+    | "outline";
   size?: "sm" | "md" | "lg" | "icon";
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
@@ -31,12 +37,14 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     const variants = {
-      primary: "bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200",
+      primary: "bg-red-600 text-white hover:bg-red-700",
       secondary: "bg-slate-100 text-slate-900 hover:bg-slate-200",
-      emerald: "bg-emerald-600 text-white hover:bg-emerald-700 shadow-md shadow-emerald-200",
-      danger: "bg-rose-500 text-white hover:bg-rose-600 shadow-md shadow-rose-200",
-      ghost: "bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900",
-      outline: "bg-transparent border border-slate-200 text-slate-600 hover:border-indigo-600 hover:text-indigo-600",
+      emerald: "bg-emerald-600 text-white hover:bg-emerald-700",
+      danger: "bg-rose-500 text-white hover:bg-rose-600",
+      ghost:
+        "bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+      outline:
+        "bg-transparent border border-slate-200 text-slate-600 hover:border-red-600 hover:text-red-600",
     };
 
     const sizes = {

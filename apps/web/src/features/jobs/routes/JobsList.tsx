@@ -1,10 +1,18 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { AlertCircle, Loader2, Search, FileSpreadsheet } from "lucide-react";
+import {
+  AlertCircle,
+  Loader2,
+  Search,
+  FileSpreadsheet,
+  Package,
+  PlusCircle,
+} from "lucide-react";
 import { useJobs } from "../hooks/useJobs";
 import { JobStatusBadge } from "../components/JobStatusBadge";
 import { ExcelImportModal } from "../components/ExcelImportModal";
 import { JobsFilter } from "../components/JobsFilter";
+import { DateRangeFilter } from "../components/DateRangeFilter";
 import { Pagination } from "../../../components/shared/Pagination";
 import { Button } from "../../../components/shared/Button";
 
@@ -12,15 +20,16 @@ export const JobsList = () => {
   const [isImportModalOpen, setImportModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const pageSize = 10;
 
-  // Xử lý Debounce tìm kiếm
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
-      setPage(1); // Reset về trang 1 khi tìm kiếm
+      setPage(1);
     }, 500);
 
     return () => clearTimeout(timer);
@@ -31,6 +40,8 @@ export const JobsList = () => {
     limit: pageSize,
     status: statusFilter || undefined,
     search: debouncedSearch || undefined,
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
   });
 
   const jobs = data?.items || [];
@@ -38,45 +49,81 @@ export const JobsList = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="relative z-50 flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white/40 backdrop-blur-md p-6 rounded-2xl border border-white/50 shadow-soft">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-            Tiến độ Xuất Bản
-          </h1>
-          <p className="text-slate-500 mt-2 text-sm">
-            Theo dõi trạng thái các bài viết đang được lấy dữ liệu và lên lịch
-            WordPress.
-          </p>
-        </div>
-        
-        <div className="flex flex-col md:flex-row items-center gap-3">
-          {/* Search Input */}
-          <div className="relative w-full md:w-80 group">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm theo tên bài viết..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm transition-all focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 hover:border-slate-300"
-            />
+      {/* Unified Control Center */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
+        {/* Row 1: Brand & Core Actions */}
+        <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center border border-red-100 shadow-inner">
+              <Package className="w-6 h-6 text-red-600" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase">
+                Kho Sản Phẩm
+              </h1>
+              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-0.5">
+                phutungoto123.vn • Quản lý xuất bản
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <JobsFilter
-              value={statusFilter}
-              onChange={(val) => {
-                setStatusFilter(val);
-                setPage(1);
-              }}
-            />
+          <div className="flex items-center gap-3">
             <Button
-              variant="emerald"
+              variant="secondary"
               onClick={() => setImportModalOpen(true)}
               leftIcon={<FileSpreadsheet className="w-4 h-4" />}
+              className="bg-slate-50 border-slate-200 text-slate-600 font-bold px-5"
             >
               Import Excel
             </Button>
+
+            <Link to="/create">
+              <Button
+                variant="primary"
+                leftIcon={<PlusCircle className="w-4 h-4" />}
+                className="shadow-lg shadow-red-200 px-6 font-bold"
+              >
+                Thêm mới
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        <div className="h-px bg-slate-100 mx-6"></div>
+        <div className="px-6 py-5 bg-slate-50/40 flex flex-col xl:flex-row items-center gap-4">
+          <div className="relative flex-1 w-full group">
+            <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-red-600 transition-colors" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm theo tên sản phẩm..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-11 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm transition-all focus:outline-none focus:ring-4 focus:ring-red-600/5 focus:border-red-600 hover:border-slate-300 font-medium placeholder:text-slate-300"
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+            <div className="flex items-center gap-2 bg-white px-1.5 py-1.5 rounded-xl border border-slate-200">
+              <DateRangeFilter
+                startDate={startDate}
+                endDate={endDate}
+                onStartDateChange={(val) => {
+                  setStartDate(val);
+                  setPage(1);
+                }}
+                onEndDateChange={(val) => {
+                  setEndDate(val);
+                  setPage(1);
+                }}
+              />
+              <div className="h-4 w-px bg-slate-100"></div>
+              <JobsFilter
+                value={statusFilter}
+                onChange={(val) => {
+                  setStatusFilter(val);
+                  setPage(1);
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -84,9 +131,9 @@ export const JobsList = () => {
       <div className="glass rounded-xl shadow-sm overflow-hidden border border-border flex flex-col min-h-[400px] relative">
         {/* Loading Overlay */}
         {(isLoading || isFetching) && (
-          <div className="absolute inset-0 z-20 bg-white/40 backdrop-blur-[1px] flex items-center justify-center animate-in fade-in duration-300">
-            <div className="bg-white/80 p-3 rounded-full shadow-lg border border-white/50">
-              <Loader2 className="w-6 h-6 text-indigo-600 animate-spin" />
+          <div className="absolute inset-0 z-20 bg-white/40 flex items-center justify-center animate-in fade-in duration-300">
+            <div className="bg-white p-3 rounded-full border border-slate-100 shadow-sm">
+              <Loader2 className="w-6 h-6 text-red-600 animate-spin" />
             </div>
           </div>
         )}
@@ -98,51 +145,89 @@ export const JobsList = () => {
               <p className="text-muted-foreground text-lg">
                 {statusFilter
                   ? `Không có bài viết nào ở trạng thái ${statusFilter}`
-                  : search 
+                  : search
                     ? `Không tìm thấy kết quả cho "${search}"`
                     : "Bạn chưa có bài viết nào."}
               </p>
             </div>
           ) : (
             <table className="w-full text-sm text-left border-collapse">
-              <thead className="text-xs uppercase bg-muted/50 text-muted-foreground sticky top-0 z-10 backdrop-blur-md">
-                <tr className="border-b border-border">
-                  <th className="px-6 py-4 font-bold">Tên Bài Viết</th>
-                  <th className="px-6 py-4 font-bold text-center">
+              <thead className="text-[10px] uppercase bg-slate-50 text-slate-500 sticky top-0 z-10 border-b border-slate-200">
+                <tr>
+                  <th className="px-6 py-3 font-black w-14">Ảnh</th>
+                  <th className="px-6 py-3 font-black">Tên Sản Phẩm</th>
+                  <th className="px-6 py-3 font-black">SKU</th>
+                  <th className="px-6 py-3 font-black text-right">Giá bán</th>
+                  <th className="px-6 py-3 font-black text-center">
                     Trạng thái
                   </th>
-                  <th className="px-6 py-4 font-bold">Cập nhật lúc</th>
-                  <th className="px-6 py-4 font-bold">Log (Nếu lỗi)</th>
+                  <th className="px-6 py-3 font-black">Cập nhật lúc</th>
+                  <th className="px-6 py-3 font-black">Nhật ký</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-slate-100">
                 {jobs.map((job) => (
                   <tr
                     key={job.id}
-                    className="border-b border-border/50 hover:bg-muted/10 transition-colors"
+                    className="hover:bg-slate-50/50 transition-colors group"
                   >
-                    <td className="px-6 py-4 font-medium text-foreground max-w-md truncate">
-                      <Link to={`/jobs/${job.id}`} className="hover:underline text-blue-600">
+                    <td className="px-6 py-3">
+                      <div className="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex-shrink-0">
+                        {job.imageUrl ? (
+                          <img
+                            src={job.imageUrl}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center opacity-30">
+                            <Package className="w-4 h-4" />
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-3 max-w-xs xl:max-w-md">
+                      <Link
+                        to={`/jobs/${job.id}`}
+                        className="font-bold text-slate-700 hover:text-red-600 transition-colors block truncate uppercase tracking-tight text-xs"
+                      >
                         {job.name}
                       </Link>
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-6 py-3 text-[10px] font-bold text-slate-400">
+                      {job.sku || "-"}
+                    </td>
+                    <td className="px-6 py-3 text-right font-black text-red-600 text-xs">
+                      {job.price
+                        ? `${Number(job.price).toLocaleString()}đ`
+                        : "-"}
+                    </td>
+                    <td className="px-6 py-3 text-center">
                       <JobStatusBadge status={job.status} />
                     </td>
-                    <td className="px-6 py-4 text-muted-foreground whitespace-nowrap">
-                      {new Date(job.updatedAt).toLocaleTimeString("vi-VN")} -{" "}
-                      {new Date(job.updatedAt).toLocaleDateString("vi-VN")}
+                    <td className="px-6 py-3 text-[10px] font-bold text-slate-500 whitespace-nowrap">
+                      <div className="flex flex-col">
+                        <span className="text-slate-800">
+                          {new Date(job.updatedAt).toLocaleTimeString("vi-VN", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                          })}
+                        </span>
+                        <span className="opacity-50">
+                          {new Date(job.updatedAt).toLocaleDateString("vi-VN")}
+                        </span>
+                      </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-3">
                       {job.status === "FAILED" && job.errorLog ? (
                         <span
-                          className="text-rose-400 text-xs line-clamp-1"
+                          className="text-[10px] font-bold text-rose-500 line-clamp-1 bg-rose-50 px-2 py-1 rounded border border-rose-100"
                           title={job.errorLog}
                         >
                           {job.errorLog}
                         </span>
                       ) : (
-                        <span className="text-muted-foreground/30 text-center block">
+                        <span className="text-slate-300 text-center block">
                           -
                         </span>
                       )}

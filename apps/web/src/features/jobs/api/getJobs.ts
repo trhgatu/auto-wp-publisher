@@ -5,6 +5,9 @@ export interface JobItem {
   name: string;
   status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
   errorLog: string | null;
+  imageUrl?: string | null;
+  price?: string | null;
+  sku?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -17,13 +20,22 @@ export const getJobs = async (
     limit?: number;
     status?: string;
     search?: string;
+    startDate?: string;
+    endDate?: string;
   } = {},
 ): Promise<{ items: JobItem[]; total: number }> => {
-  const { page = 1, limit = 10, status, search } = params;
+  const { page = 1, limit = 10, status, search, startDate, endDate } = params;
   const offset = (page - 1) * limit;
 
   const response = await axios.get(`${API_URL}/products`, {
-    params: { limit, offset, status, search },
+    params: {
+      limit,
+      offset,
+      status,
+      search,
+      startDate,
+      endDate,
+    },
   });
 
   return response.data;

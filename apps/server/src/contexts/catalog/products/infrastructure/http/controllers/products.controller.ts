@@ -23,19 +23,27 @@ export class ProductsController {
 
   @Get()
   async getProducts(
-    @Query('limit') limit?: number,
-    @Query('offset') offset?: number,
+    @Query('limit') limit = 10,
+    @Query('offset') offset = 0,
     @Query('status') status?: string,
     @Query('search') search?: string,
-  ): Promise<unknown> {
-    return this.queryBus.execute(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const { items, total } = await this.queryBus.execute<
+      GetProductsQuery,
+      { items: unknown[]; total: number }
+    >(
       new GetProductsQuery(
-        limit ? Number(limit) : 10,
-        offset ? Number(offset) : 0,
+        Number(limit),
+        Number(offset),
         status,
         search,
+        startDate ? new Date(startDate) : undefined,
+        endDate ? new Date(endDate) : undefined,
       ),
     );
+    return { items, total };
   }
 
   @Get(':id')
