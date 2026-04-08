@@ -1,8 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { PrismaService } from 'src/shared/infrastructure/prisma/prisma.service';
 
 @Injectable()
 export class WordPressService {
   private readonly logger = new Logger(WordPressService.name);
+
+  constructor(private readonly prisma: PrismaService) {}
 
   async publishProduct(
     title: string,
@@ -30,137 +33,156 @@ export class WordPressService {
       );
     }
 
-    this.logger.log(
-      `Publishing WooCommerce product: "${title}" to ${wcApiUrl}`,
-    );
-
     const authHeader =
       'Basic ' + Buffer.from(`${wpUser}:${wpPass}`).toString('base64');
 
     const numericPrice = price ? price.replace(/[^0-9]/g, '') : '';
+    const endpoint = `${wcApiUrl}/products`;
+    const requestBody = {
+      name: title,
+      type: 'simple',
+      regular_price: numericPrice,
+      description:
+        rawContent ||
+        `<p>Sản phẩm "${title}" vừa được khởi tạo bởi Auto Publisher.</p>`,
+      attributes: [
+        ...(material
+          ? [
+              {
+                name: 'Chất liệu',
+                visible: true,
+                options: [material],
+              },
+            ]
+          : []),
+        ...(carModels
+          ? [
+              {
+                name: 'Dòng xe',
+                visible: true,
+                options: [carModels],
+              },
+            ]
+          : []),
+      ],
+      meta_data: [
+        ...(shopeeLink
+          ? [
+              { key: 'shopee', value: shopeeLink },
+              { key: '_shopee', value: shopeeLink },
+              { key: 'Shopee', value: shopeeLink },
+            ]
+          : []),
+        ...(lazadaLink
+          ? [
+              { key: 'lazada', value: lazadaLink },
+              { key: '_lazada', value: lazadaLink },
+              { key: 'Lazada', value: lazadaLink },
+            ]
+          : []),
+        ...(tiktokLink
+          ? [
+              { key: 'tiktok', value: tiktokLink },
+              { key: '_tiktok', value: tiktokLink },
+              { key: 'Tiktok', value: tiktokLink },
+            ]
+          : []),
+        ...(videoUrl
+          ? [
+              { key: 'youtube', value: videoUrl },
+              { key: '_youtube', value: videoUrl },
+              { key: 'video', value: videoUrl },
+              { key: 'Video', value: videoUrl },
+              { key: '_product_video', value: videoUrl },
+              { key: 'product_video', value: videoUrl },
+              { key: '_product_video_url', value: videoUrl },
+              { key: 'product_video_url', value: videoUrl },
+              { key: '_dt_product_video_url', value: videoUrl },
+              { key: 'dt_product_video_url', value: videoUrl },
+              { key: '_product_video_size', value: '900x900' },
+              { key: 'product_video_size', value: '900x900' },
+              { key: '_dt_product_video_size', value: '900x900' },
+              { key: '_product_video_placement', value: 'lightbox' },
+              { key: '_dt_product_video_placement', value: 'lightbox' },
+            ]
+          : []),
+      ],
+      images: [
+        ...(imageUrl ? [{ src: imageUrl }] : []),
+        ...(galleryImageUrls
+          ? galleryImageUrls
+              .split(',')
+              .map((url) => ({ src: url.trim() }))
+              .filter((img) => img.src !== '')
+          : []),
+      ],
+      status: 'publish',
+      manage_stock: false,
+      stock_status: 'instock',
+    };
+
+    const startTime = Date.now();
+    let statusCode = 0;
+    let responseBodyText = '';
+    let errorMessage = '';
 
     try {
-      const response = await fetch(`${wcApiUrl}/products`, {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: authHeader,
         },
-        body: JSON.stringify({
-          name: title,
-          type: 'simple',
-          regular_price: numericPrice,
-          description:
-            rawContent ||
-            `<p>Sản phẩm "${title}" vừa được khởi tạo bởi Auto Publisher.</p>`,
-          attributes: [
-            ...(material
-              ? [
-                  {
-                    name: 'Chất liệu',
-                    visible: true,
-                    options: [material],
-                  },
-                ]
-              : []),
-            ...(carModels
-              ? [
-                  {
-                    name: 'Dòng xe',
-                    visible: true,
-                    options: [carModels],
-                  },
-                ]
-              : []),
-          ],
-          meta_data: [
-            // Link Shopee
-            ...(shopeeLink
-              ? [
-                  { key: 'shopee', value: shopeeLink },
-                  { key: '_shopee', value: shopeeLink },
-                  { key: 'Shopee', value: shopeeLink },
-                ]
-              : []),
-            // Link Lazada
-            ...(lazadaLink
-              ? [
-                  { key: 'lazada', value: lazadaLink },
-                  { key: '_lazada', value: lazadaLink },
-                  { key: 'Lazada', value: lazadaLink },
-                ]
-              : []),
-            // Link Tiktok
-            ...(tiktokLink
-              ? [
-                  { key: 'tiktok', value: tiktokLink },
-                  { key: '_tiktok', value: tiktokLink },
-                  { key: 'Tiktok', value: tiktokLink },
-                ]
-              : []),
-            ...(videoUrl
-              ? [
-                  { key: 'youtube', value: videoUrl },
-                  { key: '_youtube', value: videoUrl },
-                  { key: 'video', value: videoUrl },
-                  { key: 'Video', value: videoUrl },
-                  { key: '_product_video', value: videoUrl },
-                  { key: 'product_video', value: videoUrl },
-                  { key: '_product_video_url', value: videoUrl },
-                  { key: 'product_video_url', value: videoUrl },
-                  { key: '_dt_product_video_url', value: videoUrl },
-                  { key: 'dt_product_video_url', value: videoUrl },
-                  { key: '_product_video_size', value: '900x900' },
-                  { key: 'product_video_size', value: '900x900' },
-                  { key: '_dt_product_video_size', value: '900x900' },
-                  { key: '_product_video_placement', value: 'lightbox' },
-                  { key: '_dt_product_video_placement', value: 'lightbox' },
-                ]
-              : []),
-          ],
-          images: [
-            ...(imageUrl ? [{ src: imageUrl }] : []),
-            ...(galleryImageUrls
-              ? galleryImageUrls
-                  .split(',')
-                  .map((url) => ({ src: url.trim() }))
-                  .filter((img) => img.src !== '')
-              : []),
-          ],
-          status: 'publish',
-          manage_stock: false,
-          stock_status: 'instock',
-        }),
+        body: JSON.stringify(requestBody),
         signal: AbortSignal.timeout(20000),
       });
 
+      statusCode = response.status;
+      responseBodyText = await response.clone().text();
+
       if (!response.ok) {
-        const errorText = await response.text();
-        this.logger.error(
-          `WooCommerce Error: ${response.status} - ${errorText}`,
-        );
         throw new Error(
-          `WooCommerce từ chối: [Mã ${response.status}] - Phản hồi: ${errorText}`,
+          `WooCommerce từ chối: [Mã ${statusCode}] - Phản hồi: ${responseBodyText}`,
         );
       }
 
-      interface WCProductResponse {
+      const data = (await response.json()) as {
         id: number;
         permalink: string;
-      }
-
-      const data = (await response.json()) as WCProductResponse;
-      this.logger.log(
-        `Successfully published product "${title}" to WooCommerce! ID: ${data.id}`,
-      );
+      };
 
       return data.permalink;
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      this.logger.error(`Thất bại khi gọi WooCommerce API: ${errorMessage}`);
-      throw new Error(
-        `Kết nối bị từ chối hoặc quá hạn (Timeout): ${errorMessage}`,
-      );
+      errorMessage = err instanceof Error ? err.message : String(err);
+      if (statusCode === 0) statusCode = 500;
+      throw err;
+    } finally {
+      const duration = Date.now() - startTime;
+
+      // Save log asynchronously to not block the main process
+      this.prisma.apiLog
+        .create({
+          data: {
+            method: 'POST',
+            endpoint: endpoint,
+            requestHeader: JSON.stringify({
+              'Content-Type': 'application/json',
+              Authorization: '[MASKED]',
+            }),
+            requestBody: JSON.stringify(requestBody),
+            responseBody: responseBodyText || null,
+            statusCode: statusCode,
+            duration: duration,
+            errorMessage: errorMessage || null,
+          },
+        })
+        .catch((logErr: unknown) =>
+          this.logger.error(
+            `Failed to save API log: ${
+              logErr instanceof Error ? logErr.message : String(logErr)
+            }`,
+          ),
+        );
     }
   }
 }
