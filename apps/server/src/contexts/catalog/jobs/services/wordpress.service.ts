@@ -1,6 +1,14 @@
-/* eslint-disable */
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/shared/infrastructure/prisma/prisma.service';
+
+interface WooCommerceResponse {
+  id?: number;
+  permalink?: string;
+  link?: string;
+  url?: string;
+  message?: string;
+  [key: string]: unknown;
+}
 
 @Injectable()
 export class WordPressService {
@@ -154,16 +162,16 @@ export class WordPressService {
         );
       }
 
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as WooCommerceResponse;
 
       if (!data.id || (!data.permalink && !data.link)) {
-        this.logger.warn(
-          `WooCommerce returned a message instead of a product: ${JSON.stringify(data)}`,
-        );
+        const msg = `WooCommerce không trả về ID sản phẩm. Có thể bị chặn hoặc lỗi cấu hình. Phản hồi: ${JSON.stringify(data)}`;
+        this.logger.error(msg);
+        throw new Error(msg);
       }
 
       return {
-        id: data.id || 0,
+        id: data.id,
         permalink: data.permalink || data.link || data.url || 'URL_NOT_FOUND',
       };
     } catch (err: unknown) {
