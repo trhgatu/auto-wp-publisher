@@ -152,9 +152,11 @@ export class WordPressService {
 
       const data = (await response.json()) as any;
 
-      this.logger.debug(
-        `WooCommerce raw response keys: ${Object.keys(data).join(', ')}`,
-      );
+      if (!data.id || (!data.permalink && !data.link)) {
+        this.logger.warn(
+          `WooCommerce returned a message instead of a product: ${JSON.stringify(data)}`,
+        );
+      }
 
       return {
         id: data.id || 0,
