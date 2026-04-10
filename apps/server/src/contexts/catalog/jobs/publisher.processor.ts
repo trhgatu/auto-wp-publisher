@@ -37,7 +37,7 @@ export class PublisherProcessor extends WorkerHost {
       product.markAsProcessing();
       await this.productRepo.save(product);
 
-      const productUrl = await this.wpService.publishProduct(
+      const wpProduct = await this.wpService.publishProduct(
         product.name,
         product.rawContent,
         product.price,
@@ -51,9 +51,13 @@ export class PublisherProcessor extends WorkerHost {
         product.galleryImageUrls,
       );
 
+      this.logger.log(
+        `🔗 WooCommerce created product ID: ${wpProduct.id} - URL: ${wpProduct.permalink}`,
+      );
+
       product.markAsCompleted(
-        Math.floor(Math.random() * 10000),
-        `<p>Sản phẩm đã lên sóng: <a href="${productUrl}" target="_blank">${productUrl}</a></p>`,
+        wpProduct.id,
+        `<p>Sản phẩm đã lên sóng: <a href="${wpProduct.permalink}" target="_blank">${wpProduct.permalink}</a></p>`,
       );
       await this.productRepo.save(product);
 
