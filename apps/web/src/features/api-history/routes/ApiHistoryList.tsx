@@ -276,7 +276,7 @@ export const ApiHistoryList = () => {
                   </div>
                   <div>
                     <h3 className="font-black text-lg text-slate-900 uppercase tracking-tight">
-                      Chi tiết giao dịch API
+                      Chi tiết API
                     </h3>
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
@@ -344,7 +344,7 @@ export const ApiHistoryList = () => {
                   <div className="flex items-center justify-between">
                     <h4 className="text-[11px] font-black uppercase text-slate-900 tracking-widest flex items-center gap-2">
                       <ArrowRightLeft className="w-4 h-4 text-indigo-500" />
-                      Yêu cầu gửi đi (Request)
+                      Request
                     </h4>
                   </div>
                   <div className="bg-slate-950 rounded-2xl p-6 border border-slate-800 shadow-2xl relative group">
@@ -364,7 +364,7 @@ export const ApiHistoryList = () => {
                   <div className="flex items-center justify-between">
                     <h4 className="text-[11px] font-black uppercase text-slate-900 tracking-widest flex items-center gap-2">
                       <CheckCircle className="w-4 h-4 text-emerald-500" />
-                      Phản hồi hệ thống (Response)
+                      Response
                     </h4>
                   </div>
                   <div
@@ -396,12 +396,12 @@ export const ApiHistoryList = () => {
                 </section>
               </div>
 
-              <div className="p-6 bg-slate-50/50 border-t border-slate-100">
+              <div className="p-6 bg-slate-50/50 border-t border-slate-100 flex justify-end">
                 <button
                   onClick={() => setSelectedLogId(null)}
-                  className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-sm uppercase tracking-widest hover:bg-slate-800 transition-all active:scale-[0.98]"
+                  className="px-8 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-800 transition-all active:scale-[0.98]"
                 >
-                  Đóng chi tiết
+                  Đóng
                 </button>
               </div>
             </div>
