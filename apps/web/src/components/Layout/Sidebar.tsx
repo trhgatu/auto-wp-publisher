@@ -5,7 +5,6 @@ import {
   Settings,
   Globe,
   Bot,
-  History,
   Activity,
 } from "lucide-react";
 import { clsx } from "clsx";
@@ -17,7 +16,6 @@ const menuItems = [
   { icon: Globe, label: "Cấu hình WordPress", path: "/websites" },
   { icon: Activity, label: "Lịch sử API", path: "/api-history" },
   { icon: Bot, label: "Cấu hình AI Prompt", path: "/ai-settings" },
-  { icon: History, label: "Lịch sử Lỗi", path: "/logs" },
 ];
 
 export const Sidebar = () => {
