@@ -149,12 +149,20 @@ export class WordPressService {
         );
       }
 
-      const data = (await response.json()) as {
-        id: number;
-        permalink: string;
-      };
+      const data = (await response.json()) as Record<string, unknown>;
 
-      return { id: data.id, permalink: data.permalink };
+      this.logger.debug(
+        `WooCommerce raw response keys: ${Object.keys(data).join(', ')}`,
+      );
+
+      return {
+        id: (data.id as number) || 0,
+        permalink:
+          (data.permalink as string) ||
+          (data.link as string) ||
+          (data.url as string) ||
+          'URL_NOT_FOUND',
+      };
     } catch (err: unknown) {
       errorMessage = err instanceof Error ? err.message : String(err);
       if (statusCode === 0) statusCode = 500;
