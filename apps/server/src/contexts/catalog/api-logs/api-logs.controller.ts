@@ -6,8 +6,22 @@ export class ApiLogsController {
   constructor(private readonly apiLogsService: ApiLogsService) {}
 
   @Get()
-  async getLogs(@Query('limit') limit = 20, @Query('offset') offset = 0) {
-    return this.apiLogsService.findAll(Number(limit), Number(offset));
+  async getLogs(
+    @Query('limit') limit = 20,
+    @Query('offset') offset = 0,
+    @Query('search') search?: string,
+    @Query('status') status?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.apiLogsService.findAll(
+      Number(limit),
+      Number(offset),
+      search,
+      status,
+      startDate,
+      endDate,
+    );
   }
 
   @Get(':id')
