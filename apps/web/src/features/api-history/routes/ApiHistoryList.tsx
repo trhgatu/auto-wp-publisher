@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Activity,
   ChevronRight,
@@ -8,24 +8,50 @@ import {
   ArrowRightLeft,
   CheckCircle,
   Zap,
-  Filter,
   Search,
 } from "lucide-react";
 import { useApiLogs } from "../hooks/useApiLogs";
 import type { ApiLogItem } from "../api/getApiLogs";
 import { Pagination } from "../../../components/shared/Pagination";
 import { StatsCard } from "../../../components/shared/StatsCard";
+import { Select } from "../../../components/shared/Select";
+import { DateRangeFilter } from "../../jobs/components/DateRangeFilter";
 import { clsx } from "clsx";
+
+const statusOptions = [
+  { label: "Tất cả trạng thái", value: "" },
+  { label: "Thành công (2xx)", value: "SUCCESS" },
+  { label: "Lỗi hệ thống (4xx+)", value: "ERROR" },
+];
 
 export const ApiHistoryList = () => {
   const [page, setPage] = useState(1);
   const pageSize = 20;
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
 
-  const { data, isLoading } = useApiLogs({
+  // Filtering States
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // Debounce search logic
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const { data, isLoading, isFetching } = useApiLogs({
     limit: pageSize,
     offset: (page - 1) * pageSize,
+    search: debouncedSearch || undefined,
+    status: statusFilter || undefined,
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
   });
 
   const logs = useMemo(() => data?.items || [], [data?.items]);
@@ -74,44 +100,73 @@ export const ApiHistoryList = () => {
     }
   };
 
-  const filteredLogs = logs.filter(
-    (log) =>
-      log.endpoint.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.statusCode.toString().includes(searchTerm),
-  );
-
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-700 max-w-[1600px] mx-auto pb-12">
-      {/* 1. CLEAN HEADER (Dashboard Synced) */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-slate-200">
-        <div>
-          <div className="flex items-center gap-2 text-[10px] text-slate-400 mb-1 font-bold uppercase tracking-wider">
-            <span>Hệ thống</span>
-            <ChevronRight className="w-3 h-3" />
-            <span>Giám sát API</span>
+      {/* Unified Control Center (Synced with JobsList) */}
+      <div className="bg-white rounded-2xl border border-slate-200 transition-all shadow-sm">
+        {/* Row 1: Brand & Core Info */}
+        <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center border border-red-100 shadow-sm">
+              <Activity className="w-6 h-6 text-red-600" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 text-[10px] text-slate-400 mb-0.5 font-bold uppercase tracking-widest">
+                <span>Hệ thống</span>
+                <ChevronRight className="w-3 h-3 translate-y-[1px]" />
+                <span>Giám sát API</span>
+              </div>
+              <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase">
+                Lịch sử API
+              </h1>
+              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-0.5">
+                phutungoto123.vn • Nhật ký đồng bộ thời gian thực
+              </p>
+            </div>
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase">
-            Lịch sử Đồng bộ
-          </h1>
-          <p className="text-slate-500 text-sm mt-1 font-medium">
-            Theo dõi chi tiết payload và phản hồi từ hệ thống WooCommerce
-            WordPress.
-          </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative group">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-red-500 transition-colors" />
+
+        <div className="h-px bg-slate-100 mx-6"></div>
+
+        {/* Row 2: Advanced Filtering Toolbar */}
+        <div className="relative px-6 py-5 bg-slate-50/40 flex flex-col xl:flex-row items-center gap-4 z-50">
+          <div className="relative flex-1 w-full group">
+            <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-red-600 transition-colors" />
             <input
               type="text"
-              placeholder="Tìm kiếm endpoint..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all w-full md:w-64 uppercase tracking-tighter"
+              placeholder="Tìm kiếm theo endpoint hoặc thông điệp lỗi..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-11 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm transition-all focus:outline-none focus:ring-4 focus:ring-red-600/5 focus:border-red-600 hover:border-slate-300 font-medium placeholder:text-slate-300 uppercase tracking-tighter"
             />
           </div>
-          <button className="p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all">
-            <Filter className="w-4 h-4 text-slate-600" />
-          </button>
+          <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+            <div className="flex items-center gap-2 bg-white px-1.5 py-1.5 rounded-xl border border-slate-200 shadow-sm">
+              <DateRangeFilter
+                startDate={startDate}
+                endDate={endDate}
+                onStartDateChange={(val) => {
+                  setStartDate(val);
+                  setPage(1);
+                }}
+                onEndDateChange={(val) => {
+                  setEndDate(val);
+                  setPage(1);
+                }}
+              />
+              <div className="h-4 w-px bg-slate-100"></div>
+              <Select
+                options={statusOptions}
+                value={statusFilter}
+                onChange={(val) => {
+                  setStatusFilter(val);
+                  setPage(1);
+                }}
+                placeholder="Trạng thái API"
+                className="min-w-[180px]"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -145,9 +200,11 @@ export const ApiHistoryList = () => {
       <div className="relative">
         {/* 3. MODERN TABLE LIST (Full Width) */}
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col min-h-[600px] relative shadow-sm">
-          {isLoading && (
+          {(isLoading || isFetching) && (
             <div className="absolute inset-0 z-20 bg-white/40 flex items-center justify-center backdrop-blur-[1px]">
-              <Loader2 className="w-8 h-8 text-red-600 animate-spin" />
+              <div className="bg-white p-3 rounded-full border border-slate-100 shadow-xl">
+                <Loader2 className="w-8 h-8 text-red-600 animate-spin" />
+              </div>
             </div>
           )}
 
@@ -171,7 +228,7 @@ export const ApiHistoryList = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {filteredLogs.map((log: ApiLogItem) => (
+                {logs.map((log: ApiLogItem) => (
                   <tr
                     key={log.id}
                     onClick={() => setSelectedLogId(log.id)}
