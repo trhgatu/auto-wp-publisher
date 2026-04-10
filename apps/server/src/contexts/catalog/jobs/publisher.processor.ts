@@ -49,6 +49,7 @@ export class PublisherProcessor extends WorkerHost {
         product.videoUrl,
         product.imageUrl,
         product.galleryImageUrls,
+        product.wpPostId,
       );
 
       this.logger.log(
