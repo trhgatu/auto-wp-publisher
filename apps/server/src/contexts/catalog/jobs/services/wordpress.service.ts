@@ -21,9 +21,14 @@ export class WordPressService {
     imageUrl: string | null = null,
     galleryImageUrls: string | null = null,
   ): Promise<{ id: number; permalink: string }> {
-    const wpBaseUrl =
-      process.env.WP_API_URL || 'https://phutungoto123.vn/wp-json';
+    const wpBaseUrl = (
+      process.env.WP_API_URL || 'https://phutungoto123.vn/wp-json'
+    ).replace(/\/$/, '');
+
     const wcApiUrl = `${wpBaseUrl.replace(/\/wp\/v2\/?$/, '')}/wc/v3`;
+    const endpoint = `${wcApiUrl}/products`;
+
+    this.logger.debug(`Final WooCommerce Endpoint: ${endpoint}`);
 
     const wpUser = process.env.WP_USERNAME || 'phutungoto123';
     const wpPass = process.env.WP_APP_PASSWORD;
@@ -38,7 +43,6 @@ export class WordPressService {
       'Basic ' + Buffer.from(`${wpUser}:${wpPass}`).toString('base64');
 
     const numericPrice = price ? price.replace(/[^0-9]/g, '') : '';
-    const endpoint = `${wcApiUrl}/products`;
     const requestBody = {
       name: title,
       type: 'simple',
