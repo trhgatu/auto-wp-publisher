@@ -1,3 +1,4 @@
+import { clsx } from "clsx";
 import {
   XAxis,
   YAxis,
@@ -266,8 +267,3 @@ export const Dashboard = () => {
     </div>
   );
 };
-
-// Helper for conditional classes
-function clsx(...classes: (string | boolean | undefined | null)[]) {
-  return classes.filter(Boolean).join(" ");
-}
