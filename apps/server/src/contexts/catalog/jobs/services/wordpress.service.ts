@@ -28,15 +28,21 @@ export class WordPressService {
     videoUrl: string | null = null,
     imageUrl: string | null = null,
     galleryImageUrls: string | null = null,
+    existingWpId: number | null = null,
   ): Promise<{ id: number; permalink: string }> {
     const wpBaseUrl = (
       process.env.WP_API_URL || 'https://phutungoto123.vn/wp-json'
     ).replace(/\/$/, '');
 
     const wcApiUrl = `${wpBaseUrl.replace(/\/wp\/v2\/?$/, '')}/wc/v3`;
-    const endpoint = `${wcApiUrl}/products`;
+    const isUpdate = existingWpId != null;
+    const endpoint = isUpdate
+      ? `${wcApiUrl}/products/${existingWpId}`
+      : `${wcApiUrl}/products`;
 
-    this.logger.debug(`Final WooCommerce Endpoint: ${endpoint}`);
+    this.logger.debug(
+      `Final WooCommerce Endpoint: ${endpoint} (Method: ${isUpdate ? 'PUT' : 'POST'})`,
+    );
 
     const wpUser = process.env.WP_USERNAME || 'phutungoto123';
     const wpPass = process.env.WP_APP_PASSWORD;
@@ -141,7 +147,7 @@ export class WordPressService {
 
     try {
       const response = await fetch(endpoint, {
-        method: 'POST',
+        method: isUpdate ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           Accept: 'application/json',
@@ -185,7 +191,7 @@ export class WordPressService {
       this.prisma.apiLog
         .create({
           data: {
-            method: 'POST',
+            method: isUpdate ? 'PUT' : 'POST',
             endpoint: endpoint,
             requestHeader: JSON.stringify({
               'Content-Type': 'application/json; charset=utf-8',

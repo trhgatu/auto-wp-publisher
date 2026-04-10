@@ -88,4 +88,70 @@ export class PrismaProductRepository implements ProductRepository {
       raw.updatedAt,
     );
   }
+
+  async findBySku(sku: string): Promise<Product | null> {
+    const raw = await this.prisma.product.findFirst({
+      where: { sku },
+    });
+
+    if (!raw) return null;
+
+    return this.mapToDomain(raw);
+  }
+
+  async findByName(name: string): Promise<Product | null> {
+    const raw = await this.prisma.product.findFirst({
+      where: { name },
+    });
+
+    if (!raw) return null;
+
+    return this.mapToDomain(raw);
+  }
+
+  private mapToDomain(raw: {
+    id: string;
+    name: string;
+    description: string | null;
+    rawContent: string | null;
+    aiContent: string | null;
+    imageUrl: string | null;
+    galleryImageUrls: string | null;
+    wpPostId: number | null;
+    price: string | null;
+    sku: string | null;
+    material: string | null;
+    carModels: string | null;
+    shopeeLink: string | null;
+    lazadaLink: string | null;
+    tiktokLink: string | null;
+    videoUrl: string | null;
+    status: string;
+    errorLog: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+  }): Product {
+    return new Product(
+      ProductId.create(raw.id),
+      raw.name,
+      raw.description,
+      raw.rawContent,
+      raw.aiContent,
+      raw.imageUrl,
+      raw.galleryImageUrls,
+      raw.wpPostId,
+      raw.price,
+      raw.sku,
+      raw.material,
+      raw.carModels,
+      raw.shopeeLink,
+      raw.lazadaLink,
+      raw.tiktokLink,
+      raw.videoUrl,
+      raw.status as unknown as ProductStatus,
+      raw.errorLog,
+      raw.createdAt,
+      raw.updatedAt,
+    );
+  }
 }
