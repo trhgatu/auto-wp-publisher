@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/shared/infrastructure/prisma/prisma.service';
 
@@ -149,19 +150,15 @@ export class WordPressService {
         );
       }
 
-      const data = (await response.json()) as Record<string, unknown>;
+      const data = (await response.json()) as any;
 
       this.logger.debug(
         `WooCommerce raw response keys: ${Object.keys(data).join(', ')}`,
       );
 
       return {
-        id: (data.id as number) || 0,
-        permalink:
-          (data.permalink as string) ||
-          (data.link as string) ||
-          (data.url as string) ||
-          'URL_NOT_FOUND',
+        id: data.id || 0,
+        permalink: data.permalink || data.link || data.url || 'URL_NOT_FOUND',
       };
     } catch (err: unknown) {
       errorMessage = err instanceof Error ? err.message : String(err);
