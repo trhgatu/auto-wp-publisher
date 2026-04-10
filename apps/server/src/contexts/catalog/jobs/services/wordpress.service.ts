@@ -19,7 +19,7 @@ export class WordPressService {
     videoUrl: string | null = null,
     imageUrl: string | null = null,
     galleryImageUrls: string | null = null,
-  ): Promise<string> {
+  ): Promise<{ id: number; permalink: string }> {
     const wpBaseUrl =
       process.env.WP_API_URL || 'https://phutungoto123.vn/wp-json';
     const wcApiUrl = `${wpBaseUrl.replace(/\/wp\/v2\/?$/, '')}/wc/v3`;
@@ -154,7 +154,7 @@ export class WordPressService {
         permalink: string;
       };
 
-      return data.permalink;
+      return { id: data.id, permalink: data.permalink };
     } catch (err: unknown) {
       errorMessage = err instanceof Error ? err.message : String(err);
       if (statusCode === 0) statusCode = 500;
