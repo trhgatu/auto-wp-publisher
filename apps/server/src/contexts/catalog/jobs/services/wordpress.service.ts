@@ -130,7 +130,10 @@ export class WordPressService {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
+          Accept: 'application/json',
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 AutoPublisher/1.0',
           Authorization: authHeader,
         },
         body: JSON.stringify(requestBody),
@@ -166,7 +169,9 @@ export class WordPressService {
             method: 'POST',
             endpoint: endpoint,
             requestHeader: JSON.stringify({
-              'Content-Type': 'application/json',
+              'Content-Type': 'application/json; charset=utf-8',
+              Accept: 'application/json',
+              'User-Agent': '[HIDDEN]',
               Authorization: '[MASKED]',
             }),
             requestBody: JSON.stringify(requestBody),
