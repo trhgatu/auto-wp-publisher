@@ -29,4 +29,4 @@ EXPOSE 3000
 EXPOSE 5555
 
 # Lệnh chạy chính
-CMD ["sh", "-c", "pnpm -F @repo/database db:deploy && node apps/server/dist/main"]
+CMD ["node", "apps/server/dist/main"]

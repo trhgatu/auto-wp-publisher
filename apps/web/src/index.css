@@ -28,15 +28,7 @@
 
 /* Custom Utilities for elegant UI */
 @layer utilities {
-  .glass {
-    @apply bg-white/70 backdrop-blur-xl border border-white/50;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
-  }
-  .glass-card {
-    @apply bg-white rounded-2xl border border-slate-100/80 transition-all duration-300 hover:-translate-y-1;
-    box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08);
-  }
-  .glass-card:hover {
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+  .flat-card {
+    @apply bg-white border border-slate-200 rounded-xl transition-all;
   }
 }

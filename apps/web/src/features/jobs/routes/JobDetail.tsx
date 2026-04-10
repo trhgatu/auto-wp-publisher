@@ -1,258 +1,404 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
   Clock,
   AlertCircle,
-  CheckCircle2,
   RefreshCw,
+  Package,
+  ExternalLink,
+  ShieldCheck,
+  Tag,
+  ShoppingCart,
+  ChevronRight,
+  FileText,
+  Image as ImageIcon,
+  Globe,
+  Zap,
+  History,
 } from "lucide-react";
 import { useJob } from "../hooks/useJob";
-import type { JobDetailItem } from "../api/getJobById";
+import { Button } from "../../../components/shared/Button";
+import { clsx } from "clsx";
+
+type TabType = "content" | "ai" | "gallery" | "raw";
 
 export function JobDetail() {
   const { id } = useParams<{ id: string }>();
   const { data: job, isLoading, error } = useJob(id);
+  const [activeTab, setActiveTab] = useState<TabType>("content");
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <RefreshCw className="w-8 h-8 text-blue-500 animate-spin" />
+      <div className="flex flex-col justify-center items-center h-80">
+        <RefreshCw className="w-6 h-6 text-slate-300 animate-spin" />
+        <p className="mt-4 text-slate-400 text-sm">Đang tải chi tiết...</p>
       </div>
     );
   }
 
   if (error || !job) {
     return (
-      <div className="bg-red-50 text-red-600 p-4 rounded-lg flex items-center shadow-sm">
-        <AlertCircle className="w-5 h-5 mr-2" />
-        {(error as { message?: string })?.message || "Job not found"}
+      <div className="bg-white border border-slate-200 p-12 rounded-lg flex flex-col items-center text-center max-w-2xl mx-auto mt-10">
+        <AlertCircle className="w-10 h-10 text-slate-300 mb-4" />
+        <h2 className="text-lg font-bold text-slate-900 mb-2">
+          Không tìm thấy sản phẩm
+        </h2>
+        <p className="text-slate-500 text-sm mb-6">
+          {(error as { message?: string })?.message || "Dữ liệu không tồn tại."}
+        </p>
+        <Link to="/jobs">
+          <Button
+            variant="secondary"
+            leftIcon={<ArrowLeft className="w-4 h-4" />}
+          >
+            Quay lại danh sách
+          </Button>
+        </Link>
       </div>
     );
   }
 
-  const getStatusBadge = (status: JobDetailItem["status"]) => {
+  const getStatusDisplay = (status: string) => {
     switch (status) {
       case "COMPLETED":
-        return (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-            <CheckCircle2 className="w-4 h-4 mr-1.5" /> Thống nhất
-          </span>
-        );
+        return {
+          label: "Xuất bản",
+          color: "text-green-600 bg-green-50 border-green-100",
+          icon: ShieldCheck,
+        };
       case "PENDING":
-        return (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-            <Clock className="w-4 h-4 mr-1.5" /> Chờ xử lý
-          </span>
-        );
+        return {
+          label: "Chờ xử lý",
+          color: "text-amber-600 bg-amber-50 border-amber-100",
+          icon: Clock,
+        };
       case "PROCESSING":
-        return (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-            <RefreshCw className="w-4 h-4 mr-1.5 animate-spin" /> Đang xử lý
-          </span>
-        );
+        return {
+          label: "Đang xử lý",
+          color: "text-blue-600 bg-blue-50 border-blue-100",
+          icon: RefreshCw,
+        };
       case "FAILED":
-        return (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-            <AlertCircle className="w-4 h-4 mr-1.5" /> Thất bại
-          </span>
-        );
+        return {
+          label: "Lỗi",
+          color: "text-red-600 bg-red-50 border-red-100",
+          icon: AlertCircle,
+        };
+      default:
+        return {
+          label: status,
+          color: "text-slate-600 bg-slate-50 border-slate-100",
+          icon: Package,
+        };
     }
   };
 
+  const status = getStatusDisplay(job.status);
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 mb-10">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+    <div className="space-y-6 pb-20 max-w-[1400px] mx-auto animate-in fade-in duration-500">
+      {/* 1. CLEAN HEADER (Antd Style) */}
+      <div className="bg-white p-4 rounded-lg border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
           <Link
             to="/jobs"
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500"
+            className="p-2 hover:bg-slate-50 rounded-md border border-slate-100 text-slate-400 hover:text-slate-900 transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">{job.name}</h1>
+          <div className="h-4 w-px bg-slate-100" />
+          <div>
+            <div className="flex items-center gap-2 text-[11px] text-slate-400 mb-0.5 font-medium">
+              <span>Kho sản phẩm</span>
+              <ChevronRight className="w-3 h-3" />
+              <span>{job.sku || job.id.slice(0, 8)}</span>
+            </div>
+            <h1 className="text-lg font-bold text-slate-900 leading-tight">
+              {job.name}
+            </h1>
+          </div>
         </div>
-        {getStatusBadge(job.status)}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Cột trái: General Info */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">
-              Thông tin chung
-            </h3>
-            <dl className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-gray-500">ID:</dt>
-                <dd className="font-medium text-gray-900 text-right truncate pl-4">
-                  {job.id}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-gray-500">SKU:</dt>
-                <dd className="font-medium text-gray-900">{job.sku || "-"}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-gray-500">Giá:</dt>
-                <dd className="font-medium text-gray-900">
-                  {job.price || "-"}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-gray-500">Chất liệu:</dt>
-                <dd className="font-medium text-gray-900 truncate pl-4">
-                  {job.material || "-"}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-gray-500">Dòng xe:</dt>
-                <dd className="font-medium text-gray-900 truncate pl-4">
-                  {job.carModels || "-"}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-gray-500">WP Post ID:</dt>
-                <dd className="font-medium text-gray-900">
-                  {job.wpPostId || "-"}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-gray-500">Tạo lúc:</dt>
-                <dd className="font-medium text-gray-900">
-                  {new Date(job.createdAt).toLocaleString()}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-gray-500">Cập nhật lúc:</dt>
-                <dd className="font-medium text-gray-900">
-                  {new Date(job.updatedAt).toLocaleString()}
-                </dd>
-              </div>
-            </dl>
+      {/* 2. SUMMARY STATS */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Trạng thái",
+            value: status.label,
+            color: status.color,
+            icon: status.icon,
+          },
+          {
+            label: "Giá niêm yết",
+            value: job.price
+              ? `${Number(job.price).toLocaleString()}đ`
+              : "Chưa có",
+            icon: ShoppingCart,
+          },
+          { label: "Mã SKU", value: job.sku || "-", icon: Tag },
+          {
+            label: "Ngày cập nhật",
+            value: new Date(job.updatedAt).toLocaleDateString("vi-VN"),
+            icon: History,
+          },
+        ].map((item, i) => (
+          <div
+            key={i}
+            className="bg-white p-4 rounded-lg border border-slate-200 transition-all hover:border-slate-300"
+          >
+            <div className="flex items-center gap-2 text-slate-400 mb-1.5">
+              <item.icon className="w-3.5 h-3.5" />
+              <span className="text-[10px] uppercase tracking-wider font-bold">
+                {item.label}
+              </span>
+            </div>
+            <div
+              className={clsx(
+                "text-[13px] font-bold",
+                item.color ? item.color.split(" ")[0] : "text-slate-800",
+              )}
+            >
+              {item.value}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 3. MAIN CONTENT LAYOUT */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        {/* Left Column (Main Tabs) */}
+        <div className="lg:col-span-2 bg-white rounded-lg border border-slate-200 overflow-hidden">
+          {/* Ant-style Tabs Header */}
+          <div className="flex border-b border-slate-100 bg-slate-50/30">
+            {(
+              [
+                { id: "content", label: "Nội dung gốc", icon: FileText },
+                { id: "ai", label: "Nội dung AI", icon: Zap },
+                { id: "gallery", label: "Thư viện ảnh", icon: ImageIcon },
+              ] as const
+            ).map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={clsx(
+                  "px-6 py-4 text-xs font-bold transition-all relative flex items-center gap-2 uppercase tracking-tight",
+                  activeTab === tab.id
+                    ? "text-red-600 bg-white"
+                    : "text-slate-400 hover:text-slate-700",
+                )}
+              >
+                <tab.icon
+                  className={clsx(
+                    "w-3.5 h-3.5",
+                    activeTab === tab.id ? "text-red-600" : "text-slate-400",
+                  )}
+                />
+                {tab.label}
+                {activeTab === tab.id && (
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-red-600" />
+                )}
+              </button>
+            ))}
           </div>
 
-          {(job.shopeeLink ||
-            job.lazadaLink ||
-            job.tiktokLink ||
-            job.videoUrl) && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">
-                Liên kết Mở Rộng
-              </h3>
-              <div className="space-y-3">
-                {job.shopeeLink && (
-                  <a
-                    href={job.shopeeLink}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex justify-between items-center text-sm text-orange-600 hover:underline"
-                  >
-                    <span>Shopee</span>
-                    <span className="text-gray-400">↗</span>
-                  </a>
-                )}
-                {job.lazadaLink && (
-                  <a
-                    href={job.lazadaLink}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex justify-between items-center text-sm text-blue-600 hover:underline"
-                  >
-                    <span>Lazada</span>
-                    <span className="text-gray-400">↗</span>
-                  </a>
-                )}
-                {job.tiktokLink && (
-                  <a
-                    href={job.tiktokLink}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex justify-between items-center text-sm text-black hover:underline"
-                  >
-                    <span>TikTok Shop</span>
-                    <span className="text-gray-400">↗</span>
-                  </a>
-                )}
-                {job.videoUrl && (
-                  <a
-                    href={job.videoUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex justify-between items-center text-sm text-red-600 hover:underline"
-                  >
-                    <span>Video YouTube</span>
-                    <span className="text-gray-400">↗</span>
-                  </a>
-                )}
-              </div>
-            </div>
-          )}
-
-          {job.status === "FAILED" && job.errorLog && (
-            <div className="bg-red-50 rounded-xl shadow-sm border border-red-100 p-6">
-              <h3 className="text-lg font-semibold text-red-900 mb-2 flex items-center">
-                <AlertCircle className="w-5 h-5 mr-2" />
-                Lỗi (Error Log)
-              </h3>
-              <div className="text-sm text-red-700 bg-red-100 p-3 rounded-md overflow-auto max-h-48 whitespace-pre-wrap">
-                {job.errorLog}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Cột phải: Content */}
-        <div className="lg:col-span-2 space-y-6">
-          {job.imageUrl && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <img
-                src={job.imageUrl}
-                alt={job.name}
-                className="w-full max-h-96 object-cover bg-gray-50"
-              />
-            </div>
-          )}
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">
-              Mô tả / Nội dung gốc
-            </h3>
-            {job.description || job.rawContent ? (
-              <div className="prose prose-sm max-w-none text-gray-700 space-y-4">
-                {job.description && (
-                  <div>
-                    <h4 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-1">
-                      Description
-                    </h4>
-                    <div className="whitespace-pre-wrap leading-relaxed">
-                      {job.description}
-                    </div>
+          <div className="p-8 min-h-[450px]">
+            {activeTab === "content" && (
+              <div className="animate-in fade-in slide-in-from-left-2 duration-300">
+                {job.description || job.rawContent ? (
+                  <div className="space-y-6">
+                    {/* Render as HTML if it contains tags, otherwise fallback to text */}
+                    <div
+                      className="prose prose-sm prose-slate max-w-none text-slate-600 antialiased
+                        prose-headings:text-slate-900 prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tight
+                        prose-table:border prose-table:border-slate-100 prose-th:bg-slate-50 prose-th:px-4 prose-th:py-2 prose-td:px-4 prose-td:py-2 prose-td:border-b prose-td:border-slate-50"
+                      dangerouslySetInnerHTML={{
+                        __html: job.description || job.rawContent || "",
+                      }}
+                    />
                   </div>
-                )}
-                {job.rawContent && (
-                  <div>
-                    <h4 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-1 mt-4">
-                      Raw Content
-                    </h4>
-                    <div className="whitespace-pre-wrap leading-relaxed bg-gray-50 p-4 rounded-lg text-xs font-mono">
-                      {job.rawContent}
-                    </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-20 text-slate-300">
+                    <FileText className="w-10 h-10 mb-2 opacity-20" />
+                    <p className="italic text-sm">
+                      Chưa có thông tin mô tả chi tiết.
+                    </p>
                   </div>
                 )}
               </div>
-            ) : (
-              <p className="text-sm text-gray-500 italic">Không có nội dung</p>
+            )}
+
+            {activeTab === "ai" && (
+              <div className="animate-in fade-in slide-in-from-left-2 duration-300">
+                {job.aiContent ? (
+                  <div className="p-6 bg-slate-50 rounded-xl border border-slate-100 relative">
+                    <div className="text-[13px] text-slate-700 whitespace-pre-wrap leading-loose font-medium">
+                      {job.aiContent}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-20 text-slate-300">
+                    <Zap className="w-8 h-8 mb-2 opacity-20" />
+                    <p className="italic text-sm">
+                      Sản phẩm này chưa được xử lý bởi trợ lý AI.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "gallery" && (
+              <div className="animate-in fade-in slide-in-from-left-2 duration-300">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {job.imageUrl && (
+                    <div className="aspect-square bg-slate-50 rounded-lg border border-slate-200 overflow-hidden group cursor-pointer ring-offset-2 hover:ring-2 hover:ring-red-100 transition-all relative">
+                      <img
+                        src={job.imageUrl}
+                        className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute top-2 left-2 bg-slate-900/90 text-white text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-widest">
+                        Ảnh bìa
+                      </div>
+                    </div>
+                  )}
+                  {job.galleryImageUrls?.split(",").map((url, i) => (
+                    <div
+                      key={i}
+                      className="aspect-square bg-slate-50 rounded-lg border border-slate-100 overflow-hidden group cursor-pointer ring-offset-2 hover:ring-2 hover:ring-red-100 transition-all"
+                    >
+                      <img
+                        src={url.trim()}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === "raw" && (
+              <div className="animate-in fade-in slide-in-from-left-2 duration-300">
+                <div className="bg-slate-900 rounded-lg p-6">
+                  <div className="flex items-center justify-between mb-4 pb-2 border-b border-white/5">
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                      Raw Data (Crawler Output)
+                    </span>
+                    <History className="w-3 h-3 text-slate-700" />
+                  </div>
+                  <pre className="text-[11px] text-emerald-400/90 font-mono whitespace-pre-wrap break-all leading-relaxed">
+                    {job.rawContent || "Không tìm thấy dữ liệu thô từ Crawler."}
+                  </pre>
+                </div>
+              </div>
             )}
           </div>
+        </div>
 
-          {job.aiContent && (
-            <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl shadow-sm border border-indigo-100 p-6">
-              <h3 className="text-lg font-semibold text-indigo-900 mb-4 border-b border-indigo-200 pb-2">
-                Nội dung tạo bởi AI
+        {/* Right Column (Side Info) */}
+        <div className="space-y-6">
+          <div className="bg-white rounded-lg border border-slate-200 p-6">
+            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-5">
+              Thuộc tính kỹ thuật
+            </h3>
+            <div className="space-y-5">
+              {[
+                { label: "Chất liệu", value: job.material, icon: FileText },
+                {
+                  label: "Dòng xe / Model",
+                  value: job.carModels,
+                  icon: Package,
+                },
+                { label: "WP Post ID", value: job.wpPostId, icon: Globe },
+                { label: "System UUID", value: job.id, mono: true, icon: Tag },
+              ].map((item, i) => (
+                <div key={i} className="flex gap-4 group">
+                  <div className="mt-0.5 p-1.5 rounded bg-slate-50 text-slate-300 group-hover:text-red-600 transition-colors">
+                    <item.icon className="w-3 h-3" />
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[10px] font-bold text-slate-400 mb-0.5">
+                      {item.label}
+                    </span>
+                    <span
+                      className={clsx(
+                        "text-xs font-bold text-slate-700 truncate",
+                        item.mono && "font-mono opacity-60 text-[9px]",
+                      )}
+                    >
+                      {item.value || "-"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg border border-slate-200 p-6">
+            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-5">
+              Liên kết sàn
+            </h3>
+            <div className="grid grid-cols-1 gap-2">
+              {[
+                {
+                  label: "Shopee",
+                  link: job.shopeeLink,
+                  color: "text-orange-600 hover:bg-orange-50 border-orange-100",
+                },
+                {
+                  label: "Lazada",
+                  link: job.lazadaLink,
+                  color: "text-blue-600 hover:bg-blue-50 border-blue-100",
+                },
+                {
+                  label: "TikTok Shop",
+                  link: job.tiktokLink,
+                  color: "text-slate-900 hover:bg-slate-50 border-slate-200",
+                },
+                {
+                  label: "YouTube Video",
+                  link: job.videoUrl,
+                  color: "text-red-600 hover:bg-red-50 border-red-100",
+                },
+              ].map(
+                (m, i) =>
+                  m.link && (
+                    <a
+                      key={i}
+                      href={m.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={clsx(
+                        "flex items-center justify-between px-4 py-3 rounded-md border text-[11px] font-bold transition-all group",
+                        m.color,
+                      )}
+                    >
+                      <span className="flex items-center gap-2 uppercase tracking-tight">
+                        {m.label}
+                      </span>
+                      <ExternalLink className="w-3 h-3 opacity-20 group-hover:opacity-100 transition-opacity" />
+                    </a>
+                  ),
+              )}
+              {!job.shopeeLink &&
+                !job.lazadaLink &&
+                !job.tiktokLink &&
+                !job.videoUrl && (
+                  <p className="text-[11px] text-slate-400 italic text-center py-2">
+                    Không có liên kết mở rộng.
+                  </p>
+                )}
+            </div>
+          </div>
+
+          {job.status === "FAILED" && job.errorLog && (
+            <div className="bg-rose-50 rounded-lg border border-rose-100 p-6 relative overflow-hidden transition-all hover:bg-rose-100/50">
+              <h3 className="text-[10px] font-black text-rose-900 uppercase tracking-widest mb-3 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" /> Chi tiết lỗi
               </h3>
-              <div className="prose prose-sm max-w-none text-gray-800 whitespace-pre-wrap">
-                {job.aiContent}
-              </div>
+              <p className="text-[11px] text-rose-700 bg-white/60 p-4 rounded border border-rose-100 whitespace-pre-wrap leading-relaxed max-h-60 overflow-y-auto font-medium">
+                {job.errorLog}
+              </p>
             </div>
           )}
         </div>
