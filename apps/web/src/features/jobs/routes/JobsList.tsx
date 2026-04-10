@@ -50,11 +50,11 @@ export const JobsList = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Unified Control Center */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
+      <div className="bg-white rounded-2xl border border-slate-200 transition-all">
         {/* Row 1: Brand & Core Actions */}
         <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center border border-red-100 shadow-inner">
+            <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center border border-red-100">
               <Package className="w-6 h-6 text-red-600" />
             </div>
             <div>
@@ -69,19 +69,17 @@ export const JobsList = () => {
 
           <div className="flex items-center gap-3">
             <Button
-              variant="secondary"
               onClick={() => setImportModalOpen(true)}
               leftIcon={<FileSpreadsheet className="w-4 h-4" />}
-              className="bg-slate-50 border-slate-200 text-slate-600 font-bold px-5"
+              className="bg-red-600 hover:bg-red-700 text-white border-none font-bold px-5 h-10 shadow-none transition-all active:scale-95"
             >
               Import Excel
             </Button>
 
             <Link to="/create">
               <Button
-                variant="primary"
                 leftIcon={<PlusCircle className="w-4 h-4" />}
-                className="shadow-lg shadow-red-200 px-6 font-bold"
+                className="bg-red-600 hover:bg-red-700 text-white border-none px-6 font-bold h-10 shadow-none transition-all active:scale-95"
               >
                 Thêm mới
               </Button>
@@ -128,11 +126,11 @@ export const JobsList = () => {
         </div>
       </div>
 
-      <div className="glass rounded-xl shadow-sm overflow-hidden border border-border flex flex-col min-h-[400px] relative">
+      <div className="bg-white rounded-xl overflow-hidden border border-slate-200 flex flex-col min-h-[400px] relative">
         {/* Loading Overlay */}
         {(isLoading || isFetching) && (
           <div className="absolute inset-0 z-20 bg-white/40 flex items-center justify-center animate-in fade-in duration-300">
-            <div className="bg-white p-3 rounded-full border border-slate-100 shadow-sm">
+            <div className="bg-white p-3 rounded-full border border-slate-100">
               <Loader2 className="w-6 h-6 text-red-600 animate-spin" />
             </div>
           </div>
@@ -185,10 +183,11 @@ export const JobsList = () => {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-3 max-w-xs xl:max-w-md">
+                    <td className="px-6 py-3 max-w-[180px] xl:max-w-[250px]">
                       <Link
                         to={`/jobs/${job.id}`}
                         className="font-bold text-slate-700 hover:text-red-600 transition-colors block truncate uppercase tracking-tight text-xs"
+                        title={job.name}
                       >
                         {job.name}
                       </Link>

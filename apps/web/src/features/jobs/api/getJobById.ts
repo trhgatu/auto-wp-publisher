@@ -7,6 +7,7 @@ export interface JobDetailItem {
   rawContent: string | null;
   aiContent: string | null;
   imageUrl: string | null;
+  galleryImageUrls: string | null;
   wpPostId: number | null;
   price: string | null;
   sku: string | null;
