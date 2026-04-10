@@ -8,6 +8,7 @@ import { Queue } from 'bullmq';
 import { PublishProductJobData } from '../../../../jobs/publisher.processor';
 import { Logger } from '@nestjs/common';
 import { ImportProductDto } from '@repo/shared';
+import { ProductStatus } from '../../../domain/types/product-status.enum';
 
 @CommandHandler(BulkCreateProductsCommand)
 export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProductsCommand> {
@@ -31,36 +32,79 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
 
     for (const data of products) {
       try {
-        const id = this.uuidGenerator.generate();
         const htmlContent = this.generateWPContent(data);
+        let product: Product | null = null;
+        if (data.partNumbers) {
+          product = await this.productRepository.findBySku(
+            String(data.partNumbers),
+          );
+        }
+        if (!product) {
+          product = await this.productRepository.findByName(data.title);
+        }
 
-        const product = Product.create(
-          id,
-          data.title,
-          null, // description
-          htmlContent,
-          data.imageUrl || null,
-          data.galleryImageUrls || null,
-          data.price ? String(data.price) : null,
-          data.partNumbers ? String(data.partNumbers) : null,
-          data.material ? String(data.material) : null,
-          data.carModels ? String(data.carModels) : null,
-          data.shopeeLink ? String(data.shopeeLink) : null,
-          data.lazadaLink ? String(data.lazadaLink) : null,
-          data.tiktokLink ? String(data.tiktokLink) : null,
-          data.video ? String(data.video) : null,
-        );
+        let productId: string;
 
-        this.logger.log(
-          `Importing product: ${data.title} - Image: ${data.imageUrl}`,
-        );
-        product.markAsCreated();
+        if (product) {
+          this.logger.log(
+            `Syncing existing product: ${data.title} (SKU: ${data.partNumbers || 'N/A'})`,
+          );
+          productId = product.id.value;
+          product.name = data.title;
+          product.rawContent = htmlContent;
+          product.imageUrl = data.imageUrl || product.imageUrl;
+          product.galleryImageUrls =
+            data.galleryImageUrls || product.galleryImageUrls;
+          product.price = data.price ? String(data.price) : product.price;
+          product.sku = data.partNumbers
+            ? String(data.partNumbers)
+            : product.sku;
+          product.material = data.material
+            ? String(data.material)
+            : product.material;
+          product.carModels = data.carModels
+            ? String(data.carModels)
+            : product.carModels;
+          product.shopeeLink = data.shopeeLink
+            ? String(data.shopeeLink)
+            : product.shopeeLink;
+          product.lazadaLink = data.lazadaLink
+            ? String(data.lazadaLink)
+            : product.lazadaLink;
+          product.tiktokLink = data.tiktokLink
+            ? String(data.tiktokLink)
+            : product.tiktokLink;
+          product.videoUrl = data.video ? String(data.video) : product.videoUrl;
+          product.status = ProductStatus.PENDING;
+        } else {
+          productId = this.uuidGenerator.generate();
+          this.logger.log(`Importing new product: ${data.title}`);
+
+          product = Product.create(
+            productId,
+            data.title,
+            null,
+            htmlContent,
+            data.imageUrl || null,
+            data.galleryImageUrls || null,
+            data.price ? String(data.price) : null,
+            data.partNumbers ? String(data.partNumbers) : null,
+            data.material ? String(data.material) : null,
+            data.carModels ? String(data.carModels) : null,
+            data.shopeeLink ? String(data.shopeeLink) : null,
+            data.lazadaLink ? String(data.lazadaLink) : null,
+            data.tiktokLink ? String(data.tiktokLink) : null,
+            data.video ? String(data.video) : null,
+          );
+          product.markAsCreated();
+        }
+
         await this.productRepository.save(product);
         this.publisher.mergeObjectContext(product).commit();
 
         await this.wpPublisherQueue.add(
           'publish-product',
-          { productId: id },
+          { productId },
           {
             removeOnComplete: true,
             removeOnFail: false,
@@ -68,17 +112,19 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
             backoff: { type: 'exponential', delay: 2000 },
           },
         );
-        ids.push(id);
+        ids.push(productId);
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : String(err);
         this.logger.error(
-          `Failed to import product: ${data.title}`,
+          `Failed to import/sync product: ${data.title}`,
           errorMessage,
         );
       }
     }
 
-    this.logger.log(`Bulk imported ${ids.length}/${products.length} products.`);
+    this.logger.log(
+      `Bulk processed ${ids.length}/${products.length} products (Created/Updated).`,
+    );
     return ids;
   }
 
