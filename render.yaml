@@ -6,7 +6,6 @@ services:
     plan: free
     image:
       url: docker.io/trhgatu/wp-publisher-api:latest
-    preDeployCommand: pnpm -F @repo/database db:deploy
     envVars:
       - key: DATABASE_URL
         fromDatabase:
