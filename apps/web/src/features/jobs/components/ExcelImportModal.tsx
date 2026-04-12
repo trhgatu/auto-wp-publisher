@@ -80,12 +80,23 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
             shopeeLink: getVal(["shopee"]),
             lazadaLink: getVal(["lzd", "lazada"]),
             tiktokLink: getVal(["tiktok"]),
-            imageUrl: getVal(["ảnh đại diện", "ảnh chính", "image", "avatar", "main image"]),
-            galleryImageUrls: getVal(["thư viện ảnh", "thư viện", "gallery", "images"]),
-            category: "Phụ tùng ô tô",
+            imageUrl: getVal([
+              "ảnh đại diện",
+              "ảnh chính",
+              "image",
+              "avatar",
+              "main image",
+            ]),
+            galleryImageUrls: getVal([
+              "thư viện ảnh",
+              "thư viện",
+              "gallery",
+              "images",
+            ]),
+            category:
+              getVal(["danh mục", "chuyên mục", "category"]) || "Phụ tùng ô tô",
           };
 
-          // Kiểm tra xem dòng này có thực sự có dữ liệu kỹ thuật không
           const values = Object.values(product).filter(
             (v) => v !== "" && v !== "Phụ tùng ô tô",
           );
@@ -169,11 +180,10 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center space-y-4 transition-all ${
-                isDragging
+              className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center space-y-4 transition-all ${isDragging
                   ? "border-indigo-600 bg-indigo-50/50 scale-[1.02]"
                   : "border-gray-200 hover:border-indigo-400"
-              }`}
+                }`}
             >
               <div className="p-4 bg-indigo-50 rounded-full">
                 <Upload className="w-8 h-8 text-indigo-600" />
@@ -238,6 +248,9 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                         Dòng xe
                       </th>
                       <th className="p-3 text-sm font-semibold text-gray-600">
+                        Danh mục
+                      </th>
+                      <th className="p-3 text-sm font-semibold text-gray-600">
                         Shopee
                       </th>
                       <th className="p-3 text-sm font-semibold text-gray-600">
@@ -288,6 +301,9 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                         </td>
                         <td className="p-3 text-sm text-gray-500 truncate max-w-[150px]">
                           {row.carModels}
+                        </td>
+                        <td className="p-3 text-sm text-gray-500 truncate max-w-[150px]">
+                          {row.category}
                         </td>
                         <td className="p-3 text-sm text-gray-500 truncate max-w-[100px]">
                           {row.shopeeLink}

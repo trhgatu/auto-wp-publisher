@@ -75,6 +75,7 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
             ? String(data.tiktokLink)
             : product.tiktokLink;
           product.videoUrl = data.video ? String(data.video) : product.videoUrl;
+          product.category = data.category ?? product.category;
           product.status = ProductStatus.PENDING;
         } else {
           productId = this.uuidGenerator.generate();
@@ -95,6 +96,7 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
             data.lazadaLink ? String(data.lazadaLink) : null,
             data.tiktokLink ? String(data.tiktokLink) : null,
             data.video ? String(data.video) : null,
+            data.category ?? null,
           );
           product.markAsCreated();
         }

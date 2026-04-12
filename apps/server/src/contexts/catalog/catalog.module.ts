@@ -11,6 +11,7 @@ import { ProductRepository } from './products/domain/product.repository';
 import { PrismaProductRepository } from './products/infrastructure/repositories/prisma-product.repository';
 import { WordPressService } from './jobs/services/wordpress.service';
 import { ApiLogsModule } from './api-logs/api-logs.module';
+import { EventsGateway } from './jobs/events.gateway';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ApiLogsModule } from './api-logs/api-logs.module';
   ],
   controllers: [ProductsController],
   providers: [
+    EventsGateway,
     WordPressService,
     PublisherProcessor,
     CreateProductHandler,

@@ -21,6 +21,7 @@ export class Product extends AggregateRoot<IEvent> {
     public lazadaLink: string | null,
     public tiktokLink: string | null,
     public videoUrl: string | null,
+    public category: string | null,
     public status: ProductStatus,
     public errorLog: string | null,
     public readonly createdAt: Date,
@@ -44,16 +45,17 @@ export class Product extends AggregateRoot<IEvent> {
     lazadaLink: string | null = null,
     tiktokLink: string | null = null,
     videoUrl: string | null = null,
+    category: string | null = null,
   ): Product {
     return new Product(
       ProductId.create(id),
       name,
       description,
       rawContent,
-      null, // aiContent
+      null,
       imageUrl,
       galleryImageUrls,
-      null, // wpPostId
+      null,
       price,
       sku,
       material,
@@ -62,8 +64,9 @@ export class Product extends AggregateRoot<IEvent> {
       lazadaLink,
       tiktokLink,
       videoUrl,
+      category,
       ProductStatus.PENDING,
-      null, // errorLog
+      null,
       new Date(),
       new Date(),
     );
