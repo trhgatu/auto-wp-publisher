@@ -107,38 +107,42 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center gap-3 px-4 py-2 text-sm bg-white border border-slate-200 rounded-xl transition-all duration-300 hover:border-red-400 hover:shadow-soft focus:outline-none focus:ring-4 focus:ring-red-500/10 group min-w-[240px]",
-          isOpen && "border-red-600 ring-4 ring-red-500/10",
-          (startDate || endDate) && "border-red-200 bg-red-50/30",
+          "flex items-center gap-3 px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl transition-all duration-300 hover:border-red-400 dark:hover:border-red-500/50 hover:shadow-soft focus:outline-none focus:ring-4 focus:ring-red-500/10 dark:focus:ring-red-500/10 group min-w-[240px]",
+          isOpen &&
+            "border-red-600 dark:border-red-500 ring-4 ring-red-500/10 dark:ring-red-500/10",
+          (startDate || endDate) &&
+            "border-red-200 dark:border-red-500 bg-red-50/30 dark:bg-red-500/10",
         )}
       >
         <Calendar
           className={cn(
-            "w-4 h-4 text-slate-400 transition-colors group-hover:text-red-500",
-            (startDate || endDate) && "text-red-600",
+            "w-4 h-4 text-slate-400 dark:text-slate-500 transition-colors group-hover:text-red-500",
+            (startDate || endDate) && "text-red-600 dark:text-red-500",
           )}
         />
-        <div className="flex-1 text-left font-medium text-slate-700">
+        <div className="flex-1 text-left font-medium text-slate-700 dark:text-slate-200">
           {startDate || endDate ? (
             <span className="flex items-center gap-2">
               {formatDate(startDate)}
-              <span className="text-slate-300">—</span>
+              <span className="text-slate-300 dark:text-slate-600">—</span>
               {endDate ? formatDate(endDate) : "..."}
             </span>
           ) : (
-            <span className="text-slate-400 font-normal">Lọc theo ngày...</span>
+            <span className="text-slate-400 dark:text-slate-500 font-normal">
+              Lọc theo ngày...
+            </span>
           )}
         </div>
         {(startDate || endDate) && (
           <X
-            className="w-3.5 h-3.5 text-slate-400 hover:text-red-600 transition-colors"
+            className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-500 transition-colors"
             onClick={clearFilter}
           />
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute z-[110] top-full mt-2 left-0 w-72 bg-white border border-slate-100 rounded-2xl shadow-xl p-4 animate-in fade-in slide-in-from-top-2 duration-300 isolate backdrop-blur-xl">
+        <div className="absolute z-[110] top-full mt-2 left-0 w-72 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-xl p-4 animate-in fade-in slide-in-from-top-2 duration-300 isolate backdrop-blur-xl">
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={() =>
@@ -146,11 +150,11 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                   new Date(viewDate.getFullYear(), viewDate.getMonth() - 1),
                 )
               }
-              className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
+              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
             >
-              <ChevronLeft className="w-4 h-4 text-slate-500" />
+              <ChevronLeft className="w-4 h-4 text-slate-500 dark:text-slate-400" />
             </button>
-            <span className="text-sm font-bold text-slate-700 uppercase tracking-tight">
+            <span className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-tight">
               Tháng {viewDate.getMonth() + 1}, {viewDate.getFullYear()}
             </span>
             <button
@@ -159,9 +163,9 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                   new Date(viewDate.getFullYear(), viewDate.getMonth() + 1),
                 )
               }
-              className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
+              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
             >
-              <ChevronRight className="w-4 h-4 text-slate-500" />
+              <ChevronRight className="w-4 h-4 text-slate-500 dark:text-slate-400" />
             </button>
           </div>
 
@@ -169,7 +173,7 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
             {["CN", "T2", "T3", "T4", "T5", "T6", "T7"].map((d) => (
               <div
                 key={d}
-                className="text-[10px] font-black text-slate-400 text-center py-1"
+                className="text-[10px] font-black text-slate-400 dark:text-slate-500 text-center py-1"
               >
                 {d}
               </div>
@@ -184,10 +188,10 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                 className={cn(
                   "h-8 text-xs font-bold rounded-lg transition-all flex items-center justify-center relative",
                   isSelected(day)
-                    ? "bg-red-600 text-white shadow-md shadow-red-200 z-10"
+                    ? "bg-red-600 text-white shadow-md shadow-red-200 dark:shadow-red-900/50 z-10"
                     : isInRange(day)
-                      ? "bg-red-50 text-red-600 rounded-none first:rounded-l-lg last:rounded-r-lg"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-red-600",
+                      ? "bg-red-50 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-none first:rounded-l-lg last:rounded-r-lg"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-red-600 dark:hover:text-red-400",
                 )}
               >
                 {day}
@@ -195,10 +199,10 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
             ))}
           </div>
 
-          <div className="mt-4 pt-4 border-t border-slate-50 flex justify-end">
+          <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800 flex justify-end">
             <button
               onClick={() => setIsOpen(false)}
-              className="text-[10px] font-black uppercase tracking-widest text-red-600 hover:text-red-700"
+              className="text-[10px] font-black uppercase tracking-widest text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400"
             >
               Đóng
             </button>

@@ -7,19 +7,27 @@ const statusConfig: Record<
   JobItem["status"],
   { icon: React.ElementType; color: string; bg: string; spin?: boolean }
 > = {
-  PENDING: { icon: Clock, color: "text-amber-700", bg: "bg-amber-50" },
+  PENDING: {
+    icon: Clock,
+    color: "text-amber-700 dark:text-amber-400",
+    bg: "bg-amber-50 dark:bg-amber-900/20",
+  },
   PROCESSING: {
     icon: Loader2,
-    color: "text-blue-700",
-    bg: "bg-blue-50",
+    color: "text-blue-700 dark:text-blue-400",
+    bg: "bg-blue-50 dark:bg-blue-900/20",
     spin: true,
   },
   COMPLETED: {
     icon: CheckCircle2,
-    color: "text-emerald-700",
-    bg: "bg-emerald-50",
+    color: "text-emerald-700 dark:text-emerald-400",
+    bg: "bg-emerald-50 dark:bg-emerald-900/20",
   },
-  FAILED: { icon: XCircle, color: "text-rose-700", bg: "bg-rose-50" },
+  FAILED: {
+    icon: XCircle,
+    color: "text-rose-700 dark:text-rose-400",
+    bg: "bg-rose-50 dark:bg-rose-900/20",
+  },
 };
 
 export const JobStatusBadge = ({ status }: { status: JobItem["status"] }) => {
@@ -40,12 +48,12 @@ export const JobStatusBadge = ({ status }: { status: JobItem["status"] }) => {
           config.bg,
           config.color,
           status === "COMPLETED"
-            ? "border-emerald-200"
+            ? "border-emerald-200 dark:border-emerald-800"
             : status === "FAILED"
-              ? "border-rose-200"
+              ? "border-rose-200 dark:border-rose-800"
               : status === "PROCESSING"
-                ? "border-blue-200"
-                : "border-amber-200",
+                ? "border-blue-200 dark:border-blue-800"
+                : "border-amber-200 dark:border-amber-800",
         ),
       )}
     >

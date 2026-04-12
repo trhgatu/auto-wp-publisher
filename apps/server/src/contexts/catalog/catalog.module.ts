@@ -12,6 +12,7 @@ import { PrismaProductRepository } from './products/infrastructure/repositories/
 import { WordPressService } from './jobs/services/wordpress.service';
 import { ApiLogsModule } from './api-logs/api-logs.module';
 import { EventsGateway } from './jobs/events.gateway';
+import { GetDashboardStatsHandler } from './products/application/queries/get-dashboard-stats/get-dashboard-stats.handler';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { EventsGateway } from './jobs/events.gateway';
     BulkCreateProductsHandler,
     GetProductsHandler,
     GetProductByIdHandler,
+    GetDashboardStatsHandler,
     {
       provide: ProductRepository,
       useClass: PrismaProductRepository,

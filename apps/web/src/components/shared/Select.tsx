@@ -63,36 +63,39 @@ export const Select: React.FC<SelectProps> = ({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center justify-between w-full px-4 py-2 text-sm bg-white border border-slate-200 rounded-xl transition-all duration-300 text-left hover:border-red-400 hover:shadow-soft focus:outline-none focus:ring-4 focus:ring-red-500/10 group",
-          isOpen && "border-red-600 ring-4 ring-red-500/10",
+          "flex items-center justify-between w-full px-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl transition-all duration-300 text-left hover:border-red-400 dark:hover:border-red-500/50 hover:shadow-soft focus:outline-none focus:ring-4 focus:ring-red-500/10 dark:focus:ring-red-500/10 group",
+          isOpen &&
+            "border-red-600 dark:border-red-500 ring-4 ring-red-500/10 dark:ring-red-500/10",
         )}
       >
         <div className="flex items-center gap-2.5 truncate">
           {leftIcon && (
-            <span className="text-slate-400 group-hover:text-red-500 transition-colors">
+            <span className="text-slate-400 dark:text-slate-500 group-hover:text-red-500 transition-colors">
               {leftIcon}
             </span>
           )}
           {selectedOption ? (
-            <span className="font-medium text-slate-700 truncate">
+            <span className="font-medium text-slate-700 dark:text-slate-200 truncate">
               {selectedOption.label}
             </span>
           ) : (
-            <span className="text-slate-400">{placeholder}</span>
+            <span className="text-slate-400 dark:text-slate-500">
+              {placeholder}
+            </span>
           )}
         </div>
         <ChevronDown
           className={cn(
-            "w-4 h-4 text-slate-400 transition-transform duration-300 group-hover:text-red-500",
-            isOpen && "rotate-180 text-red-600",
+            "w-4 h-4 text-slate-400 dark:text-slate-500 transition-transform duration-300 group-hover:text-red-500",
+            isOpen && "rotate-180 text-red-600 dark:text-red-500",
           )}
         />
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute z-[100] w-full mt-2 bg-white/80 backdrop-blur-xl border border-slate-100 rounded-2xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300 isolate">
-          <div className="max-h-64 overflow-y-auto p-1.5 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+        <div className="absolute z-[100] w-full mt-2 bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-100 dark:border-slate-800 rounded-2xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300 isolate">
+          <div className="max-h-64 overflow-y-auto p-1.5 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
             {options.map((option) => (
               <button
                 key={option.value}
@@ -101,8 +104,8 @@ export const Select: React.FC<SelectProps> = ({
                 className={cn(
                   "flex items-center justify-between w-full px-3 py-2.5 text-sm font-medium rounded-[10px] transition-all duration-200 group text-left",
                   option.value === value
-                    ? "bg-red-600/10 text-red-700"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+                    ? "bg-red-600/10 dark:bg-red-500/10 text-red-700 dark:text-red-500"
+                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200",
                 )}
               >
                 <div className="flex items-center gap-2.5 min-w-0">

@@ -41,6 +41,7 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({
 
         queryClient.invalidateQueries({ queryKey: ["jobs"] });
         queryClient.invalidateQueries({ queryKey: ["products"] });
+        queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
 
         if (data.status === "COMPLETED") {
           notify(
