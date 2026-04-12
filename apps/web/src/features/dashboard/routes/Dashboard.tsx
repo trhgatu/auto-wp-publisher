@@ -26,21 +26,69 @@ export const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-[calc(100vh-10rem)] items-center justify-center">
-        <div className="flex max-w-sm flex-col items-center justify-center rounded-2xl bg-white dark:bg-slate-900 p-8 text-center border border-slate-200 dark:border-slate-800 transition-colors">
-          <div className="relative mb-6">
-            <div className="absolute inset-0 rounded-full animate-ping bg-red-400/20 dark:bg-red-500/20"></div>
-            <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-500">
-              <Package className="h-8 w-8 animate-pulse" />
+      <div className="space-y-6 max-w-[1600px] mx-auto transition-colors">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
+          <div>
+            <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-slate-500 mb-1 font-bold uppercase tracking-wider">
+              <span>Hệ thống</span>
+              <ChevronRight className="w-3 h-3" />
+              <span>Tổng quan</span>
+            </div>
+            <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100 uppercase">
+              Bảng điều hành
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium">
+              Giám sát hiệu suất nhập liệu và trạng thái đồng bộ WooCommerce.
+            </p>
+          </div>
+          <div className="hidden md:flex w-48 h-10 bg-slate-200 dark:bg-slate-800 rounded-lg animate-pulse" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 h-[130px] flex flex-col justify-between"
+            >
+              <div className="flex justify-between items-start">
+                <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800"></div>
+                <div className="flex flex-col items-end gap-2">
+                  <div className="w-20 h-3 bg-slate-100 dark:bg-slate-800 rounded"></div>
+                  <div className="w-16 h-7 bg-slate-100 dark:bg-slate-800 rounded mt-1"></div>
+                </div>
+              </div>
+              <div className="w-full flex items-center justify-between pt-3 border-t border-slate-50 dark:border-slate-800">
+                <div className="w-16 h-3 bg-slate-100 dark:bg-slate-800 rounded"></div>
+                <div className="w-12 h-4 bg-slate-100 dark:bg-slate-800 rounded"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
+          <div className="lg:col-span-2 h-[410px] bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col">
+            <div className="w-64 h-4 bg-slate-100 dark:bg-slate-800 rounded mb-8"></div>
+            <div className="flex-1 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800/80"></div>
+          </div>
+          <div className="flex flex-col gap-6">
+            <div className="flex-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col gap-6">
+              <div className="w-32 h-4 bg-slate-100 dark:bg-slate-800 rounded"></div>
+              <div className="space-y-6">
+                {[1, 2, 3].map((i) => (
+                  <div key={i}>
+                    <div className="flex justify-between mb-2">
+                      <div className="w-16 h-3 bg-slate-100 dark:bg-slate-800 rounded"></div>
+                      <div className="w-8 h-3 bg-slate-100 dark:bg-slate-800 rounded"></div>
+                    </div>
+                    <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="h-[126px] bg-slate-900 dark:bg-slate-950 rounded-xl p-6 border border-slate-800 dark:border-slate-800/50">
+              <div className="w-32 h-3 bg-slate-800 rounded mb-4"></div>
+              <div className="w-full h-2.5 bg-slate-800 rounded mb-2"></div>
+              <div className="w-3/4 h-2.5 bg-slate-800 rounded"></div>
             </div>
           </div>
-          <h3 className="mb-2 text-lg font-bold text-slate-900 dark:text-slate-100 uppercase tracking-tight">
-            Đang tổng hợp dữ liệu
-          </h3>
-          <p className="text-sm font-medium leading-relaxed text-slate-500 dark:text-slate-400">
-            Hệ thống đang tải số liệu bảng điều khiển, vui lòng chờ trong giây
-            lát...
-          </p>
         </div>
       </div>
     );
@@ -56,7 +104,6 @@ export const Dashboard = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 max-w-[1600px] mx-auto transition-colors">
-      {/* 1. CLEAN HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
         <div>
           <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-slate-500 mb-1 font-bold uppercase tracking-wider">
@@ -76,8 +123,6 @@ export const Dashboard = () => {
           Xuất báo cáo chi tiết
         </button>
       </div>
-
-      {/* 2. STATS CARDS (Antd Style) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           {
