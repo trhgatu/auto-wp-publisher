@@ -4,7 +4,7 @@ import { Header } from "./Header";
 
 export const MainLayout = () => {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex overflow-hidden relative selection:bg-indigo-500/30">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 flex overflow-hidden relative selection:bg-indigo-500/30 transition-colors">
       <Sidebar />
       <div className="flex-1 ml-64 flex flex-col min-h-screen relative w-[calc(100%-16rem)]">
         <Header />

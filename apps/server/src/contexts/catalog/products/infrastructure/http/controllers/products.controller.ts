@@ -4,6 +4,7 @@ import { CreateProductCommand } from '../../../application/commands/create-produ
 import { BulkCreateProductsCommand } from '../../../application/commands/bulk-create-products/bulk-create-products.command';
 import { GetProductsQuery } from '../../../application/queries/get-products/get-products.query';
 import { GetProductByIdQuery } from '../../../application/queries/get-product-by-id/get-product-by-id.query';
+import { GetDashboardStatsQuery } from '../../../application/queries/get-dashboard-stats/get-dashboard-stats.query';
 import { ProductResponse } from '../responses/product.response';
 import {
   ImportProductSchema,
@@ -44,6 +45,11 @@ export class ProductsController {
       ),
     );
     return { items, total };
+  }
+
+  @Get('dashboard/stats')
+  async getDashboardStats(): Promise<unknown> {
+    return this.queryBus.execute(new GetDashboardStatsQuery());
   }
 
   @Get(':id')

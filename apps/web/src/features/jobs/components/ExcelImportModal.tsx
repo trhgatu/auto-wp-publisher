@@ -158,19 +158,21 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-bottom border-gray-100">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col overflow-hidden transition-colors">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-slate-800">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Import Excel</h2>
-            <p className="text-sm text-gray-500">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-100">
+              Import Excel
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-slate-400">
               Tải lên file Excel mẫu để đăng bài hàng loạt
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors"
           >
-            <X className="w-6 h-6 text-gray-400" />
+            <X className="w-6 h-6 text-gray-400 dark:text-slate-500" />
           </button>
         </div>
 
@@ -180,19 +182,20 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center space-y-4 transition-all ${isDragging
-                  ? "border-indigo-600 bg-indigo-50/50 scale-[1.02]"
-                  : "border-gray-200 hover:border-indigo-400"
-                }`}
+              className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center space-y-4 transition-all ${
+                isDragging
+                  ? "border-indigo-600 bg-indigo-50/50 dark:border-indigo-500 dark:bg-indigo-500/10 scale-[1.02]"
+                  : "border-gray-200 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500"
+              }`}
             >
-              <div className="p-4 bg-indigo-50 rounded-full">
-                <Upload className="w-8 h-8 text-indigo-600" />
+              <div className="p-4 bg-indigo-50 dark:bg-indigo-500/10 rounded-full">
+                <Upload className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div className="text-center">
-                <p className="text-lg font-medium text-gray-900">
+                <p className="text-lg font-medium text-gray-900 dark:text-slate-200">
                   Kéo thả file Excel vào đây
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-slate-400">
                   Hỗ trợ .xlsx, .xls, .csv
                 </p>
               </div>
@@ -205,75 +208,75 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
               />
               <label
                 htmlFor="excel-upload"
-                className="px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 cursor-pointer shadow-indigo-200 shadow-lg transition-all"
+                className="px-6 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg font-medium hover:bg-indigo-700 dark:hover:bg-indigo-600 cursor-pointer shadow-indigo-200 dark:shadow-indigo-900/20 shadow-lg transition-all"
               >
                 Chọn File
               </label>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="flex items-center justify-between bg-indigo-50 p-4 rounded-lg">
-                <span className="text-indigo-700 font-medium font-sm">
+              <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-4 rounded-lg">
+                <span className="text-indigo-700 dark:text-indigo-400 font-medium font-sm">
                   <Check className="w-4 h-4 inline-block mr-2" />
                   Đã đọc thành công {data.length} dòng sản phẩm
                 </span>
                 <button
                   onClick={() => setData([])}
-                  className="text-gray-500 hover:text-red-600 text-sm font-medium"
+                  className="text-gray-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 text-sm font-medium transition-colors"
                 >
                   Tải file khác
                 </button>
               </div>
 
-              <div className="overflow-x-auto border border-gray-100 rounded-lg">
+              <div className="overflow-x-auto border border-gray-100 dark:border-slate-800 rounded-lg">
                 <table className="w-full text-left border-collapse min-w-[1200px]">
                   <thead>
-                    <tr className="bg-gray-50 border-bottom border-gray-100">
-                      <th className="p-3 text-sm font-semibold text-gray-600">
+                    <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800">
+                      <th className="p-3 text-sm font-semibold text-gray-600 dark:text-slate-400">
                         Ảnh
                       </th>
-                      <th className="p-3 text-sm font-semibold text-gray-600">
+                      <th className="p-3 text-sm font-semibold text-gray-600 dark:text-slate-400">
                         Thư viện
                       </th>
-                      <th className="p-3 text-sm font-semibold text-gray-600">
+                      <th className="p-3 text-sm font-semibold text-gray-600 dark:text-slate-400">
                         Tiêu đề (WP)
                       </th>
-                      <th className="p-3 text-sm font-semibold text-gray-600">
+                      <th className="p-3 text-sm font-semibold text-gray-600 dark:text-slate-400">
                         Kích thước
                       </th>
-                      <th className="p-3 text-sm font-semibold text-gray-600">
+                      <th className="p-3 text-sm font-semibold text-gray-600 dark:text-slate-400">
                         Giá bán
                       </th>
-                      <th className="p-3 text-sm font-semibold text-gray-600">
+                      <th className="p-3 text-sm font-semibold text-gray-600 dark:text-slate-400">
                         Dòng xe
                       </th>
-                      <th className="p-3 text-sm font-semibold text-gray-600">
+                      <th className="p-3 text-sm font-semibold text-gray-600 dark:text-slate-400">
                         Danh mục
                       </th>
-                      <th className="p-3 text-sm font-semibold text-gray-600">
+                      <th className="p-3 text-sm font-semibold text-gray-600 dark:text-slate-400">
                         Shopee
                       </th>
-                      <th className="p-3 text-sm font-semibold text-gray-600">
+                      <th className="p-3 text-sm font-semibold text-gray-600 dark:text-slate-400">
                         Lazada
                       </th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
                     {data.slice(0, 50).map((row, idx) => (
                       <tr
                         key={idx}
-                        className="border-bottom border-gray-50 hover:bg-gray-50/50"
+                        className="hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors"
                       >
-                        <td className="p-3 text-sm text-gray-500">
+                        <td className="p-3 text-sm text-gray-500 dark:text-slate-400">
                           {row.imageUrl && (
                             <img
                               src={row.imageUrl}
                               alt="preview"
-                              className="w-10 h-10 object-cover rounded shadow-sm border border-gray-200"
+                              className="w-10 h-10 object-cover rounded shadow-sm border border-gray-200 dark:border-slate-700"
                             />
                           )}
                         </td>
-                        <td className="p-3 text-sm text-gray-500">
+                        <td className="p-3 text-sm text-gray-500 dark:text-slate-400">
                           {row.galleryImageUrls && (
                             <div className="flex -space-x-3 hover:space-x-1 transition-all">
                               {row.galleryImageUrls
@@ -284,31 +287,31 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                                     key={i}
                                     src={url.trim()}
                                     alt="gallery"
-                                    className="w-8 h-8 object-cover rounded-full border-2 border-white shadow-sm"
+                                    className="w-8 h-8 object-cover rounded-full border-2 border-white dark:border-slate-900 shadow-sm"
                                   />
                                 ))}
                             </div>
                           )}
                         </td>
-                        <td className="p-3 text-sm font-medium text-gray-900 truncate max-w-[200px]">
+                        <td className="p-3 text-sm font-medium text-gray-900 dark:text-slate-200 truncate max-w-[200px]">
                           {row.title}
                         </td>
-                        <td className="p-3 text-sm text-gray-500">
+                        <td className="p-3 text-sm text-gray-500 dark:text-slate-400">
                           {row.dimensions}
                         </td>
-                        <td className="p-3 text-sm text-gray-500">
+                        <td className="p-3 text-sm text-gray-500 dark:text-slate-400">
                           {row.price}
                         </td>
-                        <td className="p-3 text-sm text-gray-500 truncate max-w-[150px]">
+                        <td className="p-3 text-sm text-gray-500 dark:text-slate-400 truncate max-w-[150px]">
                           {row.carModels}
                         </td>
-                        <td className="p-3 text-sm text-gray-500 truncate max-w-[150px]">
+                        <td className="p-3 text-sm text-gray-500 dark:text-slate-400 truncate max-w-[150px]">
                           {row.category}
                         </td>
-                        <td className="p-3 text-sm text-gray-500 truncate max-w-[100px]">
+                        <td className="p-3 text-sm text-gray-500 dark:text-slate-400 truncate max-w-[100px]">
                           {row.shopeeLink}
                         </td>
-                        <td className="p-3 text-sm text-gray-500 truncate max-w-[100px]">
+                        <td className="p-3 text-sm text-gray-500 dark:text-slate-400 truncate max-w-[100px]">
                           {row.lazadaLink}
                         </td>
                       </tr>
@@ -316,7 +319,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                   </tbody>
                 </table>
                 {data.length > 50 && (
-                  <p className="p-3 text-center text-sm text-gray-400">
+                  <p className="p-3 text-center text-sm text-gray-400 dark:text-slate-500">
                     ... và {data.length - 50} sản phẩm khác
                   </p>
                 )}
@@ -325,17 +328,17 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
           )}
         </div>
 
-        <div className="p-6 border-top border-gray-100 flex items-center justify-end space-x-4 bg-gray-50">
+        <div className="p-6 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end space-x-4 bg-gray-50 dark:bg-slate-900/50 transition-colors">
           <button
             onClick={onClose}
-            className="px-6 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors"
+            className="px-6 py-2 text-gray-700 dark:text-slate-300 font-medium hover:bg-gray-200 dark:hover:bg-slate-800 rounded-lg transition-colors"
           >
             Hủy
           </button>
           <button
             disabled={data.length === 0 || mutation.isPending}
             onClick={handleImport}
-            className="px-8 py-2 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-indigo-200 shadow-xl flex items-center"
+            className="px-8 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg font-bold hover:bg-indigo-700 dark:hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-indigo-200 dark:shadow-indigo-900/30 shadow-xl flex items-center transition-all"
           >
             {mutation.isPending ? (
               <>
