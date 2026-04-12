@@ -21,12 +21,11 @@ RUN pnpm turbo run build --filter=@repo/server
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-RUN npm install -g prisma pnpm
+RUN npm install -g prisma pnpm tsx
 
 COPY --from=installer /app .
 
 EXPOSE 3000
 EXPOSE 5555
 
-# Lệnh chạy chính
-CMD ["sh", "-c", "pnpm -F @repo/database db:deploy && node apps/server/dist/main"]
+CMD ["sh", "-c", "cd packages/database && npx prisma migrate deploy && cd ../.. && node apps/server/dist/main"]
