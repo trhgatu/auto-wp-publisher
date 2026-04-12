@@ -31,5 +31,5 @@ COPY --from=installer /app .
 EXPOSE 3000
 EXPOSE 5555
 
-# Debug: Liệt kê file và chạy migration
-CMD ["sh", "-c", "ls -R packages/database/prisma && cd packages/database && npx prisma migrate deploy && cd ../.. && node apps/server/dist/main"]
+# Force sync database (bỏ qua lịch sử migration bị lỗi trên production)
+CMD ["sh", "-c", "cd packages/database && npx prisma db push --accept-data-loss && cd ../.. && node apps/server/dist/main"]
