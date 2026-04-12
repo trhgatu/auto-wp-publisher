@@ -22,19 +22,19 @@ export const Sidebar = () => {
   const location = useLocation();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col">
-      <div className="h-20 flex items-center px-6 border-b border-slate-100 bg-white">
+    <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-colors">
+      <div className="h-20 flex items-center px-6 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors">
         <img
           src="https://phutungoto123.vn/wp-content/uploads/2025/07/logo-Huynh-Phat-1.png"
           alt="Logo Huynh Phat"
-          className="h-12 w-auto object-contain"
+          className="h-12 w-auto object-contain dark:invert"
           onError={(e) => {
             e.currentTarget.style.display = "none";
           }}
         />
       </div>
 
-      <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto bg-white">
+      <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto bg-white dark:bg-slate-900 transition-colors">
         {menuItems.map((item) => {
           const isActive =
             location.pathname === item.path ||
@@ -47,20 +47,20 @@ export const Sidebar = () => {
                 clsx(
                   "flex items-center px-4 py-2.5 text-sm font-bold transition-all duration-200 group relative rounded-lg",
                   isActive
-                    ? "text-red-600 bg-red-50"
-                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900",
+                    ? "text-red-600 dark:text-red-500 bg-red-50 dark:bg-red-500/10"
+                    : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100",
                 ),
               )}
             >
               {isActive && (
-                <span className="absolute left-0 top-2 bottom-2 w-1 bg-red-600 rounded-r-full"></span>
+                <span className="absolute left-0 top-2 bottom-2 w-1 bg-red-600 dark:bg-red-500 rounded-r-full"></span>
               )}
               <item.icon
                 className={clsx(
                   "w-4 h-4 mr-3 transition-colors",
                   isActive
-                    ? "text-red-600"
-                    : "text-slate-400 group-hover:text-slate-600",
+                    ? "text-red-600 dark:text-red-500"
+                    : "text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300",
                 )}
               />
               <span className="tracking-tight">{item.label}</span>
@@ -69,10 +69,10 @@ export const Sidebar = () => {
         })}
       </nav>
 
-      <div className="p-4 mt-auto border-t border-slate-100 bg-slate-50/30">
+      <div className="p-4 mt-auto border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/30 transition-colors">
         <Link
           to="/settings"
-          className="flex items-center px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-900 transition-all uppercase tracking-wider"
+          className="flex items-center px-4 py-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-all uppercase tracking-wider"
         >
           <Settings className="w-4 h-4 mr-3" />
           Cấu hình
