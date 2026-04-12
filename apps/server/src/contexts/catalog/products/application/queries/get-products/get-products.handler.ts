@@ -54,6 +54,7 @@ export class GetProductsHandler implements IQueryHandler<GetProductsQuery> {
           imageUrl: true,
           price: true,
           sku: true,
+          category: true,
           createdAt: true,
           updatedAt: true,
         },

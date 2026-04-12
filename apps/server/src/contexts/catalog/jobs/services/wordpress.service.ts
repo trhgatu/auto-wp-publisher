@@ -7,7 +7,13 @@ interface WooCommerceResponse {
   link?: string;
   url?: string;
   message?: string;
+  code?: string;
   [key: string]: unknown;
+}
+
+interface WCCategory {
+  id: number;
+  name: string;
 }
 
 @Injectable()
@@ -28,6 +34,7 @@ export class WordPressService {
     videoUrl: string | null = null,
     imageUrl: string | null = null,
     galleryImageUrls: string | null = null,
+    categoryName: string | null = null,
     existingWpId: number | null = null,
   ): Promise<{ id: number; permalink: string }> {
     const wpBaseUrl = (
@@ -56,11 +63,25 @@ export class WordPressService {
     const authHeader =
       'Basic ' + Buffer.from(`${wpUser}:${wpPass}`).toString('base64');
 
+    // --- Xử lý Category ---
+    const categories: { id: number }[] = [];
+    if (categoryName) {
+      const categoryId = await this.getCategoryIdByName(
+        categoryName,
+        wcApiUrl,
+        authHeader,
+      );
+      if (categoryId) {
+        categories.push({ id: categoryId });
+      }
+    }
+
     const numericPrice = price ? price.replace(/[^0-9]/g, '') : '';
     const requestBody = {
       name: title,
       type: 'simple',
       regular_price: numericPrice,
+      categories: categories,
       description:
         rawContent ||
         `<p>Sản phẩm "${title}" vừa được khởi tạo bởi Auto Publisher.</p>`,
@@ -163,6 +184,54 @@ export class WordPressService {
       responseBodyText = await response.clone().text();
 
       if (!response.ok) {
+        this.logger.error(
+          `WooCommerce API Error [${statusCode}]: ${responseBodyText}`,
+        );
+        const errorData = JSON.parse(responseBodyText) as WooCommerceResponse;
+
+        // --- Sửa lỗi 400/404 ID không hợp lệ ---
+        const isInvalidIdError =
+          errorData.code === 'woocommerce_rest_product_invalid_id' ||
+          errorData.code === 'woocommerce_rest_product_invalid_object_id' ||
+          (statusCode === 404 &&
+            errorData.code === 'woocommerce_rest_product_not_found') ||
+          errorData.message?.toLowerCase().includes('id không hợp lệ') ||
+          errorData.message?.toLowerCase().includes('invalid id');
+
+        if (isUpdate && isInvalidIdError) {
+          this.logger.warn(
+            `🚀 ID ${existingWpId} hỏng. Đang xóa trắng ID cũ trong DB và tạo bài mới...`,
+          );
+
+          // Xóa trắng ID hỏng trong Database để lần sau không bị gọi lại nữa
+          try {
+            await this.prisma.product.updateMany({
+              where: { wpPostId: existingWpId },
+              data: { wpPostId: null, errorLog: null },
+            });
+          } catch (dbErr) {
+            this.logger.error(
+              `Không thể xóa trắng ID hỏng trong DB: ${String(dbErr)}`,
+            );
+          }
+
+          return this.publishProduct(
+            title,
+            rawContent,
+            price,
+            material,
+            carModels,
+            shopeeLink,
+            lazadaLink,
+            tiktokLink,
+            videoUrl,
+            imageUrl,
+            galleryImageUrls,
+            categoryName,
+            null, // Force create
+          );
+        }
+
         throw new Error(
           `WooCommerce từ chối: [Mã ${statusCode}] - Phản hồi: ${responseBodyText}`,
         );
@@ -213,6 +282,42 @@ export class WordPressService {
             }`,
           ),
         );
+    }
+  }
+
+  private categoryCache: Map<string, number> = new Map();
+
+  private async getCategoryIdByName(
+    name: string,
+    apiUrl: string,
+    auth: string,
+  ): Promise<number | null> {
+    const cachedId = this.categoryCache.get(name);
+    if (cachedId) return cachedId;
+
+    try {
+      // Tìm kiếm category theo name
+      const searchUrl = `${apiUrl}/products/categories?search=${encodeURIComponent(name)}`;
+      const response = await fetch(searchUrl, {
+        headers: { Authorization: auth },
+      });
+
+      if (!response.ok) return null;
+
+      const categories = (await response.json()) as WCCategory[];
+      // Tìm chính xác tên (vì search có thể trả về kết quả gần đúng)
+      const exactMatch = categories.find(
+        (c) => c.name.toLowerCase() === name.toLowerCase(),
+      );
+
+      if (exactMatch) {
+        this.categoryCache.set(name, exactMatch.id);
+        return exactMatch.id;
+      }
+      return null;
+    } catch (err) {
+      this.logger.error(`Error fetching category ${name}: ${String(err)}`);
+      return null;
     }
   }
 }

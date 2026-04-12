@@ -7,9 +7,11 @@ export const useJob = (id: string | undefined) => {
     queryFn: () => getJobById(id!),
     enabled: !!id,
     refetchInterval: (query) => {
-       const job = query.state.data;
-       if (!job) return false;
-       return (job.status === "PENDING" || job.status === "PROCESSING") ? 3000 : false;
-    }
+      const job = query.state.data;
+      if (!job) return false;
+      return job.status === "PENDING" || job.status === "PROCESSING"
+        ? 3000
+        : false;
+    },
   });
 };

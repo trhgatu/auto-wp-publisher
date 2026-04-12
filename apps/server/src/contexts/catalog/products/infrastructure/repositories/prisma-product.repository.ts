@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ProductRepository } from '../../domain/product.repository';
 import { Product } from '../../domain/entities/product.entity';
 import { ProductId } from '../../domain/value-objects/product-id.vo';
-import { PrismaService } from 'src/shared/infrastructure/prisma/prisma.service';
-import { JobStatus } from '@prisma/client';
+import { PrismaService } from '../../../../../shared/infrastructure/prisma/prisma.service';
+import { Product as PrismaProduct, JobStatus } from '@repo/database';
 import { ProductStatus } from '../../domain/types/product-status.enum';
 
 @Injectable()
@@ -29,6 +29,7 @@ export class PrismaProductRepository implements ProductRepository {
         lazadaLink: product.lazadaLink,
         tiktokLink: product.tiktokLink,
         videoUrl: product.videoUrl,
+        category: product.category,
         status: product.status as unknown as JobStatus,
         errorLog: product.errorLog,
         updatedAt: product.updatedAt,
@@ -50,6 +51,7 @@ export class PrismaProductRepository implements ProductRepository {
         lazadaLink: product.lazadaLink,
         tiktokLink: product.tiktokLink,
         videoUrl: product.videoUrl,
+        category: product.category,
         status: product.status as unknown as JobStatus,
         errorLog: product.errorLog,
         createdAt: product.createdAt,
@@ -65,28 +67,7 @@ export class PrismaProductRepository implements ProductRepository {
 
     if (!raw) return null;
 
-    return new Product(
-      ProductId.create(raw.id),
-      raw.name,
-      raw.description,
-      raw.rawContent,
-      raw.aiContent,
-      raw.imageUrl,
-      raw.galleryImageUrls,
-      raw.wpPostId,
-      raw.price,
-      raw.sku,
-      raw.material,
-      raw.carModels,
-      raw.shopeeLink,
-      raw.lazadaLink,
-      raw.tiktokLink,
-      raw.videoUrl,
-      raw.status as unknown as ProductStatus,
-      raw.errorLog,
-      raw.createdAt,
-      raw.updatedAt,
-    );
+    return this.mapToDomain(raw);
   }
 
   async findBySku(sku: string): Promise<Product | null> {
@@ -109,28 +90,7 @@ export class PrismaProductRepository implements ProductRepository {
     return this.mapToDomain(raw);
   }
 
-  private mapToDomain(raw: {
-    id: string;
-    name: string;
-    description: string | null;
-    rawContent: string | null;
-    aiContent: string | null;
-    imageUrl: string | null;
-    galleryImageUrls: string | null;
-    wpPostId: number | null;
-    price: string | null;
-    sku: string | null;
-    material: string | null;
-    carModels: string | null;
-    shopeeLink: string | null;
-    lazadaLink: string | null;
-    tiktokLink: string | null;
-    videoUrl: string | null;
-    status: string;
-    errorLog: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-  }): Product {
+  private mapToDomain(raw: PrismaProduct): Product {
     return new Product(
       ProductId.create(raw.id),
       raw.name,
@@ -148,6 +108,7 @@ export class PrismaProductRepository implements ProductRepository {
       raw.lazadaLink,
       raw.tiktokLink,
       raw.videoUrl,
+      raw.category,
       raw.status as unknown as ProductStatus,
       raw.errorLog,
       raw.createdAt,

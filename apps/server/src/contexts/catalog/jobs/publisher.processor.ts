@@ -4,6 +4,7 @@ import { Logger } from '@nestjs/common';
 import { ProductRepository } from '../products/domain/product.repository';
 import { WordPressService } from './services/wordpress.service';
 import { ProductId } from '../products/domain/value-objects/product-id.vo';
+import { EventsGateway } from './events.gateway';
 
 export interface PublishProductJobData {
   productId: string;
@@ -16,6 +17,7 @@ export class PublisherProcessor extends WorkerHost {
   constructor(
     private readonly productRepo: ProductRepository,
     private readonly wpService: WordPressService,
+    private readonly eventsGateway: EventsGateway,
   ) {
     super();
   }
@@ -37,6 +39,12 @@ export class PublisherProcessor extends WorkerHost {
       product.markAsProcessing();
       await this.productRepo.save(product);
 
+      this.eventsGateway.broadcastJobUpdate({
+        productId: product.id.value,
+        status: 'PROCESSING',
+        message: `Đang xử lý bài viết: ${product.name}`,
+      });
+
       const wpProduct = await this.wpService.publishProduct(
         product.name,
         product.rawContent,
@@ -49,6 +57,7 @@ export class PublisherProcessor extends WorkerHost {
         product.videoUrl,
         product.imageUrl,
         product.galleryImageUrls,
+        product.category,
         product.wpPostId,
       );
 
@@ -61,6 +70,12 @@ export class PublisherProcessor extends WorkerHost {
         `<p>Sản phẩm đã lên sóng: <a href="${wpProduct.permalink}" target="_blank">${wpProduct.permalink}</a></p>`,
       );
       await this.productRepo.save(product);
+
+      this.eventsGateway.broadcastJobUpdate({
+        productId: product.id.value,
+        status: 'COMPLETED',
+        message: `Đã đăng bài thành công: ${product.name}`,
+      });
 
       this.logger.log(`✅ Job ${job.id} completed successfully!`);
     } catch (err: unknown) {
@@ -77,6 +92,12 @@ export class PublisherProcessor extends WorkerHost {
         if (product) {
           product.markAsFailed(errorMessage);
           await this.productRepo.save(product);
+
+          this.eventsGateway.broadcastJobUpdate({
+            productId: product.id.value,
+            status: 'FAILED',
+            message: `Lỗi đăng bài: ${errorMessage}`,
+          });
         }
       } catch (innerErr: unknown) {
         const innerMessage =
