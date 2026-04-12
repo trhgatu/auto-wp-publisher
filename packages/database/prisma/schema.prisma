@@ -32,6 +32,7 @@ model Product {
   lazadaLink  String?
   tiktokLink  String?
   videoUrl    String?
+  category    String?
 
   status      JobStatus @default(PENDING)
   errorLog    String?   @db.Text

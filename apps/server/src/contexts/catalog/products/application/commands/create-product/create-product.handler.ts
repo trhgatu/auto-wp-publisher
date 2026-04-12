@@ -29,26 +29,30 @@ export class CreateProductHandler implements ICommandHandler<CreateProductComman
       command.data;
     const id = this.uuidGenerator.generate();
 
-    // Khởi tạo Aggregate Root
     const product = Product.create(
       id,
       title,
-      baseDescription,
-      sourceUrl || null, // Map source URL sang rawContent tạm
-      imageUrl || null,
-      galleryImageUrls || null,
+      baseDescription ?? null,
+      sourceUrl ?? null, // Map source URL sang rawContent tạm
+      imageUrl ?? null,
+      galleryImageUrls ?? null,
+      null, // price
+      null, // sku
+      null, // material
+      null, // carModels
+      null, // shopeeLink
+      null, // lazadaLink
+      null, // tiktokLink
+      null, // videoUrl
+      command.data.category ?? null,
     );
 
-    // Kích hoạt Event tạo mới
     product.markAsCreated();
 
-    // Lưu vào Repository
     await this.productRepository.save(product);
 
-    // Apply các events thông qua EventPublisher của NestJS CQRS
     this.publisher.mergeObjectContext(product).commit();
 
-    // Bắn một Job ngầm vào BullMQ (Redis) xử lý gọi API lấy bài viết và đăng WP
     await this.wpPublisherQueue.add(
       'publish-product',
       { productId: id },
