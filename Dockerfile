@@ -4,6 +4,9 @@ WORKDIR /app
 COPY . .
 RUN turbo prune @repo/server --docker
 
+# Cứu folder migrations nếu turbo prune bỏ qua (đảm bảo file SQL có mặt trong image final)
+COPY packages/database/prisma/migrations ./out/full/packages/database/prisma/migrations
+
 FROM node:20-alpine AS installer
 RUN npm install -g pnpm
 WORKDIR /app
@@ -28,4 +31,5 @@ COPY --from=installer /app .
 EXPOSE 3000
 EXPOSE 5555
 
-CMD ["sh", "-c", "cd packages/database && npx prisma migrate deploy && cd ../.. && node apps/server/dist/main"]
+# Debug: Liệt kê file và chạy migration
+CMD ["sh", "-c", "ls -R packages/database/prisma && cd packages/database && npx prisma migrate deploy && cd ../.. && node apps/server/dist/main"]
