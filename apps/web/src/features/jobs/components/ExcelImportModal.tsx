@@ -76,10 +76,32 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
     });
   }, [uniqueExcelCategories, categoryMapping, wpCategories, savedMappings]);
 
-  const categoryOptions = useMemo(
-    () => wpCategories.map((c) => ({ label: c.name, value: String(c.id) })),
-    [wpCategories],
-  );
+  const categoryOptions = useMemo(() => {
+    // Sort categories to show hierarchy (simple approach: parent then its children)
+    const sorted: { label: string; value: string; depth: number }[] = [];
+    const visit = (parentId: number, depth: number) => {
+      wpCategories
+        .filter((c) => c.parent === parentId)
+        .forEach((c) => {
+          sorted.push({
+            label: depth > 0 ? `${"　".repeat(depth)}↳ ${c.name}` : c.name,
+            value: String(c.id),
+            depth,
+          });
+          visit(c.id, depth + 1);
+        });
+    };
+    visit(0, 0);
+
+    // Add any categories that might have been missed (e.g., orphans)
+    wpCategories.forEach((c) => {
+      if (!sorted.find((s) => s.value === String(c.id))) {
+        sorted.push({ label: c.name, value: String(c.id), depth: 0 });
+      }
+    });
+
+    return sorted;
+  }, [wpCategories]);
 
   if (!isOpen) return null;
 
@@ -158,7 +180,8 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
             "số tiền",
           ]);
 
-          const category = brand || "Chưa phân loại";
+          const category =
+            brand && model ? `${brand} > ${model}` : brand || "Chưa phân loại";
 
           const smartTags = [brand, model, partNumber]
             .map((t) => (t ? String(t).trim() : ""))
@@ -256,7 +279,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-white/5">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-slate-100 flex items-center gap-2">
-            <Upload className="w-5 h-5 text-blue-600" />
+            <Upload className="w-5 h-5 text-red-600" />
             Nhập dữ liệu từ Excel
           </h2>
           <button
@@ -285,9 +308,9 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                       className={cn(
                         "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all border-2",
                         isActive
-                          ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-100"
+                          ? "bg-red-600 border-red-600 text-white shadow-lg shadow-red-100"
                           : isPast
-                            ? "bg-white border-blue-600 text-blue-600"
+                            ? "bg-white border-red-600 text-red-600"
                             : "bg-white border-gray-200 text-gray-400",
                       )}
                     >
@@ -307,7 +330,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                   {idx < arr.length - 1 && (
                     <div className="flex-1 h-[2px] mx-4 bg-gray-100 dark:bg-white/5 relative">
                       <div
-                        className="absolute inset-0 bg-blue-600 transition-all duration-300"
+                        className="absolute inset-0 bg-red-600 transition-all duration-300"
                         style={{ width: isPast ? "100%" : "0%" }}
                       />
                     </div>
@@ -336,8 +359,8 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                 className={cn(
                   "w-full max-w-lg aspect-video rounded-xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-4 cursor-pointer group",
                   isDragging
-                    ? "border-blue-600 bg-blue-50/50"
-                    : "border-gray-200 hover:border-blue-400 bg-gray-50/30",
+                    ? "border-red-600 bg-red-50/50"
+                    : "border-gray-200 hover:border-red-400 bg-gray-50/30",
                 )}
                 onClick={() => document.getElementById("excel-upload")?.click()}
               >
@@ -352,7 +375,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                   }}
                 />
                 <div className="p-4 bg-white shadow-sm border border-gray-100 rounded-2xl group-hover:scale-110 transition-transform">
-                  <Upload className="w-8 h-8 text-blue-600" />
+                  <Upload className="w-8 h-8 text-red-600" />
                 </div>
                 <div className="text-center">
                   <p className="text-base font-semibold text-gray-800 dark:text-slate-100">
@@ -395,7 +418,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                         <Table.Cell className="text-center font-mono text-xs text-gray-500">
                           {row.partNumbers}
                         </Table.Cell>
-                        <Table.Cell className="text-center font-bold text-blue-600">
+                        <Table.Cell className="text-center font-bold text-red-600">
                           {row.price}
                         </Table.Cell>
                         <Table.Cell className="text-center">
@@ -485,7 +508,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                       });
                       setStep("mapping");
                     }}
-                    className="px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-sm transition-all flex items-center gap-2"
+                    className="px-6 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md shadow-sm transition-all flex items-center gap-2"
                   >
                     Tiếp theo: Ánh xạ <ArrowRight className="w-4 h-4" />
                   </button>
@@ -498,9 +521,9 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
             <>
               <div className="flex-1 overflow-auto px-12 py-8 bg-gray-50/30">
                 <div className="max-w-4xl mx-auto space-y-6">
-                  <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100 flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
-                    <div className="text-sm text-blue-800">
+                  <div className="bg-red-50/50 p-4 rounded-lg border border-red-100 flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                    <div className="text-sm text-red-800">
                       <p className="font-semibold">Ánh xạ danh mục</p>
                       <p>
                         Hãy chọn danh mục WordPress tương ứng cho từng nhóm sản
@@ -513,7 +536,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                     {uniqueExcelCategories.map((excelCat) => (
                       <div
                         key={excelCat}
-                        className="flex items-center gap-6 p-4 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-xl hover:border-blue-200 shadow-sm transition-colors"
+                        className="flex items-center gap-6 p-4 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-xl hover:border-red-200 shadow-sm transition-colors"
                       >
                         <div className="flex-1">
                           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
@@ -562,7 +585,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                   disabled={
                     mutation.isPending || upsertMappingsMutation.isPending
                   }
-                  className="px-10 py-2.5 text-base font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-lg shadow-blue-200 dark:shadow-none transition-all disabled:opacity-50 flex items-center gap-2"
+                  className="px-10 py-2.5 text-base font-bold text-white bg-red-600 hover:bg-red-700 rounded-md shadow-lg shadow-red-200 dark:shadow-none transition-all disabled:opacity-50 flex items-center gap-2"
                 >
                   {mutation.isPending ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
