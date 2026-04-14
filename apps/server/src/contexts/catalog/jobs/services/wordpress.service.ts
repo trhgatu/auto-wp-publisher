@@ -11,9 +11,10 @@ interface WooCommerceResponse {
   [key: string]: unknown;
 }
 
-interface WCCategory {
+export interface WCCategory {
   id: number;
   name: string;
+  parent: number;
 }
 
 @Injectable()
@@ -67,11 +68,19 @@ export class WordPressService {
     // --- Xử lý Category ---
     const categories: { id: number }[] = [];
     if (categoryName) {
-      const categoryId = await this.getOrCreateCategoryId(
-        categoryName,
-        wcApiUrl,
-        authHeader,
-      );
+      const isNumeric = /^\d+$/.test(categoryName);
+      let categoryId: number | null = null;
+
+      if (isNumeric) {
+        categoryId = parseInt(categoryName, 10);
+      } else {
+        categoryId = await this.getOrCreateCategoryId(
+          categoryName,
+          wcApiUrl,
+          authHeader,
+        );
+      }
+
       if (categoryId) {
         categories.push({ id: categoryId });
       }
@@ -295,6 +304,59 @@ export class WordPressService {
           ),
         );
     }
+  }
+
+  async getCategories(): Promise<WCCategory[]> {
+    const wpBaseUrl = (
+      process.env.WP_API_URL || 'https://phutungoto123.vn/wp-json'
+    ).replace(/\/$/, '');
+    const wcApiUrl = `${wpBaseUrl.replace(/\/wp\/v2\/?$/, '')}/wc/v3`;
+    const wpUser = process.env.WP_USERNAME || 'phutungoto123';
+    const wpPass = process.env.WP_APP_PASSWORD;
+
+    if (!wpPass) {
+      throw new Error('Hệ thống thiếu WP_APP_PASSWORD.');
+    }
+
+    const authHeader =
+      'Basic ' + Buffer.from(`${wpUser}:${wpPass}`).toString('base64');
+
+    const allCategories: WCCategory[] = [];
+    let page = 1;
+    let hasMore = true;
+
+    while (hasMore) {
+      const url = `${wcApiUrl}/products/categories?per_page=100&page=${page}&hide_empty=false`;
+      try {
+        const response = await fetch(url, {
+          headers: { Authorization: authHeader },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch categories: ${response.statusText}`);
+        }
+
+        const categories = (await response.json()) as WCCategory[];
+        allCategories.push(...categories);
+
+        const totalPages = parseInt(
+          response.headers.get('X-WP-TotalPages') || '0',
+          10,
+        );
+        if (page >= totalPages || categories.length < 100) {
+          hasMore = false;
+        } else {
+          page++;
+        }
+      } catch (err) {
+        this.logger.error(
+          `Error fetching categories page ${page}: ${String(err)}`,
+        );
+        hasMore = false;
+      }
+    }
+
+    return allCategories;
   }
 
   private categoryCache: Map<string, number> = new Map();

@@ -45,6 +45,16 @@ model Product {
   @@map("catalog_products")
 }
 
+model CategoryMapping {
+  id             String   @id @default(uuid())
+  excelValue     String   @unique
+  wpCategoryId   Int
+  wpCategoryName String
+  updatedAt      DateTime @updatedAt
+
+  @@map("catalog_category_mappings")
+}
+
 model ApiLog {
   id             String   @id @default(uuid())
   method         String
