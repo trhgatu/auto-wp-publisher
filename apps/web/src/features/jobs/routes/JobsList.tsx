@@ -138,7 +138,7 @@ export const JobsList = () => {
               }
               className={`font-bold h-10 shadow-none transition-all active:scale-95 ${!onlyTrashed ? "text-slate-600 border-slate-200 hover:bg-slate-50" : ""}`}
             >
-              {onlyTrashed ? "Về Kho" : "Thẻ Rác"}
+              {onlyTrashed ? "Về Kho" : "Thùng Rác"}
             </Button>
 
             {!onlyTrashed && (
