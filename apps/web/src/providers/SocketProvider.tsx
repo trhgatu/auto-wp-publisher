@@ -37,8 +37,6 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({
     newSocket.on(
       "jobStatusUpdated",
       (data: { productId: string; status: string; message?: string }) => {
-        console.log("Job Update Received:", data);
-
         queryClient.invalidateQueries({ queryKey: ["jobs"] });
         queryClient.invalidateQueries({ queryKey: ["products"] });
         queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
