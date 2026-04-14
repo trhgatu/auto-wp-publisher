@@ -9,6 +9,7 @@ export const useJobs = (
     search?: string;
     startDate?: string;
     endDate?: string;
+    onlyTrashed?: boolean;
   } = {},
 ) => {
   return useQuery({

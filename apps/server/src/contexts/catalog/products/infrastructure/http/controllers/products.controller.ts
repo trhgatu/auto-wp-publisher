@@ -5,6 +5,9 @@ import { BulkCreateProductsCommand } from '../../../application/commands/bulk-cr
 import { GetProductsQuery } from '../../../application/queries/get-products/get-products.query';
 import { GetProductByIdQuery } from '../../../application/queries/get-product-by-id/get-product-by-id.query';
 import { GetDashboardStatsQuery } from '../../../application/queries/get-dashboard-stats/get-dashboard-stats.query';
+import { TrashProductCommand } from '../../../application/commands/trash-product/trash-product.command';
+import { RestoreProductCommand } from '../../../application/commands/restore-product/restore-product.command';
+import { PermanentlyDeleteProductCommand } from '../../../application/commands/permanently-delete-product/permanently-delete-product.command';
 import { ProductResponse } from '../responses/product.response';
 import {
   ImportProductSchema,
@@ -30,6 +33,7 @@ export class ProductsController {
     @Query('search') search?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
+    @Query('onlyTrashed') onlyTrashed: string = 'false',
   ) {
     const { items, total } = await this.queryBus.execute<
       GetProductsQuery,
@@ -42,6 +46,7 @@ export class ProductsController {
         search,
         startDate ? new Date(startDate) : undefined,
         endDate ? new Date(endDate) : undefined,
+        onlyTrashed === 'true',
       ),
     );
     return { items, total };
@@ -80,5 +85,20 @@ export class ProductsController {
     return this.commandBus.execute<BulkCreateProductsCommand, string[]>(
       new BulkCreateProductsCommand(data),
     );
+  }
+
+  @Post(':id/restore')
+  async restoreProduct(@Param('id') id: string): Promise<void> {
+    return this.commandBus.execute(new RestoreProductCommand(id));
+  }
+
+  @Post(':id/trash')
+  async trashProduct(@Param('id') id: string): Promise<void> {
+    return this.commandBus.execute(new TrashProductCommand(id));
+  }
+
+  @Post(':id/permanent-delete')
+  async permanentlyDeleteProduct(@Param('id') id: string): Promise<void> {
+    return this.commandBus.execute(new PermanentlyDeleteProductCommand(id));
   }
 }

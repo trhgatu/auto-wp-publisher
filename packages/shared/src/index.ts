@@ -18,6 +18,7 @@ export const ImportProductSchema = z.object({
   tiktokLink: z.string().optional(),
   imageUrl: z.string().optional(),
   galleryImageUrls: z.string().optional(),
+  tags: z.string().optional(),
 });
 
 export type ImportProductDto = z.infer<typeof ImportProductSchema>;

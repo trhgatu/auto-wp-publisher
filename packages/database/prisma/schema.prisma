@@ -33,12 +33,14 @@ model Product {
   tiktokLink  String?
   videoUrl    String?
   category    String?
+  tags        String?   @db.Text
 
   status      JobStatus @default(PENDING)
   errorLog    String?   @db.Text
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
 
   @@map("catalog_products")
 }

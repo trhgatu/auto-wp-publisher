@@ -30,9 +30,11 @@ export class PrismaProductRepository implements ProductRepository {
         tiktokLink: product.tiktokLink,
         videoUrl: product.videoUrl,
         category: product.category,
+        tags: product.tags,
         status: product.status as unknown as JobStatus,
         errorLog: product.errorLog,
         updatedAt: product.updatedAt,
+        deletedAt: product.deletedAt,
       },
       create: {
         id: product.id.value,
@@ -52,10 +54,12 @@ export class PrismaProductRepository implements ProductRepository {
         tiktokLink: product.tiktokLink,
         videoUrl: product.videoUrl,
         category: product.category,
+        tags: product.tags,
         status: product.status as unknown as JobStatus,
         errorLog: product.errorLog,
         createdAt: product.createdAt,
         updatedAt: product.updatedAt,
+        deletedAt: product.deletedAt,
       },
     });
   }
@@ -90,6 +94,12 @@ export class PrismaProductRepository implements ProductRepository {
     return this.mapToDomain(raw);
   }
 
+  async delete(id: ProductId): Promise<void> {
+    await this.prisma.product.delete({
+      where: { id: id.value },
+    });
+  }
+
   private mapToDomain(raw: PrismaProduct): Product {
     return new Product(
       ProductId.create(raw.id),
@@ -109,10 +119,12 @@ export class PrismaProductRepository implements ProductRepository {
       raw.tiktokLink,
       raw.videoUrl,
       raw.category,
+      raw.tags,
       raw.status as unknown as ProductStatus,
       raw.errorLog,
       raw.createdAt,
       raw.updatedAt,
+      raw.deletedAt,
     );
   }
 }

@@ -35,6 +35,7 @@ export class WordPressService {
     imageUrl: string | null = null,
     galleryImageUrls: string | null = null,
     categoryName: string | null = null,
+    tags: string | null = null,
     existingWpId: number | null = null,
   ): Promise<{ id: number; permalink: string }> {
     const wpBaseUrl = (
@@ -66,7 +67,7 @@ export class WordPressService {
     // --- Xử lý Category ---
     const categories: { id: number }[] = [];
     if (categoryName) {
-      const categoryId = await this.getCategoryIdByName(
+      const categoryId = await this.getOrCreateCategoryId(
         categoryName,
         wcApiUrl,
         authHeader,
@@ -76,12 +77,22 @@ export class WordPressService {
       }
     }
 
+    // --- Xử lý Tags ---
+    const wpTags: { id: number }[] = [];
+    if (tags) {
+      const tagIds = await this.getOrCreateTags(tags, wcApiUrl, authHeader);
+      for (const id of tagIds) {
+        wpTags.push({ id });
+      }
+    }
+
     const numericPrice = price ? price.replace(/[^0-9]/g, '') : '';
     const requestBody = {
       name: title,
       type: 'simple',
       regular_price: numericPrice,
       categories: categories,
+      tags: wpTags,
       description:
         rawContent ||
         `<p>Sản phẩm "${title}" vừa được khởi tạo bởi Auto Publisher.</p>`,
@@ -228,6 +239,7 @@ export class WordPressService {
             imageUrl,
             galleryImageUrls,
             categoryName,
+            tags,
             null, // Force create
           );
         }
@@ -286,38 +298,151 @@ export class WordPressService {
   }
 
   private categoryCache: Map<string, number> = new Map();
+  private tagCache: Map<string, number> = new Map();
 
-  private async getCategoryIdByName(
-    name: string,
+  private async getOrCreateCategoryId(
+    path: string,
     apiUrl: string,
     auth: string,
   ): Promise<number | null> {
-    const cachedId = this.categoryCache.get(name);
+    const segments = path
+      .split(/[>|/]/)
+      .map((s) => s.trim())
+      .filter((s) => s !== '');
+    if (segments.length === 0) return null;
+
+    let parentId = 0;
+    for (const segment of segments) {
+      const currentLevelId = await this.getOrCreateSingleCategory(
+        segment,
+        parentId,
+        apiUrl,
+        auth,
+      );
+      if (currentLevelId === null) return null;
+      parentId = currentLevelId;
+    }
+
+    return parentId === 0 ? null : parentId;
+  }
+
+  private async getOrCreateSingleCategory(
+    name: string,
+    parentId: number,
+    apiUrl: string,
+    auth: string,
+  ): Promise<number | null> {
+    const cacheKey = `${parentId}:${name.toLowerCase()}`;
+    const cachedId = this.categoryCache.get(cacheKey);
     if (cachedId) return cachedId;
 
     try {
-      // Tìm kiếm category theo name
-      const searchUrl = `${apiUrl}/products/categories?search=${encodeURIComponent(name)}`;
+      // 1. Tìm kiếm category theo name và parent
+      const searchUrl = `${apiUrl}/products/categories?search=${encodeURIComponent(name)}&parent=${parentId}`;
       const response = await fetch(searchUrl, {
         headers: { Authorization: auth },
       });
 
-      if (!response.ok) return null;
+      if (response.ok) {
+        const categories = (await response.json()) as WCCategory[];
+        const exactMatch = categories.find(
+          (c) => c.name.toLowerCase() === name.toLowerCase(),
+        );
 
-      const categories = (await response.json()) as WCCategory[];
-      // Tìm chính xác tên (vì search có thể trả về kết quả gần đúng)
-      const exactMatch = categories.find(
-        (c) => c.name.toLowerCase() === name.toLowerCase(),
-      );
-
-      if (exactMatch) {
-        this.categoryCache.set(name, exactMatch.id);
-        return exactMatch.id;
+        if (exactMatch) {
+          this.categoryCache.set(cacheKey, exactMatch.id);
+          return exactMatch.id;
+        }
       }
+
+      // 2. Nếu không tìm thấy, tạo mới dưới parentId
+      this.logger.log(`Creating new category: ${name} (Parent: ${parentId})`);
+      const createResponse = await fetch(`${apiUrl}/products/categories`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: auth,
+        },
+        body: JSON.stringify({ name, parent: parentId }),
+      });
+
+      if (createResponse.ok) {
+        const newCategory = (await createResponse.json()) as WCCategory;
+        this.categoryCache.set(cacheKey, newCategory.id);
+        return newCategory.id;
+      }
+
       return null;
     } catch (err) {
-      this.logger.error(`Error fetching category ${name}: ${String(err)}`);
+      this.logger.error(
+        `Error getOrCreateSingleCategory ${name}: ${String(err)}`,
+      );
       return null;
     }
+  }
+
+  private async getOrCreateTags(
+    tagsStr: string,
+    apiUrl: string,
+    auth: string,
+  ): Promise<number[]> {
+    const tagNames = tagsStr
+      .split(',')
+      .map((t) => t.trim())
+      .filter((t) => t !== '');
+    const tagIds: number[] = [];
+
+    for (const name of tagNames) {
+      const cachedId = this.tagCache.get(name);
+      if (cachedId) {
+        tagIds.push(cachedId);
+        continue;
+      }
+
+      try {
+        // 1. Tìm kiếm tag theo name
+        const searchUrl = `${apiUrl}/products/tags?search=${encodeURIComponent(name)}`;
+        const response = await fetch(searchUrl, {
+          headers: { Authorization: auth },
+        });
+
+        if (response.ok) {
+          const tags = (await response.json()) as {
+            id: number;
+            name: string;
+          }[];
+          const exactMatch = tags.find(
+            (t) => t.name.toLowerCase() === name.toLowerCase(),
+          );
+
+          if (exactMatch) {
+            this.tagCache.set(name, exactMatch.id);
+            tagIds.push(exactMatch.id);
+            continue;
+          }
+        }
+
+        // 2. Tạo mới nếu không thấy
+        this.logger.log(`Creating new tag: ${name}`);
+        const createResponse = await fetch(`${apiUrl}/products/tags`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: auth,
+          },
+          body: JSON.stringify({ name }),
+        });
+
+        if (createResponse.ok) {
+          const newTag = (await createResponse.json()) as { id: number };
+          this.tagCache.set(name, newTag.id);
+          tagIds.push(newTag.id);
+        }
+      } catch (err) {
+        this.logger.error(`Error getOrCreateTag ${name}: ${String(err)}`);
+      }
+    }
+
+    return tagIds;
   }
 }

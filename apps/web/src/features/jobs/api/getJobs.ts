@@ -22,9 +22,10 @@ export const getJobs = async (
     search?: string;
     startDate?: string;
     endDate?: string;
+    onlyTrashed?: boolean;
   } = {},
 ): Promise<{ items: JobItem[]; total: number }> => {
-  const { page = 1, limit = 10, status, search, startDate, endDate } = params;
+  const { page = 1, limit = 10, status, search, startDate, endDate, onlyTrashed } = params;
   const offset = (page - 1) * limit;
 
   const response = await axios.get(`${API_URL}/products`, {
@@ -35,6 +36,7 @@ export const getJobs = async (
       search,
       startDate,
       endDate,
+      onlyTrashed,
     },
   });
 
