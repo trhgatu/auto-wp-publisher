@@ -5,7 +5,7 @@ import { JobStatus } from '@prisma/client';
 
 @QueryHandler(GetProductsQuery)
 export class GetProductsHandler implements IQueryHandler<GetProductsQuery> {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async execute(
     query: GetProductsQuery,
