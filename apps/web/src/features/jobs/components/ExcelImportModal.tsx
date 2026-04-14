@@ -3,6 +3,7 @@ import * as XLSX from "xlsx";
 import type { ImportProductDto } from "@repo/shared";
 import { Loader2, Upload, X, Check } from "lucide-react";
 import { useBulkCreateJobs } from "../hooks/useBulkCreateJobs";
+import { Table } from "../../../components/shared/Table";
 
 interface ExcelImportModalProps {
   isOpen: boolean;
@@ -68,14 +69,32 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
             return key ? String(row[key]) : "";
           };
 
+          const brand = getVal(["hãng xe", "brand"]);
+          const model = getVal(["dòng xe", "model"]);
+          const partNumber = getVal(["mã phụ tùng", "mã", "part number"]);
+          const explicitTags = getVal(["thẻ", "tags", "tag"]);
+          let category = getVal(["danh mục", "chuyên mục", "category"]);
+          if (brand && model) {
+            category = `${brand} > ${model}`;
+          } else if (brand || model) {
+            category = brand || model;
+          }
+
+          if (!category) category = "Phụ tùng ô tô";
+
+          const smartTags = [brand, model, partNumber]
+            .map((t) => t.trim())
+            .filter((t) => t !== "")
+            .join(", ");
+
           const product: ImportProductDto = {
             title: String(title).trim(),
             dimensions: getVal(["kích thước", "dimensions"]),
             material: getVal(["chất liệu", "material"]),
             price: getVal(["giá bán", "giá", "price"]),
-            carModels: getVal(["dòng xe", "models"]),
+            carModels: model || getVal(["dòng xe", "models"]),
             carDetail: getVal(["chi tiết", "detail"]),
-            partNumbers: getVal(["mã phụ tùng", "mã", "part number"]),
+            partNumbers: partNumber,
             video: getVal(["video", "youtube"]),
             shopeeLink: getVal(["shopee"]),
             lazadaLink: getVal(["lzd", "lazada"]),
@@ -93,8 +112,8 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
               "gallery",
               "images",
             ]),
-            category:
-              getVal(["danh mục", "chuyên mục", "category"]) || "Phụ tùng ô tô",
+            category: category,
+            tags: explicitTags || smartTags,
           };
 
           const values = Object.values(product).filter(
@@ -182,14 +201,13 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center space-y-4 transition-all ${
-                isDragging
-                  ? "border-indigo-600 bg-indigo-50/50 dark:border-indigo-500 dark:bg-indigo-500/10 scale-[1.02]"
-                  : "border-gray-200 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500"
-              }`}
+              className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center space-y-4 transition-all ${isDragging
+                ? "border-red-600 bg-red-50/50 dark:border-red-500 dark:bg-red-500/10 scale-[1.02]"
+                : "border-gray-200 dark:border-slate-700 hover:border-red-400 dark:hover:border-red-500"
+                }`}
             >
-              <div className="p-4 bg-indigo-50 dark:bg-indigo-500/10 rounded-full">
-                <Upload className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+              <div className="p-4 bg-red-50 dark:bg-red-500/10 rounded-full">
+                <Upload className="w-8 h-8 text-red-600 dark:text-red-400" />
               </div>
               <div className="text-center">
                 <p className="text-lg font-medium text-gray-900 dark:text-slate-200">
@@ -208,15 +226,15 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
               />
               <label
                 htmlFor="excel-upload"
-                className="px-6 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg font-medium hover:bg-indigo-700 dark:hover:bg-indigo-600 cursor-pointer shadow-indigo-200 dark:shadow-indigo-900/20 shadow-lg transition-all"
+                className="px-6 py-2 bg-red-600 dark:bg-red-500 text-white rounded-lg font-medium hover:bg-red-700 dark:hover:bg-red-600 cursor-pointer shadow-red-200 dark:shadow-red-900/20 shadow-lg transition-all"
               >
                 Chọn File
               </label>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-4 rounded-lg">
-                <span className="text-indigo-700 dark:text-indigo-400 font-medium font-sm">
+              <div className="flex items-center justify-between bg-red-50 dark:bg-red-500/10 p-4 rounded-lg">
+                <span className="text-red-700 dark:text-red-400 font-medium font-sm">
                   <Check className="w-4 h-4 inline-block mr-2" />
                   Đã đọc thành công {data.length} dòng sản phẩm
                 </span>
@@ -228,102 +246,109 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                 </button>
               </div>
 
-              <div className="overflow-x-auto border border-gray-100 dark:border-slate-800 rounded-lg">
-                <table className="w-full text-left border-collapse min-w-[1200px]">
-                  <thead>
-                    <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800">
-                      <th className="p-3 text-sm font-semibold text-gray-600 dark:text-slate-400">
-                        Ảnh
-                      </th>
-                      <th className="p-3 text-sm font-semibold text-gray-600 dark:text-slate-400">
-                        Thư viện
-                      </th>
-                      <th className="p-3 text-sm font-semibold text-gray-600 dark:text-slate-400">
-                        Tiêu đề (WP)
-                      </th>
-                      <th className="p-3 text-sm font-semibold text-gray-600 dark:text-slate-400">
-                        Kích thước
-                      </th>
-                      <th className="p-3 text-sm font-semibold text-gray-600 dark:text-slate-400">
-                        Giá bán
-                      </th>
-                      <th className="p-3 text-sm font-semibold text-gray-600 dark:text-slate-400">
-                        Dòng xe
-                      </th>
-                      <th className="p-3 text-sm font-semibold text-gray-600 dark:text-slate-400">
-                        Danh mục
-                      </th>
-                      <th className="p-3 text-sm font-semibold text-gray-600 dark:text-slate-400">
-                        Shopee
-                      </th>
-                      <th className="p-3 text-sm font-semibold text-gray-600 dark:text-slate-400">
-                        Lazada
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
-                    {data.slice(0, 50).map((row, idx) => (
-                      <tr
-                        key={idx}
-                        className="hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors"
-                      >
-                        <td className="p-3 text-sm text-gray-500 dark:text-slate-400">
-                          {row.imageUrl && (
+              <Table
+                className="min-w-[2000px]"
+                containerClassName="border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm bg-white dark:bg-slate-900"
+              >
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeadCell className="w-14">Ảnh</Table.HeadCell>
+                    <Table.HeadCell>Thư viện</Table.HeadCell>
+                    <Table.HeadCell>Tiêu đề (WP)</Table.HeadCell>
+                    <Table.HeadCell>Kích thước</Table.HeadCell>
+                    <Table.HeadCell>Mã phụ tùng</Table.HeadCell>
+                    <Table.HeadCell>Danh mục</Table.HeadCell>
+                    <Table.HeadCell>Thẻ (Tags)</Table.HeadCell>
+                    <Table.HeadCell>Chất liệu</Table.HeadCell>
+                    <Table.HeadCell>Chi tiết</Table.HeadCell>
+                    <Table.HeadCell>Shopee</Table.HeadCell>
+                    <Table.HeadCell>Lazada</Table.HeadCell>
+                    <Table.HeadCell>TikTok</Table.HeadCell>
+                    <Table.HeadCell>Video</Table.HeadCell>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {data.slice(0, 50).map((row, idx) => (
+                    <Table.Row key={idx}>
+                      <Table.Cell>
+                        {row.imageUrl && (
+                          <div className="relative group/img w-14 h-14 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
                             <img
                               src={row.imageUrl}
                               alt="preview"
-                              className="w-10 h-10 object-cover rounded shadow-sm border border-gray-200 dark:border-slate-700"
+                              className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-500"
                             />
-                          )}
-                        </td>
-                        <td className="p-3 text-sm text-gray-500 dark:text-slate-400">
-                          {row.galleryImageUrls && (
-                            <div className="flex -space-x-3 hover:space-x-1 transition-all">
-                              {row.galleryImageUrls
-                                .split(",")
-                                .slice(0, 4)
-                                .map((url, i) => (
+                            <div className="absolute inset-0 bg-black/5 opacity-0 group-hover/img:opacity-100 transition-opacity" />
+                          </div>
+                        )}
+                      </Table.Cell>
+                      <Table.Cell>
+                        {row.galleryImageUrls && (
+                          <div className="flex items-center gap-1.5">
+                            {row.galleryImageUrls
+                              .split(",")
+                              .slice(0, 3)
+                              .map((url, i) => (
+                                <div key={i} className="w-8 h-8 rounded-lg border border-slate-100 dark:border-slate-800 overflow-hidden shadow-xs flex-shrink-0">
                                   <img
-                                    key={i}
                                     src={url.trim()}
                                     alt="gallery"
-                                    className="w-8 h-8 object-cover rounded-full border-2 border-white dark:border-slate-900 shadow-sm"
+                                    className="w-full h-full object-cover"
                                   />
-                                ))}
-                            </div>
-                          )}
-                        </td>
-                        <td className="p-3 text-sm font-medium text-gray-900 dark:text-slate-200 truncate max-w-[200px]">
-                          {row.title}
-                        </td>
-                        <td className="p-3 text-sm text-gray-500 dark:text-slate-400">
-                          {row.dimensions}
-                        </td>
-                        <td className="p-3 text-sm text-gray-500 dark:text-slate-400">
-                          {row.price}
-                        </td>
-                        <td className="p-3 text-sm text-gray-500 dark:text-slate-400 truncate max-w-[150px]">
-                          {row.carModels}
-                        </td>
-                        <td className="p-3 text-sm text-gray-500 dark:text-slate-400 truncate max-w-[150px]">
-                          {row.category}
-                        </td>
-                        <td className="p-3 text-sm text-gray-500 dark:text-slate-400 truncate max-w-[100px]">
-                          {row.shopeeLink}
-                        </td>
-                        <td className="p-3 text-sm text-gray-500 dark:text-slate-400 truncate max-w-[100px]">
-                          {row.lazadaLink}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {data.length > 50 && (
-                  <p className="p-3 text-center text-sm text-gray-400 dark:text-slate-500">
-                    ... và {data.length - 50} sản phẩm khác
-                  </p>
-                )}
-              </div>
+                                </div>
+                              ))}
+                            {row.galleryImageUrls.split(",").length > 3 && (
+                              <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-500">
+                                +{row.galleryImageUrls.split(",").length - 3}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </Table.Cell>
+                      <Table.Cell className="font-bold text-slate-700 dark:text-slate-300 truncate max-w-[300px] uppercase text-[11px] tracking-tight whitespace-nowrap">
+                        {row.title}
+                      </Table.Cell>
+                      <Table.Cell className="text-[10px] font-bold text-slate-400 dark:text-slate-500 whitespace-nowrap">
+                        {row.dimensions}
+                      </Table.Cell>
+                      <Table.Cell className="text-sm text-slate-600 dark:text-slate-400">
+                        {row.partNumbers}
+                      </Table.Cell>
+                      <Table.Cell className="text-sm text-slate-600 dark:text-slate-400 truncate max-w-[200px]">
+                        {row.category}
+                      </Table.Cell>
+                      <Table.Cell>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-red-50 text-red-700 border border-red-100 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20">
+                          {row.tags}
+                        </span>
+                      </Table.Cell>
+                      <Table.Cell className="text-sm text-slate-500 whitespace-nowrap">
+                        {row.material}
+                      </Table.Cell>
+                      <Table.Cell className="text-[10px] font-medium text-slate-500 truncate max-w-[150px]">
+                        {row.carDetail}
+                      </Table.Cell>
+                      <Table.Cell className="text-[10px] font-medium text-blue-600 truncate max-w-[100px]">
+                        {row.shopeeLink}
+                      </Table.Cell>
+                      <Table.Cell className="text-[10px] font-medium text-orange-600 truncate max-w-[100px]">
+                        {row.lazadaLink}
+                      </Table.Cell>
+                      <Table.Cell className="text-[10px] font-medium text-pink-600 truncate max-w-[100px]">
+                        {row.tiktokLink}
+                      </Table.Cell>
+                      <Table.Cell className="text-center">
+                        {row.video ? "✅" : ""}
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table>
+              {data.length > 50 && (
+                <p className="p-3 text-center text-sm text-gray-400 dark:text-slate-500">
+                  ... và {data.length - 50} sản phẩm khác
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -338,7 +363,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
           <button
             disabled={data.length === 0 || mutation.isPending}
             onClick={handleImport}
-            className="px-8 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg font-bold hover:bg-indigo-700 dark:hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-indigo-200 dark:shadow-indigo-900/30 shadow-xl flex items-center transition-all"
+            className="px-8 py-2 bg-red-600 dark:bg-red-500 text-white rounded-lg font-bold hover:bg-red-700 dark:hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-red-200 dark:shadow-red-900/30 shadow-xl flex items-center transition-all"
           >
             {mutation.isPending ? (
               <>

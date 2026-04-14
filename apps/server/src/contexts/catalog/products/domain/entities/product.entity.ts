@@ -22,10 +22,12 @@ export class Product extends AggregateRoot<IEvent> {
     public tiktokLink: string | null,
     public videoUrl: string | null,
     public category: string | null,
+    public tags: string | null,
     public status: ProductStatus,
     public errorLog: string | null,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
+    public deletedAt: Date | null = null,
   ) {
     super();
   }
@@ -46,6 +48,7 @@ export class Product extends AggregateRoot<IEvent> {
     tiktokLink: string | null = null,
     videoUrl: string | null = null,
     category: string | null = null,
+    tags: string | null = null,
   ): Product {
     return new Product(
       ProductId.create(id),
@@ -65,6 +68,7 @@ export class Product extends AggregateRoot<IEvent> {
       tiktokLink,
       videoUrl,
       category,
+      tags,
       ProductStatus.PENDING,
       null,
       new Date(),
@@ -89,5 +93,19 @@ export class Product extends AggregateRoot<IEvent> {
     this.status = ProductStatus.COMPLETED;
     this.wpPostId = wpPostId;
     this.aiContent = aiContent;
+  }
+
+  trash(): void {
+    if (!this.deletedAt) {
+      this.deletedAt = new Date();
+    }
+  }
+
+  restore(): void {
+    this.deletedAt = null;
+  }
+
+  isDeleted(): boolean {
+    return this.deletedAt !== null;
   }
 }

@@ -58,6 +58,7 @@ export class PublisherProcessor extends WorkerHost {
         product.imageUrl,
         product.galleryImageUrls,
         product.category,
+        product.tags,
         product.wpPostId,
       );
 
