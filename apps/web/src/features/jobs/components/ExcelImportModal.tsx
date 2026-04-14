@@ -180,8 +180,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
             "số tiền",
           ]);
 
-          const category =
-            brand && model ? `${brand} > ${model}` : brand || "Chưa phân loại";
+          const category = brand || "Chưa phân loại";
 
           const smartTags = [brand, model, partNumber]
             .map((t) => (t ? String(t).trim() : ""))

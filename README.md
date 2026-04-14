@@ -16,7 +16,7 @@
 
 ### 2. 🧠 Smart Category Mapping (Ánh xạ danh mục thông minh)
 - **Persistent Mapping**: Hệ thống ghi nhớ các lựa chọn ánh xạ trước đó trong cơ sở dữ liệu. Lần sau bạn Import, hệ thống sẽ tự động nhận diện!
-- **Hierarchical Support**: Tự động xử lý danh mục theo cấp bậc (Ví dụ: `MERCEDES BENZ > C-Class`).
+- **Hierarchical Support**: Hiển thị danh mục WordPress theo cấp bậc trực quan (Hãng xe ↳ Dòng xe) trong trình chọn mapping.
 - **Auto-matching**: Thuật toán Fuzzy Search tự động gợi ý danh mục WordPress phù hợp nhất với giá trị trong Excel.
 
 ### 3. 🎨 Giao diện Premium (Ant Design Style)
@@ -49,6 +49,3 @@
 
 ## 📝 Giấy phép
 Dự án được phát triển bởi **trhgatu**.
-
----
-**Auto WP Publisher** - *Nâng tầm quy trình nhập liệu của bạn!*
