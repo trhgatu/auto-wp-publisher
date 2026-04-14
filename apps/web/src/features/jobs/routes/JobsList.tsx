@@ -7,6 +7,9 @@ import {
   FileSpreadsheet,
   Package,
   PlusCircle,
+  Trash2,
+  Undo2,
+  Trash,
 } from "lucide-react";
 import { useJobs } from "../hooks/useJobs";
 import { JobStatusBadge } from "../components/JobStatusBadge";
@@ -15,6 +18,12 @@ import { JobsFilter } from "../components/JobsFilter";
 import { DateRangeFilter } from "../components/DateRangeFilter";
 import { Pagination } from "../../../components/shared/Pagination";
 import { Button } from "../../../components/shared/Button";
+import { trashJob } from "../api/trashJob";
+import { restoreJob } from "../api/restoreJob";
+import { permanentlyDeleteJob } from "../api/permanentlyDeleteJob";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNotification } from "../../../hooks/useNotification";
+import { ConfirmModal } from "../../../components/shared/ConfirmModal";
 
 export const JobsList = () => {
   const [isImportModalOpen, setImportModalOpen] = useState(false);
@@ -24,7 +33,25 @@ export const JobsList = () => {
   const [endDate, setEndDate] = useState<string>("");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [onlyTrashed, setOnlyTrashed] = useState(false);
   const pageSize = 10;
+  const queryClient = useQueryClient();
+  const { notify } = useNotification();
+  
+  // Modal State
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    variant: "danger" | "primary" | "emerald";
+    action: () => Promise<void>;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    variant: "primary",
+    action: async () => {},
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -42,7 +69,34 @@ export const JobsList = () => {
     search: debouncedSearch || undefined,
     startDate: startDate || undefined,
     endDate: endDate || undefined,
+    onlyTrashed,
   });
+
+  const handleAction = (
+    action: () => Promise<void>, 
+    title: string,
+    message: string, 
+    variant: "danger" | "primary" | "emerald" = "primary"
+  ) => {
+    setConfirmConfig({
+      isOpen: true,
+      title,
+      message,
+      variant,
+      action: async () => {
+        try {
+          await action();
+          queryClient.invalidateQueries({ queryKey: ["jobs"] });
+          notify("Thành công", "Thao tác đã được thực hiện", "success");
+        } catch (err) {
+          console.error(err);
+          notify("Lỗi", "Không thể thực hiện thao tác", "error");
+        } finally {
+          setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+        }
+      }
+    });
+  };
 
   const jobs = data?.items || [];
   const total = data?.total || 0;
@@ -59,31 +113,46 @@ export const JobsList = () => {
             </div>
             <div>
               <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100 uppercase">
-                Kho Sản Phẩm
+                {onlyTrashed ? "Thùng Rác" : "Kho Sản Phẩm"}
               </h1>
               <p className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-0.5">
-                phutungoto123.vn • Quản lý xuất bản
+                {onlyTrashed ? "Các bài viết đã tạm xóa" : "phutungoto123.vn • Quản lý xuất bản"}
               </p>
             </div>
           </div>
-
           <div className="flex items-center gap-3">
             <Button
-              onClick={() => setImportModalOpen(true)}
-              leftIcon={<FileSpreadsheet className="w-4 h-4" />}
-              className="bg-red-600 hover:bg-red-700 text-white border-none font-bold px-5 h-10 shadow-none transition-all active:scale-95"
+              onClick={() => {
+                setOnlyTrashed(!onlyTrashed);
+                setPage(1);
+              }}
+              variant={onlyTrashed ? "primary" : "outline"}
+              leftIcon={onlyTrashed ? <Package className="w-4 h-4" /> : <Trash2 className="w-4 h-4" />}
+              className={`font-bold h-10 shadow-none transition-all active:scale-95 ${!onlyTrashed ? "text-slate-600 border-slate-200 hover:bg-slate-50" : ""}`}
             >
-              Import Excel
+              {onlyTrashed ? "Về Kho" : "Thẻ Rác"}
             </Button>
 
-            <Link to="/create">
-              <Button
-                leftIcon={<PlusCircle className="w-4 h-4" />}
-                className="bg-red-600 hover:bg-red-700 text-white border-none px-6 font-bold h-10 shadow-none transition-all active:scale-95"
-              >
-                Thêm mới
-              </Button>
-            </Link>
+            {!onlyTrashed && (
+              <>
+                <Button
+                  onClick={() => setImportModalOpen(true)}
+                  leftIcon={<FileSpreadsheet className="w-4 h-4" />}
+                  className="bg-red-600 hover:bg-red-700 text-white border-none font-bold px-5 h-10 shadow-none transition-all active:scale-95"
+                >
+                  Import Excel
+                </Button>
+
+                <Link to="/create">
+                  <Button
+                    leftIcon={<PlusCircle className="w-4 h-4" />}
+                    className="bg-red-600 hover:bg-red-700 text-white border-none px-6 font-bold h-10 shadow-none transition-all active:scale-95"
+                  >
+                    Thêm mới
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
@@ -160,7 +229,7 @@ export const JobsList = () => {
                     Trạng thái
                   </th>
                   <th className="px-6 py-3 font-black">Cập nhật lúc</th>
-                  <th className="px-6 py-3 font-black">Nhật ký</th>
+                  <th className="px-6 py-3 font-black text-center w-24">Hành động</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -218,18 +287,49 @@ export const JobsList = () => {
                       </div>
                     </td>
                     <td className="px-6 py-3">
-                      {job.status === "FAILED" && job.errorLog ? (
-                        <span
-                          className="text-[10px] font-bold text-rose-500 dark:text-rose-400 line-clamp-1 bg-rose-50 dark:bg-rose-900/20 px-2 py-1 rounded border border-rose-100 dark:border-rose-900/30"
-                          title={job.errorLog}
-                        >
-                          {job.errorLog}
-                        </span>
-                      ) : (
-                        <span className="text-slate-300 dark:text-slate-600 text-center block">
-                          -
-                        </span>
-                      )}
+                      <div className="flex items-center justify-center gap-2">
+                        {onlyTrashed ? (
+                          <>
+                            <button
+                              onClick={() => handleAction(
+                                () => restoreJob(job.id), 
+                                "Khôi phục sản phẩm",
+                                "Bạn có chắc chắn muốn đưa sản phẩm này trở lại kho hàng?",
+                                "emerald"
+                              )}
+                              className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20 transition-colors"
+                              title="Khôi phục"
+                            >
+                              <Undo2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleAction(
+                                () => permanentlyDeleteJob(job.id), 
+                                "Xóa vĩnh viễn",
+                                "Sản phẩm này sẽ bị xóa khỏi hệ thống hoàn toàn và không thể khôi phục. Bạn chắc chứ?",
+                                "danger"
+                              )}
+                              className="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20 transition-colors"
+                              title="Xóa vĩnh viễn"
+                            >
+                              <Trash className="w-4 h-4" />
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => handleAction(
+                              () => trashJob(job.id), 
+                              "Bỏ vào thùng rác",
+                              "Sản phẩm sẽ được chuyển vào khu vực rác. Bạn có thể khôi phục sau này.",
+                              "danger"
+                            )}
+                            className="p-1.5 rounded-lg bg-slate-50 text-slate-500 hover:bg-rose-50 hover:text-rose-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-rose-500/10 dark:hover:text-rose-400 transition-colors"
+                            title="Xóa tạm thời"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -249,6 +349,15 @@ export const JobsList = () => {
       <ExcelImportModal
         isOpen={isImportModalOpen}
         onClose={() => setImportModalOpen(false)}
+      />
+
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        variant={confirmConfig.variant}
+        onConfirm={confirmConfig.action}
+        onCancel={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
       />
     </div>
   );

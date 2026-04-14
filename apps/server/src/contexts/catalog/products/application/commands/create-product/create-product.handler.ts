@@ -25,8 +25,14 @@ export class CreateProductHandler implements ICommandHandler<CreateProductComman
   ) {}
 
   async execute(command: CreateProductCommand): Promise<string> {
-    const { title, baseDescription, sourceUrl, imageUrl, galleryImageUrls } =
-      command.data;
+    const {
+      title,
+      baseDescription,
+      sourceUrl,
+      imageUrl,
+      galleryImageUrls,
+      tags,
+    } = command.data;
     const id = this.uuidGenerator.generate();
 
     const product = Product.create(
@@ -45,6 +51,7 @@ export class CreateProductHandler implements ICommandHandler<CreateProductComman
       null, // tiktokLink
       null, // videoUrl
       command.data.category ?? null,
+      tags ?? null,
     );
 
     product.markAsCreated();

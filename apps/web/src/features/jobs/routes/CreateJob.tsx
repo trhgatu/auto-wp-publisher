@@ -18,8 +18,9 @@ export const CreateJob = () => {
     title: "",
     sku: "",
     baseDescription: "",
-    category: "Uncategorized",
+    category: "Phụ tùng ô tô",
     sourceUrl: "",
+    tags: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -48,6 +49,7 @@ export const CreateJob = () => {
       title: formData.title,
       baseDescription: formData.baseDescription,
       category: formData.category,
+      tags: formData.tags,
       ...(formData.sku ? { sku: formData.sku } : {}),
       ...(formData.sourceUrl ? { sourceUrl: formData.sourceUrl } : {}),
     };
@@ -172,17 +174,24 @@ export const CreateJob = () => {
                 <label className="text-sm font-medium">
                   Chuyên mục (Category)
                 </label>
-                <select
+                <input
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
-                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all appearance-none"
-                >
-                  <option value="Uncategorized">Chưa phân loại</option>
-                  <option value="Công nghệ">Công nghệ</option>
-                  <option value="Tài chính">Tài chính</option>
-                  <option value="Đời sống">Đời sống</option>
-                </select>
+                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                  placeholder="VD: Phụ tùng ô tô, Đồ chơi xe..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Thẻ (Tags)</label>
+                <input
+                  name="tags"
+                  value={formData.tags}
+                  onChange={handleChange}
+                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                  placeholder="tag1, tag2, tag3..."
+                />
               </div>
             </div>
           </div>

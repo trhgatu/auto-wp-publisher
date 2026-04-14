@@ -5,7 +5,7 @@ import { JobStatus } from '@prisma/client';
 
 @QueryHandler(GetProductsQuery)
 export class GetProductsHandler implements IQueryHandler<GetProductsQuery> {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async execute(
     query: GetProductsQuery,
@@ -14,7 +14,10 @@ export class GetProductsHandler implements IQueryHandler<GetProductsQuery> {
       status?: JobStatus;
       name?: { contains: string; mode: 'insensitive' };
       createdAt?: { gte?: Date; lte?: Date };
-    } = {};
+      deletedAt?: { not: null } | null;
+    } = {
+      deletedAt: query.onlyTrashed ? { not: null } : null,
+    };
 
     if (query.status) {
       where.status = query.status as JobStatus;
@@ -33,7 +36,6 @@ export class GetProductsHandler implements IQueryHandler<GetProductsQuery> {
         where.createdAt.gte = new Date(query.startDate);
       }
       if (query.endDate) {
-        // Set to end of day
         const endDay = new Date(query.endDate);
         endDay.setHours(23, 59, 59, 999);
         where.createdAt.lte = endDay;

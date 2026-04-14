@@ -6,5 +6,6 @@ export class GetProductsQuery {
     public readonly search?: string,
     public readonly startDate?: Date,
     public readonly endDate?: Date,
+    public readonly onlyTrashed: boolean = false,
   ) {}
 }
