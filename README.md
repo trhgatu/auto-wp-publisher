@@ -1,159 +1,54 @@
-# Turborepo starter
+# Auto WP Publisher 🚗💨
 
-This Turborepo starter is maintained by the Turborepo core team.
+**Hệ thống tự động hóa đăng bài sản phẩm lên WordPress từ file Excel - Đỉnh cao của sự tiện lợi!**
 
-## Using this example
+---
 
-Run the following command:
+## 🌟 Tổng quan
+`Auto WP Publisher` là một giải pháp mạnh mẽ được thiết kế để giải quyết bài toán nhập liệu sản phẩm hàng loạt từ Excel lên các website WordPress (WooCommerce). Không chỉ dừng lại ở việc copy-paste, hệ thống tích hợp các thuật toán **Smart Mapping** thông minh, ghi nhớ hành vi người dùng và hỗ trợ cấu trúc dữ liệu phân cấp phức tạp.
 
-```sh
-npx create-turbo@latest
-```
+## ✨ Tính năng nổi bật
 
-## What's inside?
+### 1. 🚀 Fast Import (Nhập liệu siêu tốc)
+- Hỗ trợ file Excel (.xlsx, .xls) với khả năng nhận diện cột linh hoạt.
+- Tự động trích xuất thông tin: Tên sản phẩm, Giá, Ảnh, SKU, Mã phụ tùng, và nhiều hơn thế nữa.
+- Preview dữ liệu trực quan trước khi thực hiện quy trình đẩy lên server.
 
-This Turborepo includes the following packages/apps:
+### 2. 🧠 Smart Category Mapping (Ánh xạ danh mục thông minh)
+- **Persistent Mapping**: Hệ thống ghi nhớ các lựa chọn ánh xạ trước đó trong cơ sở dữ liệu. Lần sau bạn Import, hệ thống sẽ tự động nhận diện!
+- **Hierarchical Support**: Tự động xử lý danh mục theo cấp bậc (Ví dụ: `MERCEDES BENZ > C-Class`).
+- **Auto-matching**: Thuật toán Fuzzy Search tự động gợi ý danh mục WordPress phù hợp nhất với giá trị trong Excel.
 
-### Apps and Packages
+### 3. 🎨 Giao diện Premium (Ant Design Style)
+- Thiết kế hiện đại dựa trên triết lý **Ant Design** cao cấp.
+- **Red Theme**: Tông màu đỏ rực rỡ, đồng bộ hoàn hảo với bộ nhận diện thương hiệu.
+- Hiệu ứng Glassmorphism và vi mô tương tác (micro-animations) mượt mà.
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+### 4. 🛠️ Robust Infrastructure
+- Hệ thống **Background Jobs**: Xử lý hàng nghìn sản phẩm mà không lo bị timeout.
+- Quản lý Logs chi tiết: Theo dõi trạng thái từng bài đăng (Thành công/Thất bại).
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+---
 
-### Utilities
+## 🛠️ Công nghệ sử dụng
 
-This Turborepo has some additional tools already setup for you:
+| Tầng | Công nghệ |
+| :--- | :--- |
+| **Frontend** | React (Vite), Tailwind CSS, Lucide Icons, TanStack Query |
+| **Backend** | NestJS, Prisma ORM, PostgreSQL |
+| **Monorepo** | Turborepo |
+| **Integration** | WordPress REST API |
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+---
 
-### Build
+## 📸 Ảnh chụp màn hình
 
-To build all apps and packages, run the following command:
+*(Hình ảnh sẽ được cập nhật sau)*
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+---
 
-```sh
-cd my-turborepo
-turbo build
-```
+## 📝 Giấy phép
+Dự án được phát triển bởi **trhgatu**.
 
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+---
+**Auto WP Publisher** - *Nâng tầm quy trình nhập liệu của bạn!*
