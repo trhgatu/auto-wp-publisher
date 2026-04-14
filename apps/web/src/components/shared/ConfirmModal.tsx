@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { AlertTriangle, X } from "lucide-react";
 import { Button } from "./Button";
 
@@ -27,11 +28,11 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
+      <div
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
         onClick={onCancel}
       />
 
@@ -39,11 +40,15 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
       <div className="relative w-full max-w-md scale-in-center overflow-hidden rounded-2xl bg-white dark:bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800">
         <div className="p-6">
           <div className="flex items-start gap-4">
-            <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${
-              variant === "danger" ? "bg-rose-50 text-rose-500 dark:bg-rose-500/10" : 
-              variant === "emerald" ? "bg-emerald-50 text-emerald-500 dark:bg-emerald-500/10" :
-              "bg-blue-50 text-blue-500 dark:bg-blue-500/10"
-            }`}>
+            <div
+              className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${
+                variant === "danger"
+                  ? "bg-rose-50 text-rose-500 dark:bg-rose-500/10"
+                  : variant === "emerald"
+                    ? "bg-emerald-50 text-emerald-500 dark:bg-emerald-500/10"
+                    : "bg-blue-50 text-blue-500 dark:bg-blue-500/10"
+              }`}
+            >
               <AlertTriangle className="w-6 h-6" />
             </div>
             <div className="flex-1">
@@ -92,6 +97,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           100% { transform: scale(1); opacity: 1; }
         }
       `}</style>
-    </div>
+    </div>,
+    document.body,
   );
 };

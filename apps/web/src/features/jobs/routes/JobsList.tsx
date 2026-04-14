@@ -37,7 +37,7 @@ export const JobsList = () => {
   const pageSize = 10;
   const queryClient = useQueryClient();
   const { notify } = useNotification();
-  
+
   // Modal State
   const [confirmConfig, setConfirmConfig] = useState<{
     isOpen: boolean;
@@ -73,10 +73,10 @@ export const JobsList = () => {
   });
 
   const handleAction = (
-    action: () => Promise<void>, 
+    action: () => Promise<void>,
     title: string,
-    message: string, 
-    variant: "danger" | "primary" | "emerald" = "primary"
+    message: string,
+    variant: "danger" | "primary" | "emerald" = "primary",
   ) => {
     setConfirmConfig({
       isOpen: true,
@@ -92,9 +92,9 @@ export const JobsList = () => {
           console.error(err);
           notify("Lỗi", "Không thể thực hiện thao tác", "error");
         } finally {
-          setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+          setConfirmConfig((prev) => ({ ...prev, isOpen: false }));
         }
-      }
+      },
     });
   };
 
@@ -116,7 +116,9 @@ export const JobsList = () => {
                 {onlyTrashed ? "Thùng Rác" : "Kho Sản Phẩm"}
               </h1>
               <p className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-0.5">
-                {onlyTrashed ? "Các bài viết đã tạm xóa" : "phutungoto123.vn • Quản lý xuất bản"}
+                {onlyTrashed
+                  ? "Các bài viết đã tạm xóa"
+                  : "phutungoto123.vn • Quản lý xuất bản"}
               </p>
             </div>
           </div>
@@ -127,7 +129,13 @@ export const JobsList = () => {
                 setPage(1);
               }}
               variant={onlyTrashed ? "primary" : "outline"}
-              leftIcon={onlyTrashed ? <Package className="w-4 h-4" /> : <Trash2 className="w-4 h-4" />}
+              leftIcon={
+                onlyTrashed ? (
+                  <Package className="w-4 h-4" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )
+              }
               className={`font-bold h-10 shadow-none transition-all active:scale-95 ${!onlyTrashed ? "text-slate-600 border-slate-200 hover:bg-slate-50" : ""}`}
             >
               {onlyTrashed ? "Về Kho" : "Thẻ Rác"}
@@ -229,7 +237,9 @@ export const JobsList = () => {
                     Trạng thái
                   </th>
                   <th className="px-6 py-3 font-black">Cập nhật lúc</th>
-                  <th className="px-6 py-3 font-black text-center w-24">Hành động</th>
+                  <th className="px-6 py-3 font-black text-center w-28 whitespace-nowrap">
+                    Hành động
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -291,24 +301,28 @@ export const JobsList = () => {
                         {onlyTrashed ? (
                           <>
                             <button
-                              onClick={() => handleAction(
-                                () => restoreJob(job.id), 
-                                "Khôi phục sản phẩm",
-                                "Bạn có chắc chắn muốn đưa sản phẩm này trở lại kho hàng?",
-                                "emerald"
-                              )}
+                              onClick={() =>
+                                handleAction(
+                                  () => restoreJob(job.id),
+                                  "Khôi phục sản phẩm",
+                                  "Bạn có chắc chắn muốn đưa sản phẩm này trở lại kho hàng?",
+                                  "emerald",
+                                )
+                              }
                               className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20 transition-colors"
                               title="Khôi phục"
                             >
                               <Undo2 className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => handleAction(
-                                () => permanentlyDeleteJob(job.id), 
-                                "Xóa vĩnh viễn",
-                                "Sản phẩm này sẽ bị xóa khỏi hệ thống hoàn toàn và không thể khôi phục. Bạn chắc chứ?",
-                                "danger"
-                              )}
+                              onClick={() =>
+                                handleAction(
+                                  () => permanentlyDeleteJob(job.id),
+                                  "Xóa vĩnh viễn",
+                                  "Sản phẩm này sẽ bị xóa khỏi hệ thống hoàn toàn và không thể khôi phục. Bạn chắc chứ?",
+                                  "danger",
+                                )
+                              }
                               className="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20 transition-colors"
                               title="Xóa vĩnh viễn"
                             >
@@ -317,12 +331,14 @@ export const JobsList = () => {
                           </>
                         ) : (
                           <button
-                            onClick={() => handleAction(
-                              () => trashJob(job.id), 
-                              "Bỏ vào thùng rác",
-                              "Sản phẩm sẽ được chuyển vào khu vực rác. Bạn có thể khôi phục sau này.",
-                              "danger"
-                            )}
+                            onClick={() =>
+                              handleAction(
+                                () => trashJob(job.id),
+                                "Bỏ vào thùng rác",
+                                "Sản phẩm sẽ được chuyển vào khu vực rác. Bạn có thể khôi phục sau này.",
+                                "danger",
+                              )
+                            }
                             className="p-1.5 rounded-lg bg-slate-50 text-slate-500 hover:bg-rose-50 hover:text-rose-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-rose-500/10 dark:hover:text-rose-400 transition-colors"
                             title="Xóa tạm thời"
                           >
@@ -357,7 +373,9 @@ export const JobsList = () => {
         message={confirmConfig.message}
         variant={confirmConfig.variant}
         onConfirm={confirmConfig.action}
-        onCancel={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+        onCancel={() =>
+          setConfirmConfig((prev) => ({ ...prev, isOpen: false }))
+        }
       />
     </div>
   );
