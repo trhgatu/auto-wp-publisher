@@ -71,16 +71,22 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
         <Table containerClassName="h-full">
           <Table.Header>
             <Table.Row>
-              <Table.HeadCell className="min-w-[400px]">
+              <Table.HeadCell className="min-w-[300px]">
                 Tên sản phẩm
               </Table.HeadCell>
-              <Table.HeadCell className="w-40 text-center">
+              <Table.HeadCell className="w-32 text-center">
                 Mã hàng
               </Table.HeadCell>
-              <Table.HeadCell className="w-40 text-center">
+              <Table.HeadCell className="w-32 text-center">
+                Dòng xe
+              </Table.HeadCell>
+              <Table.HeadCell className="w-32 text-center">
+                Chất liệu
+              </Table.HeadCell>
+              <Table.HeadCell className="w-28 text-center">
                 Giá bán
               </Table.HeadCell>
-              <Table.HeadCell className="w-48 text-center">
+              <Table.HeadCell className="w-40 text-center">
                 Danh mục Excel
               </Table.HeadCell>
             </Table.Row>
@@ -88,15 +94,27 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
           <Table.Body>
             {data.map((row, idx) => (
               <Table.Row key={idx}>
-                <Table.Cell className="font-medium">{row.title}</Table.Cell>
-                <Table.Cell className="text-center font-mono text-xs text-gray-500">
+                <Table.Cell className="font-medium text-xs">
+                  {row.title}
+                </Table.Cell>
+                <Table.Cell className="text-center font-mono text-[10px] text-gray-500">
                   {row.partNumbers}
                 </Table.Cell>
-                <Table.Cell className="text-center font-bold text-red-600">
+                <Table.Cell className="text-center">
+                  <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400">
+                    {row.carModels || "-"}
+                  </span>
+                </Table.Cell>
+                <Table.Cell className="text-center">
+                  <span className="text-[10px] text-gray-500">
+                    {row.material || "-"}
+                  </span>
+                </Table.Cell>
+                <Table.Cell className="text-center font-bold text-red-600 text-xs">
                   {row.price}
                 </Table.Cell>
                 <Table.Cell className="text-center">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                     {row.category}
                   </span>
                 </Table.Cell>

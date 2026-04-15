@@ -26,11 +26,10 @@ export class CategoriesController {
     @Body()
     mappings: {
       excelValue: string;
-      wpCategoryId: number;
+      wpCategoryId: string;
       wpCategoryName: string;
     }[],
   ) {
-    // Upsert each mapping
     for (const mapping of mappings) {
       await this.prisma.categoryMapping.upsert({
         where: { excelValue: mapping.excelValue },

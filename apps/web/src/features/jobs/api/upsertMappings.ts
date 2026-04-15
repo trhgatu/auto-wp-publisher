@@ -2,7 +2,7 @@ import { axios } from "@/lib/axios";
 
 export interface CategoryMappingDto {
   excelValue: string;
-  wpCategoryId: number;
+  wpCategoryId: string;
   wpCategoryName: string;
 }
 
