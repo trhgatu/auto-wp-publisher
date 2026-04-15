@@ -24,6 +24,7 @@ import { permanentlyDeleteJob } from "../api/permanentlyDeleteJob";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNotification } from "../../../hooks/useNotification";
 import { ConfirmModal } from "../../../components/shared/ConfirmModal";
+import { Table } from "../../../components/shared/Table";
 
 export const JobsList = () => {
   const [isImportModalOpen, setImportModalOpen] = useState(false);
@@ -204,7 +205,6 @@ export const JobsList = () => {
       </div>
 
       <div className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col min-h-[400px] relative transition-colors">
-        {/* Loading Overlay */}
         {(isLoading || isFetching) && (
           <div className="absolute inset-0 z-20 bg-white/40 dark:bg-slate-900/40 flex items-center justify-center animate-in fade-in duration-300">
             <div className="bg-white dark:bg-slate-800 p-3 rounded-full border border-slate-100 dark:border-slate-700">
@@ -226,29 +226,36 @@ export const JobsList = () => {
               </p>
             </div>
           ) : (
-            <table className="w-full text-sm text-left border-collapse">
-              <thead className="text-[10px] uppercase bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 sticky top-0 z-10 border-b border-slate-200 dark:border-slate-800 transition-colors">
-                <tr>
-                  <th className="px-6 py-3 font-black w-14">Ảnh</th>
-                  <th className="px-6 py-3 font-black">Tên Sản Phẩm</th>
-                  <th className="px-6 py-3 font-black">SKU</th>
-                  <th className="px-6 py-3 font-black text-right">Giá bán</th>
-                  <th className="px-6 py-3 font-black text-center">
+            <Table>
+              <Table.Header className="text-[10px] uppercase">
+                <Table.Row>
+                  <Table.HeadCell className="px-6 py-3 font-black w-14">
+                    Ảnh
+                  </Table.HeadCell>
+                  <Table.HeadCell className="px-6 py-3 font-black">
+                    Tên Sản Phẩm
+                  </Table.HeadCell>
+                  <Table.HeadCell className="px-6 py-3 font-black">
+                    SKU
+                  </Table.HeadCell>
+                  <Table.HeadCell className="px-6 py-3 font-black text-right">
+                    Giá bán
+                  </Table.HeadCell>
+                  <Table.HeadCell className="px-6 py-3 font-black text-center">
                     Trạng thái
-                  </th>
-                  <th className="px-6 py-3 font-black">Cập nhật lúc</th>
-                  <th className="px-6 py-3 font-black text-center w-28 whitespace-nowrap">
+                  </Table.HeadCell>
+                  <Table.HeadCell className="px-6 py-3 font-black">
+                    Cập nhật lúc
+                  </Table.HeadCell>
+                  <Table.HeadCell className="px-6 py-3 font-black text-center w-28 whitespace-nowrap">
                     Hành động
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  </Table.HeadCell>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
                 {jobs.map((job) => (
-                  <tr
-                    key={job.id}
-                    className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group"
-                  >
-                    <td className="px-6 py-3">
+                  <Table.Row key={job.id}>
+                    <Table.Cell className="px-6 py-3">
                       <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden flex-shrink-0 transition-colors">
                         {job.imageUrl ? (
                           <img
@@ -261,8 +268,8 @@ export const JobsList = () => {
                           </div>
                         )}
                       </div>
-                    </td>
-                    <td className="px-6 py-3 max-w-[180px] xl:max-w-[250px]">
+                    </Table.Cell>
+                    <Table.Cell className="px-6 py-3 max-w-[180px] xl:max-w-[250px]">
                       <Link
                         to={`/jobs/${job.id}`}
                         className="font-bold text-slate-700 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-500 transition-colors block truncate uppercase tracking-tight text-xs"
@@ -270,19 +277,19 @@ export const JobsList = () => {
                       >
                         {job.name}
                       </Link>
-                    </td>
-                    <td className="px-6 py-3 text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                    </Table.Cell>
+                    <Table.Cell className="px-6 py-3 text-[10px] font-bold text-slate-400 dark:text-slate-500">
                       {job.sku || "-"}
-                    </td>
-                    <td className="px-6 py-3 text-right font-black text-red-600 dark:text-red-500 text-xs">
+                    </Table.Cell>
+                    <Table.Cell className="px-6 py-3 text-right font-black text-red-600 dark:text-red-500 text-xs">
                       {job.price
                         ? `${Number(job.price).toLocaleString()}đ`
                         : "-"}
-                    </td>
-                    <td className="px-6 py-3 text-center">
+                    </Table.Cell>
+                    <Table.Cell className="px-6 py-3 text-center">
                       <JobStatusBadge status={job.status} />
-                    </td>
-                    <td className="px-6 py-3 text-[10px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                    </Table.Cell>
+                    <Table.Cell className="px-6 py-3 text-[10px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">
                       <div className="flex flex-col">
                         <span className="text-slate-800 dark:text-slate-200">
                           {new Date(job.updatedAt).toLocaleTimeString("vi-VN", {
@@ -295,8 +302,8 @@ export const JobsList = () => {
                           {new Date(job.updatedAt).toLocaleDateString("vi-VN")}
                         </span>
                       </div>
-                    </td>
-                    <td className="px-6 py-3">
+                    </Table.Cell>
+                    <Table.Cell className="px-6 py-3">
                       <div className="flex items-center justify-center gap-2">
                         {onlyTrashed ? (
                           <>
@@ -346,11 +353,11 @@ export const JobsList = () => {
                           </button>
                         )}
                       </div>
-                    </td>
-                  </tr>
+                    </Table.Cell>
+                  </Table.Row>
                 ))}
-              </tbody>
-            </table>
+              </Table.Body>
+            </Table>
           )}
         </div>
 

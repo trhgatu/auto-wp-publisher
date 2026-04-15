@@ -49,7 +49,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
         .filter((c) => c.parent === parentId)
         .forEach((c) => {
           sorted.push({
-            label: depth > 0 ? `${"　".repeat(depth)}↳ ${c.name}` : c.name,
+            label: c.name,
             value: String(c.id),
             depth,
           });
@@ -74,9 +74,15 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
       const mappingsToSave = Object.entries(categoryMapping).map(
         ([excelName, wpId]) => ({
           excelValue: excelName,
-          wpCategoryId: parseInt(wpId, 10),
-          wpCategoryName:
-            wpCategories.find((c) => String(c.id) === wpId)?.name || "N/A",
+          wpCategoryId: wpId,
+          wpCategoryName: wpId
+            .split(",")
+            .map(
+              (id) =>
+                wpCategories.find((c) => String(c.id) === id.trim())?.name ||
+                "N/A",
+            )
+            .join(", "),
         }),
       );
 

@@ -65,24 +65,30 @@ export class WordPressService {
     const authHeader =
       'Basic ' + Buffer.from(`${wpUser}:${wpPass}`).toString('base64');
 
-    // --- Xử lý Category ---
     const categories: { id: number }[] = [];
     if (categoryName) {
-      const isNumeric = /^\d+$/.test(categoryName);
-      let categoryId: number | null = null;
+      const names = categoryName
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => s !== '');
 
-      if (isNumeric) {
-        categoryId = parseInt(categoryName, 10);
-      } else {
-        categoryId = await this.getOrCreateCategoryId(
-          categoryName,
-          wcApiUrl,
-          authHeader,
-        );
-      }
+      for (const name of names) {
+        const isNumeric = /^\d+$/.test(name);
+        let categoryId: number | null = null;
 
-      if (categoryId) {
-        categories.push({ id: categoryId });
+        if (isNumeric) {
+          categoryId = parseInt(name, 10);
+        } else {
+          categoryId = await this.getOrCreateCategoryId(
+            name,
+            wcApiUrl,
+            authHeader,
+          );
+        }
+
+        if (categoryId) {
+          categories.push({ id: categoryId });
+        }
       }
     }
 
@@ -222,8 +228,6 @@ export class WordPressService {
           this.logger.warn(
             `🚀 ID ${existingWpId} hỏng. Đang xóa trắng ID cũ trong DB và tạo bài mới...`,
           );
-
-          // Xóa trắng ID hỏng trong Database để lần sau không bị gọi lại nữa
           try {
             await this.prisma.product.updateMany({
               where: { wpPostId: existingWpId },
@@ -249,7 +253,7 @@ export class WordPressService {
             galleryImageUrls,
             categoryName,
             tags,
-            null, // Force create
+            null,
           );
         }
 
@@ -277,7 +281,6 @@ export class WordPressService {
     } finally {
       const duration = Date.now() - startTime;
 
-      // Save log asynchronously to not block the main process
       this.prisma.apiLog
         .create({
           data: {
@@ -399,7 +402,6 @@ export class WordPressService {
     if (cachedId) return cachedId;
 
     try {
-      // 1. Tìm kiếm category theo name và parent
       const searchUrl = `${apiUrl}/products/categories?search=${encodeURIComponent(name)}&parent=${parentId}`;
       const response = await fetch(searchUrl, {
         headers: { Authorization: auth },
@@ -417,7 +419,6 @@ export class WordPressService {
         }
       }
 
-      // 2. Nếu không tìm thấy, tạo mới dưới parentId
       this.logger.log(`Creating new category: ${name} (Parent: ${parentId})`);
       const createResponse = await fetch(`${apiUrl}/products/categories`, {
         method: 'POST',
@@ -462,7 +463,6 @@ export class WordPressService {
       }
 
       try {
-        // 1. Tìm kiếm tag theo name
         const searchUrl = `${apiUrl}/products/tags?search=${encodeURIComponent(name)}`;
         const response = await fetch(searchUrl, {
           headers: { Authorization: auth },
@@ -484,7 +484,6 @@ export class WordPressService {
           }
         }
 
-        // 2. Tạo mới nếu không thấy
         this.logger.log(`Creating new tag: ${name}`);
         const createResponse = await fetch(`${apiUrl}/products/tags`, {
           method: 'POST',

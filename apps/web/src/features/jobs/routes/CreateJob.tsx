@@ -172,7 +172,7 @@ export const CreateJob = () => {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">
-                  Chuyên mục (Category)
+                  Danh mục wordpress
                 </label>
                 <input
                   name="category"

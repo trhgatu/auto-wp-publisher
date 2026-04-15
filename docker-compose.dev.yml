@@ -1,9 +1,37 @@
 services:
+  database:
+    image: postgres:16-alpine
+    container_name: wp-publish-db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin_password
+      POSTGRES_DB: wp_publisher_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - wp-publish-db-data:/var/lib/postgresql/data
+    networks:
+      - wp-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: wp-publish-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - wp-network
+
   api:
     build:
       context: .
       dockerfile: Dockerfile
       target: installer
+    container_name: wp-publish-api
+    restart: always
+    env_file:
+      - .env
     volumes:
       - .:/app:cached
       - /app/node_modules
@@ -15,7 +43,25 @@ services:
       - NODE_ENV=development
       - WATCHPACK_POLLING=true
       - CHOKIDAR_USEPOLLING=true
+      - DATABASE_URL=postgresql://admin:admin_password@database:5432/wp_publisher_db?schema=public
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "3000:3000"
+      - "5555:5555"
+    depends_on:
+      - database
+      - redis
+    networks:
+      - wp-network
     command: >
       sh -c "pnpm install &&
              pnpm -F @repo/database db:generate &&
+             pnpm -F @repo/database db:push &&
              pnpm -F @repo/server dev"
+
+networks:
+  wp-network:
+    driver: bridge
+
+volumes:
+  wp-publish-db-data:

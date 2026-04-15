@@ -1,9 +1,9 @@
-datasource db {
-  provider = "postgresql"
-}
-
 generator client {
   provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
 }
 
 model User {
@@ -16,31 +16,29 @@ model User {
 }
 
 model Product {
-  id          String    @id @default(uuid())
-  name        String
-  description String?   @db.Text
-  rawContent  String?   @db.Text
-  aiContent   String?   @db.Text
-  imageUrl    String?
-  galleryImageUrls String?   @db.Text
-  wpPostId    Int?
-  price       String?
-  sku         String?
-  material    String?
-  carModels   String?
-  shopeeLink  String?
-  lazadaLink  String?
-  tiktokLink  String?
-  videoUrl    String?
-  category    String?
-  tags        String?   @db.Text
-
-  status      JobStatus @default(PENDING)
-  errorLog    String?   @db.Text
-
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
+  id               String    @id @default(uuid())
+  name             String
+  description      String?
+  rawContent       String?
+  aiContent        String?
+  imageUrl         String?
+  galleryImageUrls String?
+  wpPostId         Int?
+  price            String?
+  sku              String?
+  material         String?
+  carModels        String?
+  shopeeLink       String?
+  lazadaLink       String?
+  tiktokLink       String?
+  videoUrl         String?
+  category         String?
+  status           JobStatus @default(PENDING)
+  errorLog         String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  tags             String?
+  deletedAt        DateTime?
 
   @@map("catalog_products")
 }
@@ -48,7 +46,7 @@ model Product {
 model CategoryMapping {
   id             String   @id @default(uuid())
   excelValue     String   @unique
-  wpCategoryId   Int
+  wpCategoryId   String
   wpCategoryName String
   updatedAt      DateTime @updatedAt
 
@@ -56,16 +54,16 @@ model CategoryMapping {
 }
 
 model ApiLog {
-  id             String   @id @default(uuid())
-  method         String
-  endpoint       String
-  requestHeader  String?  @db.Text
-  requestBody    String?  @db.Text
-  responseBody   String?  @db.Text
-  statusCode     Int
-  duration       Int      // in ms
-  errorMessage   String?  @db.Text
-  createdAt      DateTime @default(now())
+  id            String   @id @default(uuid())
+  method        String
+  endpoint      String
+  requestHeader String?
+  requestBody   String?
+  responseBody  String?
+  statusCode    Int
+  duration      Int
+  errorMessage  String?
+  createdAt     DateTime @default(now())
 
   @@map("system_api_logs")
 }
