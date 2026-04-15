@@ -50,12 +50,23 @@ export const MappingStep: React.FC<MappingStepProps> = ({
                 key={excelCat}
                 className="flex items-center gap-6 p-4 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-xl hover:border-red-200 shadow-sm transition-colors"
               >
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
                     Danh mục Excel
                   </p>
-                  <p className="text-base font-semibold text-gray-800 dark:text-slate-100">
+                  <p className="text-base font-semibold text-gray-800 dark:text-slate-100 truncate">
                     {excelCat}
+                  </p>
+                  <p className="text-[10px] text-gray-500 mt-1 line-clamp-2">
+                    {useImportStore
+                      .getState()
+                      .data.filter((d) => d.category === excelCat)
+                      .map((d) => d.carModels)
+                      .filter(
+                        (val, index, self) =>
+                          val && self.indexOf(val) === index,
+                      )
+                      .join(", ") || "Không có thông tin dòng xe"}
                   </p>
                 </div>
 
@@ -65,13 +76,14 @@ export const MappingStep: React.FC<MappingStepProps> = ({
 
                 <div className="flex-1">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
-                    WordPress Category
+                    Danh mục wordpress
                   </p>
                   <SearchableSelect
                     options={categoryOptions}
                     value={categoryMapping[excelCat] || ""}
                     onChange={(val) => setMapping(excelCat, val)}
                     placeholder="Tìm danh mục WP..."
+                    multiple={true}
                   />
                 </div>
               </div>

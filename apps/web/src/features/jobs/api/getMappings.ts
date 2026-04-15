@@ -3,7 +3,7 @@ import { axios } from "@/lib/axios";
 export interface CategoryMapping {
   id: string;
   excelValue: string;
-  wpCategoryId: number;
+  wpCategoryId: string;
   wpCategoryName: string;
 }
 

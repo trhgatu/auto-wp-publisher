@@ -11,16 +11,18 @@ export interface SelectOption {
   label: string;
   value: string;
   icon?: React.ReactNode;
+  depth?: number;
 }
 
 interface SearchableSelectProps {
   options: SelectOption[];
-  value: string;
+  value: string; // Comma-separated if multiple
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
   leftIcon?: React.ReactNode;
   disabled?: boolean;
+  multiple?: boolean;
 }
 
 export const SearchableSelect: React.FC<SearchableSelectProps> = ({
@@ -31,13 +33,22 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   className,
   leftIcon,
   disabled = false,
+  multiple = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const selectedOption = options.find((opt) => opt.value === value);
+  const selectedValues = useMemo(() => {
+    if (!multiple) return [value];
+    return value ? value.split(",").filter(Boolean) : [];
+  }, [value, multiple]);
+
+  const selectedOptions = useMemo(
+    () => options.filter((opt) => selectedValues.includes(opt.value)),
+    [options, selectedValues],
+  );
 
   const filteredOptions = useMemo(() => {
     if (!searchTerm.trim()) return options;
@@ -69,9 +80,19 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   }, [isOpen]);
 
   const handleSelect = (optionValue: string) => {
-    onChange(optionValue);
-    setIsOpen(false);
-    setSearchTerm("");
+    if (multiple) {
+      let newValue: string[];
+      if (selectedValues.includes(optionValue)) {
+        newValue = selectedValues.filter((v) => v !== optionValue);
+      } else {
+        newValue = [...selectedValues, optionValue];
+      }
+      onChange(newValue.join(","));
+    } else {
+      onChange(optionValue);
+      setIsOpen(false);
+      setSearchTerm("");
+    }
   };
 
   return (
@@ -99,9 +120,20 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
               {leftIcon}
             </span>
           )}
-          {selectedOption ? (
-            <span className="font-semibold text-slate-800 dark:text-slate-100 truncate">
-              {selectedOption.label}
+          {selectedOptions.length > 0 ? (
+            <span className="font-semibold text-slate-800 dark:text-slate-100 truncate max-w-[250px]">
+              {multiple ? (
+                <>
+                  {selectedOptions.length > 2
+                    ? `${selectedOptions
+                        .slice(0, 2)
+                        .map((o) => o.label)
+                        .join(", ")} +${selectedOptions.length - 2}`
+                    : selectedOptions.map((o) => o.label).join(", ")}
+                </>
+              ) : (
+                selectedOptions[0].label
+              )}
             </span>
           ) : (
             <span className="text-slate-400 dark:text-slate-500">
@@ -157,18 +189,52 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                   onClick={() => handleSelect(option.value)}
                   className={cn(
                     "flex items-center justify-between w-full px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 group text-left mb-0.5",
-                    option.value === value
+                    selectedValues.includes(option.value)
                       ? "bg-red-600/10 dark:bg-red-500/10 text-red-700 dark:text-red-500"
                       : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200",
                   )}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
+                  <div
+                    className={cn(
+                      "flex items-center gap-2 min-w-0 transition-all duration-200",
+                      (option.depth ?? 0) > 0
+                        ? "text-slate-600 dark:text-slate-300 font-medium"
+                        : "text-slate-900 dark:text-white font-bold",
+                    )}
+                    style={{
+                      paddingLeft:
+                        (option.depth ?? 0) > 0
+                          ? `${(option.depth ?? 0) * 20}px`
+                          : 0,
+                    }}
+                  >
+                    {multiple && (
+                      <div
+                        className={cn(
+                          "w-4 h-4 rounded border flex items-center justify-center mr-1 transition-all",
+                          selectedValues.includes(option.value)
+                            ? "bg-red-600 border-red-600 shadow-sm"
+                            : "border-slate-300 dark:border-slate-600",
+                        )}
+                      >
+                        {selectedValues.includes(option.value) && (
+                          <Check className="w-3 h-3 text-white" />
+                        )}
+                      </div>
+                    )}
+                    {(option.depth ?? 0) > 0 && (
+                      <div className="flex items-center">
+                        <span className="w-3 h-4 border-l-2 border-b-2 border-red-200 dark:border-red-900/50 rounded-bl-lg -mt-2 mr-1.5 opacity-80" />
+                      </div>
+                    )}
                     {option.icon && (
                       <span className="flex-shrink-0">{option.icon}</span>
                     )}
-                    <span className="truncate">{option.label}</span>
+                    <span className="truncate tracking-tight">
+                      {option.label}
+                    </span>
                   </div>
-                  {option.value === value && (
+                  {!multiple && selectedValues.includes(option.value) && (
                     <Check className="w-4 h-4 text-red-600 animate-in zoom-in duration-300" />
                   )}
                 </button>
