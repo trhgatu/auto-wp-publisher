@@ -3,6 +3,7 @@ import { z } from "zod";
 export const ImportProductSchema = z.object({
   title: z.string().min(1, "Tiêu đề không được để trống"),
   sku: z.string().optional(),
+  shortDescription: z.string().optional(),
   baseDescription: z.string().optional(),
   category: z.string().default("Uncategorized"),
   sourceUrl: z.string().url().optional(),

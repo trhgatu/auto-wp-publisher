@@ -8,11 +8,13 @@ export class Product extends AggregateRoot<IEvent> {
     public readonly id: ProductId,
     public name: string,
     public description: string | null,
+    public shortDescription: string | null,
     public rawContent: string | null,
     public aiContent: string | null,
     public imageUrl: string | null,
     public galleryImageUrls: string | null,
     public wpPostId: number | null,
+    public wpUrl: string | null,
     public price: string | null,
     public sku: string | null,
     public material: string | null,
@@ -36,6 +38,7 @@ export class Product extends AggregateRoot<IEvent> {
     id: string,
     name: string,
     description: string | null,
+    shortDescription: string | null = null,
     rawContent: string | null,
     imageUrl: string | null,
     galleryImageUrls: string | null = null,
@@ -54,10 +57,12 @@ export class Product extends AggregateRoot<IEvent> {
       ProductId.create(id),
       name,
       description,
+      shortDescription,
       rawContent,
       null,
       imageUrl,
       galleryImageUrls,
+      null,
       null,
       price,
       sku,
@@ -89,9 +94,10 @@ export class Product extends AggregateRoot<IEvent> {
     this.errorLog = errorMsg;
   }
 
-  markAsCompleted(wpPostId: number, aiContent: string): void {
+  markAsCompleted(wpPostId: number, wpUrl: string, aiContent: string): void {
     this.status = ProductStatus.COMPLETED;
     this.wpPostId = wpPostId;
+    this.wpUrl = wpUrl;
     this.aiContent = aiContent;
   }
 

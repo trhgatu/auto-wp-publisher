@@ -120,7 +120,7 @@ export const ApiHistoryList = () => {
                 Lịch sử API
               </h1>
               <p className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-0.5">
-                phutungoto123.vn • Nhật ký đồng bộ thời gian thực
+                Hệ thống • Nhật ký đồng bộ thời gian thực
               </p>
             </div>
           </div>

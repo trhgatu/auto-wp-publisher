@@ -124,6 +124,19 @@ export function JobDetail() {
             </h1>
           </div>
         </div>
+
+        {job.wpUrl && (
+          <a
+            href={job.wpUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-sm font-bold border border-emerald-100 dark:border-emerald-500/20 transition-all active:scale-95 group"
+          >
+            <Globe className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+            Xem trên website
+            <ExternalLink className="w-3 h-3 opacity-50" />
+          </a>
+        )}
       </div>
 
       {/* 2. SUMMARY STATS */}
@@ -215,9 +228,21 @@ export function JobDetail() {
           <div className="p-8 min-h-[450px]">
             {activeTab === "content" && (
               <div className="animate-in fade-in slide-in-from-left-2 duration-300">
-                {job.description || job.rawContent ? (
-                  <div className="space-y-6">
-                    {/* Render as HTML if it contains tags, otherwise fallback to text */}
+                {job?.description ||
+                job?.rawContent ||
+                job?.shortDescription ? (
+                  <div className="space-y-8">
+                    {job?.shortDescription && (
+                      <div className="p-5 bg-slate-50/50 dark:bg-slate-800/20 rounded-xl border border-slate-100 dark:border-slate-800/50 relative overflow-hidden group">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-red-600/20 dark:bg-red-500/20" />
+                        <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                          <FileText className="w-3 h-3" /> Mô tả ngắn sản phẩm
+                        </h4>
+                        <div className="text-[13px] text-slate-600 dark:text-slate-400 leading-relaxed italic font-medium">
+                          {job.shortDescription}
+                        </div>
+                      </div>
+                    )}
                     <div
                       className="prose prose-sm max-w-none antialiased
                         dark:prose-invert prose-slate dark:text-slate-300
@@ -320,24 +345,43 @@ export function JobDetail() {
                   icon: Package,
                 },
                 { label: "WP Post ID", value: job.wpPostId, icon: Globe },
+                {
+                  label: "WP Link",
+                  value: job.wpUrl,
+                  icon: ExternalLink,
+                  isLink: true,
+                },
                 { label: "System UUID", value: job.id, mono: true, icon: Tag },
               ].map((item, i) => (
                 <div key={i} className="flex gap-4 group">
                   <div className="mt-0.5 p-1.5 rounded bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-500 group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors">
                     <item.icon className="w-3 h-3" />
                   </div>
-                  <div className="flex flex-col min-w-0">
+                  <div className="flex flex-col min-w-0 flex-1">
                     <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-0.5">
                       {item.label}
                     </span>
-                    <span
-                      className={clsx(
-                        "text-xs font-bold text-slate-700 dark:text-slate-300 truncate",
-                        item.mono && "font-mono opacity-60 text-[9px]",
-                      )}
-                    >
-                      {item.value || "-"}
-                    </span>
+                    {(item as { isLink?: boolean }).isLink && item.value ? (
+                      <a
+                        href={item.value as string}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs font-bold text-red-600 dark:text-red-500 truncate hover:underline flex items-center gap-1"
+                      >
+                        {item.value || "-"}
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      </a>
+                    ) : (
+                      <span
+                        className={clsx(
+                          "text-xs font-bold text-slate-700 dark:text-slate-300 truncate",
+                          (item as { mono?: boolean }).mono &&
+                            "font-mono opacity-60 text-[9px]",
+                        )}
+                      >
+                        {item.value || "-"}
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}

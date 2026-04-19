@@ -51,7 +51,7 @@ export const ImportStepsIndicator: React.FC<ImportStepsIndicatorProps> = ({
                     className={cn(
                       "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all border-2",
                       isActive
-                        ? "bg-red-600 border-red-600 text-white shadow-lg shadow-red-100"
+                        ? "bg-red-600 border-red-600 text-white"
                         : isPast
                           ? "bg-white border-red-600 text-red-600"
                           : "bg-white border-gray-200 text-gray-400",

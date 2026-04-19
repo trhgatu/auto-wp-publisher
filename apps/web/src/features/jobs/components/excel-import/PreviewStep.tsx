@@ -80,6 +80,9 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
               <Table.HeadCell className="w-32 text-center">
                 Dòng xe
               </Table.HeadCell>
+              <Table.HeadCell className="w-48 text-center">
+                Mô tả ngắn
+              </Table.HeadCell>
               <Table.HeadCell className="w-32 text-center">
                 Chất liệu
               </Table.HeadCell>
@@ -103,6 +106,11 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
                 <Table.Cell className="text-center">
                   <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400">
                     {row.carModels || "-"}
+                  </span>
+                </Table.Cell>
+                <Table.Cell className="text-center">
+                  <span className="text-[10px] text-gray-500 line-clamp-2 max-w-[200px]">
+                    {row.shortDescription || "-"}
                   </span>
                 </Table.Cell>
                 <Table.Cell className="text-center">
