@@ -25,7 +25,7 @@ export const Sidebar = () => {
     <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-colors">
       <div className="h-20 flex items-center px-6 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center shadow-lg shadow-red-500/20">
+          <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center">
             <Package className="w-6 h-6 text-white" />
           </div>
           <div className="flex flex-col">
