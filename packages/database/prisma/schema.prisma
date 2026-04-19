@@ -19,11 +19,13 @@ model Product {
   id               String    @id @default(uuid())
   name             String
   description      String?
+  shortDescription String?
   rawContent       String?
   aiContent        String?
   imageUrl         String?
   galleryImageUrls String?
   wpPostId         Int?
+  wpUrl            String?
   price            String?
   sku              String?
   material         String?

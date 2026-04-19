@@ -24,14 +24,19 @@ export const Sidebar = () => {
   return (
     <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-colors">
       <div className="h-20 flex items-center px-6 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors">
-        <img
-          src="https://phutungoto123.vn/wp-content/uploads/2025/07/logo-Huynh-Phat-1.png"
-          alt="Logo Huynh Phat"
-          className="h-12 w-auto object-contain dark:invert"
-          onError={(e) => {
-            e.currentTarget.style.display = "none";
-          }}
-        />
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center shadow-lg shadow-red-500/20">
+            <Package className="w-6 h-6 text-white" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-lg font-black tracking-tighter text-slate-900 dark:text-white leading-none">
+              AUTO WP
+            </span>
+            <span className="text-[10px] font-bold text-red-600 dark:text-red-500 tracking-widest uppercase mt-0.5">
+              Publisher
+            </span>
+          </div>
+        </div>
       </div>
 
       <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto bg-white dark:bg-slate-900 transition-colors">

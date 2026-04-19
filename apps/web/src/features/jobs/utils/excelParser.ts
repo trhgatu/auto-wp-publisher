@@ -75,6 +75,12 @@ export const parseExcelFile = (
       price: price,
       carModels: model || getVal(["dòng xe", "models", "loại xe"]),
       carDetail: getVal(["chi tiết dòng xe", "chi tiết", "detail", "mô tả"]),
+      shortDescription: getVal([
+        "mô tả ngắn",
+        "short description",
+        "tóm tắt",
+        "short_description",
+      ]),
       partNumbers: partNumber,
       video: getVal(["video", "youtube", "clip"]),
       shopeeLink: getVal(["shopee", "link shopee"]),
