@@ -37,11 +37,16 @@ export class WordPressService {
     galleryImageUrls: string | null = null,
     categoryName: string | null = null,
     tags: string | null = null,
+    shortDescription: string | null = null,
     existingWpId: number | null = null,
   ): Promise<{ id: number; permalink: string }> {
-    const wpBaseUrl = (
-      process.env.WP_API_URL || 'https://phutungoto123.vn/wp-json'
-    ).replace(/\/$/, '');
+    const wpBaseUrl = process.env.WP_API_URL?.replace(/\/$/, '');
+
+    if (!wpBaseUrl) {
+      throw new Error(
+        'Config missing: WP_API_URL must be defined in environment',
+      );
+    }
 
     const wcApiUrl = `${wpBaseUrl.replace(/\/wp\/v2\/?$/, '')}/wc/v3`;
     const isUpdate = existingWpId != null;
@@ -53,8 +58,14 @@ export class WordPressService {
       `Final WooCommerce Endpoint: ${endpoint} (Method: ${isUpdate ? 'PUT' : 'POST'})`,
     );
 
-    const wpUser = process.env.WP_USERNAME || 'phutungoto123';
+    const wpUser = process.env.WP_USERNAME;
     const wpPass = process.env.WP_APP_PASSWORD;
+
+    if (!wpUser) {
+      throw new Error(
+        'Config missing: WP_USERNAME must be defined in environment',
+      );
+    }
 
     if (!wpPass) {
       throw new Error(
@@ -91,8 +102,6 @@ export class WordPressService {
         }
       }
     }
-
-    // --- Xử lý Tags ---
     const wpTags: { id: number }[] = [];
     if (tags) {
       const tagIds = await this.getOrCreateTags(tags, wcApiUrl, authHeader);
@@ -111,6 +120,7 @@ export class WordPressService {
       description:
         rawContent ||
         `<p>Sản phẩm "${title}" vừa được khởi tạo bởi Auto Publisher.</p>`,
+      short_description: shortDescription || '',
       attributes: [
         ...(material
           ? [
@@ -215,7 +225,6 @@ export class WordPressService {
         );
         const errorData = JSON.parse(responseBodyText) as WooCommerceResponse;
 
-        // --- Sửa lỗi 400/404 ID không hợp lệ ---
         const isInvalidIdError =
           errorData.code === 'woocommerce_rest_product_invalid_id' ||
           errorData.code === 'woocommerce_rest_product_invalid_object_id' ||
@@ -253,6 +262,7 @@ export class WordPressService {
             galleryImageUrls,
             categoryName,
             tags,
+            shortDescription,
             null,
           );
         }
@@ -310,12 +320,22 @@ export class WordPressService {
   }
 
   async getCategories(): Promise<WCCategory[]> {
-    const wpBaseUrl = (
-      process.env.WP_API_URL || 'https://phutungoto123.vn/wp-json'
-    ).replace(/\/$/, '');
+    const wpBaseUrl = process.env.WP_API_URL?.replace(/\/$/, '');
+
+    if (!wpBaseUrl) {
+      throw new Error(
+        'Config missing: WP_API_URL must be defined in environment',
+      );
+    }
     const wcApiUrl = `${wpBaseUrl.replace(/\/wp\/v2\/?$/, '')}/wc/v3`;
-    const wpUser = process.env.WP_USERNAME || 'phutungoto123';
+    const wpUser = process.env.WP_USERNAME;
     const wpPass = process.env.WP_APP_PASSWORD;
+
+    if (!wpUser) {
+      throw new Error(
+        'Config missing: WP_USERNAME must be defined in environment',
+      );
+    }
 
     if (!wpPass) {
       throw new Error('Hệ thống thiếu WP_APP_PASSWORD.');

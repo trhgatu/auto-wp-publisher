@@ -6,9 +6,7 @@ import { useNotification } from "../hooks/useNotification";
 
 import { SocketContext } from "../contexts/SocketContext";
 
-const SOCKET_URL =
-  import.meta.env.VITE_API_URL?.replace("/api/v1", "") ||
-  "http://localhost:3000";
+const SOCKET_URL = import.meta.env.VITE_API_URL?.replace("/api/v1", "");
 
 export const SocketProvider: React.FC<{ children: ReactNode }> = ({
   children,
@@ -20,17 +18,21 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({
 
   useEffect(() => {
     const newSocket = io(SOCKET_URL, {
-      transports: ["websocket"],
       reconnectionAttempts: 5,
     });
 
     newSocket.on("connect", () => {
-      console.log("Connected to WebSocket");
+      console.log("✅ WebSocket connected to:", SOCKET_URL);
       setIsConnected(true);
     });
 
-    newSocket.on("disconnect", () => {
-      console.log("Disconnected from WebSocket");
+    newSocket.on("connect_error", (err) => {
+      console.error("❌ WebSocket connection error:", err.message);
+      setIsConnected(false);
+    });
+
+    newSocket.on("disconnect", (reason) => {
+      console.log("🔌 WebSocket disconnected:", reason);
       setIsConnected(false);
     });
 

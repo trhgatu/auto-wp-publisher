@@ -59,6 +59,7 @@ export class PublisherProcessor extends WorkerHost {
         product.galleryImageUrls,
         product.category,
         product.tags,
+        product.shortDescription,
         product.wpPostId,
       );
 
@@ -68,6 +69,7 @@ export class PublisherProcessor extends WorkerHost {
 
       product.markAsCompleted(
         wpProduct.id,
+        wpProduct.permalink,
         `<p>Sản phẩm đã lên sóng: <a href="${wpProduct.permalink}" target="_blank">${wpProduct.permalink}</a></p>`,
       );
       await this.productRepo.save(product);

@@ -6,6 +6,10 @@ export interface JobItem {
   status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
   errorLog: string | null;
   imageUrl?: string | null;
+  description?: string | null;
+  shortDescription?: string | null;
+  rawContent?: string | null;
+  wpUrl?: string | null;
   price?: string | null;
   sku?: string | null;
   createdAt: string;

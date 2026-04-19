@@ -12,9 +12,11 @@ export interface JobDetail {
   price?: string | null;
   sku?: string | null;
   description?: string | null;
+  shortDescription?: string | null;
   rawContent?: string | null;
   aiContent?: string | null;
   material?: string | null;
+  wpUrl?: string | null;
   carModels?: string | null;
   wpPostId?: string | null;
   shopeeLink?: string | null;
