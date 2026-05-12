@@ -72,35 +72,47 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
 
     try {
       const mappingsToSave = Object.entries(categoryMapping).map(
-        ([excelName, wpId]) => ({
-          excelValue: excelName,
-          wpCategoryId: wpId,
-          wpCategoryName: wpId
-            .split(",")
-            .map(
-              (id) =>
-                wpCategories.find((c) => String(c.id) === id.trim())?.name ||
-                "N/A",
-            )
-            .join(", "),
-        }),
+        ([excelName, wpId]) => {
+          const wpIdStr = Array.isArray(wpId) ? wpId.join(",") : String(wpId);
+          return {
+            excelValue: excelName,
+            wpCategoryId: wpIdStr,
+            wpCategoryName: wpIdStr
+              .split(",")
+              .map(
+                (id) =>
+                  wpCategories.find((c) => String(c.id) === id.trim())?.name ||
+                  "N/A",
+              )
+              .join(", "),
+          };
+        },
       );
 
       if (mappingsToSave.length > 0) {
         await upsertMappingsMutation.mutateAsync(mappingsToSave);
       }
 
-      const finalData = data.map((product) => ({
-        ...product,
-        category: categoryMapping[product.category || ""] || product.category,
-      }));
+      const finalData = data.map((product) => {
+        const mappedCat = categoryMapping[product.category || ""];
+        const finalCat = Array.isArray(mappedCat)
+          ? mappedCat.join(",")
+          : mappedCat || product.category;
+
+        return {
+          ...product,
+          category: finalCat,
+        };
+      });
 
       await mutation.mutateAsync(finalData);
       onSuccess?.();
       onClose();
     } catch (err) {
-      console.error(err);
-      alert("Lỗi khi kết thúc Import.");
+      console.error("Import error:", err);
+      const errorMsg =
+        err instanceof Error ? err.message : "Đã có lỗi xảy ra không xác định.";
+      alert(`Lỗi khi kết thúc Import: ${errorMsg}`);
     }
   };
 

@@ -8,6 +8,7 @@ import { GetDashboardStatsQuery } from '../../../application/queries/get-dashboa
 import { TrashProductCommand } from '../../../application/commands/trash-product/trash-product.command';
 import { RestoreProductCommand } from '../../../application/commands/restore-product/restore-product.command';
 import { PermanentlyDeleteProductCommand } from '../../../application/commands/permanently-delete-product/permanently-delete-product.command';
+import { GetProductsBySkusQuery } from '../../../application/queries/get-products-by-skus/get-products-by-skus.query';
 import { ProductResponse } from '../responses/product.response';
 import {
   ImportProductSchema,
@@ -55,6 +56,14 @@ export class ProductsController {
   @Get('dashboard/stats')
   async getDashboardStats(): Promise<unknown> {
     return this.queryBus.execute(new GetDashboardStatsQuery());
+  }
+
+  @Get('check-skus')
+  async checkSkus(@Query('skus') skus: string): Promise<unknown> {
+    if (!skus) return [];
+    return this.queryBus.execute<GetProductsBySkusQuery, unknown>(
+      new GetProductsBySkusQuery(skus.split(',').map((s) => s.trim())),
+    );
   }
 
   @Get(':id')

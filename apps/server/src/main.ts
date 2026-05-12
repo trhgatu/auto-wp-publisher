@@ -8,7 +8,6 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
-  // Mở CORS cho Frontend Vite (hoặc bất kỳ Domain hợp lệ nào khác sau này)
   app.enableCors({
     origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -25,10 +24,10 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3000;
 
-  await app.listen(port, '0.0.0.0');
+  await app.listen(port, '::');
 
   logger.log(
-    `🚀 8eyond Infinite Backend is running on: http://0.0.0.0:${port}/${globalPrefix}`,
+    `🚀 8eyond Infinite Backend is running on: http://localhost:${port}/${globalPrefix}`,
   );
 }
 

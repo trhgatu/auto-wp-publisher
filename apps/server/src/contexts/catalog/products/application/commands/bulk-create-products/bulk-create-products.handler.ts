@@ -7,8 +7,10 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { PublishProductJobData } from '../../../../jobs/publisher.processor';
 import { Logger } from '@nestjs/common';
-import { ImportProductDto } from '@repo/shared';
-import { ProductStatus } from '../../../domain/types/product-status.enum';
+import { ImportProductDto as BaseDto } from '@repo/shared';
+
+// Patch: Extend the DTO to include shortDescription if the shared package hasn't been rebuilt in Docker
+type ImportProductDto = BaseDto & { shortDescription?: string; sku?: string };
 
 @CommandHandler(BulkCreateProductsCommand)
 export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProductsCommand> {
@@ -27,81 +29,41 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
   ) {}
 
   async execute(command: BulkCreateProductsCommand): Promise<string[]> {
-    const products = command.data;
+    const products = command.data as ImportProductDto[];
     const ids: string[] = [];
 
     for (const data of products) {
       try {
         const htmlContent = this.generateWPContent(data);
-        let product: Product | null = null;
-        if (data.partNumbers) {
-          product = await this.productRepository.findBySku(
-            String(data.partNumbers),
-          );
-        }
-        if (!product) {
-          product = await this.productRepository.findByName(data.title);
-        }
+        const productId = this.uuidGenerator.generate();
 
-        let productId: string;
+        this.logger.log(
+          `Importing product: ${data.title} (SKU: ${data.sku || data.partNumbers || 'N/A'})`,
+        );
 
-        if (product) {
-          this.logger.log(
-            `Syncing existing product: ${data.title} (SKU: ${data.partNumbers || 'N/A'})`,
-          );
-          productId = product.id.value;
-          product.name = data.title;
-          product.rawContent = htmlContent;
-          product.imageUrl = data.imageUrl || product.imageUrl;
-          product.galleryImageUrls =
-            data.galleryImageUrls || product.galleryImageUrls;
-          product.price = data.price ? String(data.price) : product.price;
-          product.sku = data.partNumbers
-            ? String(data.partNumbers)
-            : product.sku;
-          product.material = data.material
-            ? String(data.material)
-            : product.material;
-          product.carModels = data.carModels
-            ? String(data.carModels)
-            : product.carModels;
-          product.shopeeLink = data.shopeeLink
-            ? String(data.shopeeLink)
-            : product.shopeeLink;
-          product.lazadaLink = data.lazadaLink
-            ? String(data.lazadaLink)
-            : product.lazadaLink;
-          product.tiktokLink = data.tiktokLink
-            ? String(data.tiktokLink)
-            : product.tiktokLink;
-          product.videoUrl = data.video ? String(data.video) : product.videoUrl;
-          product.category = data.category ?? product.category;
-          product.tags = data.tags ?? product.tags;
-          product.status = ProductStatus.PENDING;
-        } else {
-          productId = this.uuidGenerator.generate();
-          this.logger.log(`Importing new product: ${data.title}`);
+        const product = Product.create(
+          productId,
+          data.title,
+          null, // description field not used for now
+          data.shortDescription || null,
+          htmlContent, // rawContent
+          data.imageUrl || null,
+          data.galleryImageUrls || null,
+          data.price ? String(data.price) : null,
+          data.sku || data.partNumbers
+            ? String(data.sku || data.partNumbers)
+            : null,
+          data.material ? String(data.material) : null,
+          data.carModels ? String(data.carModels) : null,
+          data.shopeeLink ? String(data.shopeeLink) : null,
+          data.lazadaLink ? String(data.lazadaLink) : null,
+          data.tiktokLink ? String(data.tiktokLink) : null,
+          data.video ? String(data.video) : null,
+          data.category ?? null,
+          data.tags ?? null,
+        );
 
-          product = Product.create(
-            productId,
-            data.title,
-            null,
-            htmlContent,
-            data.imageUrl || null,
-            data.galleryImageUrls || null,
-            data.price ? String(data.price) : null,
-            data.partNumbers ? String(data.partNumbers) : null,
-            data.material ? String(data.material) : null,
-            data.carModels ? String(data.carModels) : null,
-            data.shopeeLink ? String(data.shopeeLink) : null,
-            data.lazadaLink ? String(data.lazadaLink) : null,
-            data.tiktokLink ? String(data.tiktokLink) : null,
-            data.video ? String(data.video) : null,
-            data.category ?? null,
-            data.tags ?? null,
-          );
-          product.markAsCreated();
-        }
+        product.markAsCreated();
 
         await this.productRepository.save(product);
         this.publisher.mergeObjectContext(product).commit();
