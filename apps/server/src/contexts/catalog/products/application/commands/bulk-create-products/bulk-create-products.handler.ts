@@ -7,8 +7,10 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { PublishProductJobData } from '../../../../jobs/publisher.processor';
 import { Logger } from '@nestjs/common';
-import { ImportProductDto } from '@repo/shared';
-import { ProductStatus } from '../../../domain/types/product-status.enum';
+import { ImportProductDto as BaseDto } from '@repo/shared';
+
+// Patch: Extend the DTO to include shortDescription if the shared package hasn't been rebuilt in Docker
+type ImportProductDto = BaseDto & { shortDescription?: string; sku?: string };
 
 @CommandHandler(BulkCreateProductsCommand)
 export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProductsCommand> {
@@ -27,17 +29,22 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
   ) {}
 
   async execute(command: BulkCreateProductsCommand): Promise<string[]> {
-    const products = command.data;
+    const products = command.data as ImportProductDto[];
     const ids: string[] = [];
+    const newlyCreatedIds = new Set<string>();
 
     for (const data of products) {
       try {
         const htmlContent = this.generateWPContent(data);
         let product: Product | null = null;
-        if (data.partNumbers) {
-          product = await this.productRepository.findBySku(
-            String(data.partNumbers),
-          );
+
+        // 1. Try to find existing product by SKU or Title
+        const skuToSearch =
+          data.sku || data.partNumbers
+            ? String(data.sku || data.partNumbers)
+            : null;
+        if (skuToSearch) {
+          product = await this.productRepository.findBySku(skuToSearch);
         }
         if (!product) {
           product = await this.productRepository.findByName(data.title);
@@ -45,52 +52,45 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
 
         let productId: string;
 
-        if (product) {
-          this.logger.log(
-            `Syncing existing product: ${data.title} (SKU: ${data.partNumbers || 'N/A'})`,
-          );
+        // 2. Only Sync if the product existed BEFORE this import batch
+        if (product && !newlyCreatedIds.has(product.id.value)) {
+          this.logger.log(`Updating existing product: ${data.title}`);
           productId = product.id.value;
           product.name = data.title;
+          product.shortDescription =
+            data.shortDescription || product.shortDescription;
           product.rawContent = htmlContent;
           product.imageUrl = data.imageUrl || product.imageUrl;
           product.galleryImageUrls =
             data.galleryImageUrls || product.galleryImageUrls;
           product.price = data.price ? String(data.price) : product.price;
-          product.sku = data.partNumbers
-            ? String(data.partNumbers)
-            : product.sku;
-          product.material = data.material
-            ? String(data.material)
-            : product.material;
-          product.carModels = data.carModels
-            ? String(data.carModels)
-            : product.carModels;
-          product.shopeeLink = data.shopeeLink
-            ? String(data.shopeeLink)
-            : product.shopeeLink;
-          product.lazadaLink = data.lazadaLink
-            ? String(data.lazadaLink)
-            : product.lazadaLink;
-          product.tiktokLink = data.tiktokLink
-            ? String(data.tiktokLink)
-            : product.tiktokLink;
-          product.videoUrl = data.video ? String(data.video) : product.videoUrl;
+          product.sku = skuToSearch || product.sku;
+          product.material = data.material || product.material;
+          product.carModels = data.carModels || product.carModels;
+          product.shopeeLink = data.shopeeLink || product.shopeeLink;
+          product.lazadaLink = data.lazadaLink || product.lazadaLink;
+          product.tiktokLink = data.tiktokLink || product.tiktokLink;
+          product.videoUrl = data.video || product.videoUrl;
           product.category = data.category ?? product.category;
           product.tags = data.tags ?? product.tags;
-          product.status = ProductStatus.PENDING;
+          // Set to pending so it gets re-published to WP with new links
+          product.markAsPending();
         } else {
+          // 3. Create new product
           productId = this.uuidGenerator.generate();
           this.logger.log(`Importing new product: ${data.title}`);
+          newlyCreatedIds.add(productId);
 
           product = Product.create(
             productId,
             data.title,
             null,
+            data.shortDescription || null,
             htmlContent,
             data.imageUrl || null,
             data.galleryImageUrls || null,
             data.price ? String(data.price) : null,
-            data.partNumbers ? String(data.partNumbers) : null,
+            skuToSearch,
             data.material ? String(data.material) : null,
             data.carModels ? String(data.carModels) : null,
             data.shopeeLink ? String(data.shopeeLink) : null,

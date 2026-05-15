@@ -8,6 +8,7 @@ import {
 import { useShallow } from "zustand/react/shallow";
 import type { WCCategory } from "../../api/getWpCategories";
 import type { CategoryMapping } from "../../api/getMappings";
+import { checkSkus, type ExistingProductInfo } from "../../api/checkSkus";
 
 interface PreviewStepProps {
   wpCategories: WCCategory[];
@@ -26,6 +27,16 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
       setFullMapping: state.setFullMapping,
     })),
   );
+  const [existingProducts, setExistingProducts] = React.useState<
+    ExistingProductInfo[]
+  >([]);
+
+  React.useEffect(() => {
+    const skus = data.map((p) => p.partNumbers).filter(Boolean) as string[];
+    if (skus.length > 0) {
+      checkSkus(skus).then(setExistingProducts);
+    }
+  }, [data]);
 
   const uniqueExcelCategories = useImportStore(
     useShallow((state) => selectUniqueExcelCategories(state)),
@@ -92,6 +103,9 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
               <Table.HeadCell className="w-40 text-center">
                 Danh mục Excel
               </Table.HeadCell>
+              <Table.HeadCell className="w-32 text-center">
+                Trạng thái
+              </Table.HeadCell>
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -119,12 +133,25 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
                   </span>
                 </Table.Cell>
                 <Table.Cell className="text-center font-bold text-red-600 text-xs">
-                  {row.price}
+                  {row.price && !isNaN(Number(row.price))
+                    ? Number(row.price).toLocaleString("vi-VN")
+                    : row.price || "-"}
                 </Table.Cell>
                 <Table.Cell className="text-center">
                   <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                     {row.category}
                   </span>
+                </Table.Cell>
+                <Table.Cell className="text-center">
+                  {existingProducts.find((ex) => ex.sku === row.partNumbers) ? (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20">
+                      Đã có (Update)
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400 border border-green-100 dark:border-green-500/20">
+                      Mới (Import)
+                    </span>
+                  )}
                 </Table.Cell>
               </Table.Row>
             ))}

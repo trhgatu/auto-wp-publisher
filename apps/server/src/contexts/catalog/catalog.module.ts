@@ -14,6 +14,7 @@ import { WordPressService } from './jobs/services/wordpress.service';
 import { ApiLogsModule } from './api-logs/api-logs.module';
 import { EventsGateway } from './jobs/events.gateway';
 import { GetDashboardStatsHandler } from './products/application/queries/get-dashboard-stats/get-dashboard-stats.handler';
+import { GetProductsBySkusHandler } from './products/application/queries/get-products-by-skus/get-products-by-skus.handler';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { GetDashboardStatsHandler } from './products/application/queries/get-das
     GetProductsHandler,
     GetProductByIdHandler,
     GetDashboardStatsHandler,
+    GetProductsBySkusHandler,
     {
       provide: ProductRepository,
       useClass: PrismaProductRepository,

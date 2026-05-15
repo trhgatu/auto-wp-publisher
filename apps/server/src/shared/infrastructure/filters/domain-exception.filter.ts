@@ -4,6 +4,7 @@ import {
   Catch,
   ArgumentsHost,
   HttpStatus,
+  HttpException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { IdentityAlreadyExistsException } from '../../../contexts/iam/users/domain/exceptions/identity-already-exists.exception';
@@ -29,6 +30,9 @@ export class DomainExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
+    // Log the actual error for debugging
+    console.error('Unhandled Exception:', exception);
+
     const exceptionConfig = this.exceptionMap.get(exception.constructor.name);
     if (exceptionConfig) {
       return response.status(exceptionConfig.status).json({
@@ -38,9 +42,21 @@ export class DomainExceptionFilter implements ExceptionFilter {
       });
     }
 
+    // Handle NestJS Built-in HttpExceptions (like NotFoundException)
+    if (exception instanceof HttpException) {
+      const status = exception.getStatus();
+      const res = exception.getResponse();
+      return response
+        .status(status)
+        .json(
+          typeof res === 'object' ? res : { statusCode: status, message: res },
+        );
+    }
+
     return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       statusCode: 500,
-      message: 'An unexpected error occurred in this reality',
+      message:
+        exception.message || 'An unexpected error occurred in this reality',
       error: 'Internal Server Error',
     });
   }

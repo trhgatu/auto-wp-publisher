@@ -23,6 +23,20 @@ export class WordPressService {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  private isValidUrl(url: string | null | undefined): boolean {
+    if (!url) return false;
+    const trimmed = url.trim();
+    if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+      return false;
+    }
+    try {
+      new URL(trimmed);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async publishProduct(
     title: string,
     rawContent: string | null,
@@ -184,12 +198,15 @@ export class WordPressService {
           : []),
       ],
       images: [
-        ...(imageUrl ? [{ src: imageUrl }] : []),
+        ...(imageUrl && this.isValidUrl(imageUrl)
+          ? [{ src: imageUrl.trim() }]
+          : []),
         ...(galleryImageUrls
           ? galleryImageUrls
               .split(',')
-              .map((url) => ({ src: url.trim() }))
-              .filter((img) => img.src !== '')
+              .map((url) => url.trim())
+              .filter((url) => url !== '' && this.isValidUrl(url))
+              .map((url) => ({ src: url }))
           : []),
       ],
       status: 'publish',
