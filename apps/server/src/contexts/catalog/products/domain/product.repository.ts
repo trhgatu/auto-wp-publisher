@@ -6,5 +6,6 @@ export abstract class ProductRepository {
   abstract findById(id: ProductId): Promise<Product | null>;
   abstract findBySku(sku: string): Promise<Product | null>;
   abstract findByName(name: string): Promise<Product | null>;
+  abstract findBySkus(skus: string[]): Promise<Product[]>;
   abstract delete(id: ProductId): Promise<void>;
 }

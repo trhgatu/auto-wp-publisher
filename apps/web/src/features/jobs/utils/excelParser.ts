@@ -1,10 +1,16 @@
 import * as XLSX from "xlsx";
 import type { ImportProductDto } from "@repo/shared";
 
+const cleanPrice = (val: string) => {
+  if (!val) return "";
+  return val.replace(/[.,\sđđ]/g, "");
+};
+
 export const parseExcelFile = (
-  bstr: string | ArrayBuffer,
+  data: string | ArrayBuffer,
+  isCsv: boolean = false,
 ): ImportProductDto[] => {
-  const wb = XLSX.read(bstr, { type: "binary" });
+  const wb = XLSX.read(data, { type: isCsv ? "string" : "binary" });
   const wsname = wb.SheetNames[0];
   const ws = wb.Sheets[wsname];
   const rawData = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws);
@@ -18,6 +24,13 @@ export const parseExcelFile = (
     if (keys.length < 2) return null;
 
     const findKey = (possibleNames: string[]) => {
+      const lowerKeys = keys.map((k) => k.toLowerCase());
+
+      for (const name of possibleNames) {
+        const idx = lowerKeys.indexOf(name.toLowerCase());
+        if (idx !== -1) return keys[idx];
+      }
+
       return keys.find((k) =>
         possibleNames.some((name) =>
           k.toLowerCase().includes(name.toLowerCase()),
@@ -28,6 +41,13 @@ export const parseExcelFile = (
     const getVal = (possibleNames: string[]) => {
       const key = findKey(possibleNames);
       return key ? String(row[key]) : "";
+    };
+
+    const getUrlVal = (possibleNames: string[]) => {
+      const val = getVal(possibleNames).trim();
+      if (!val) return "";
+      if (!val.toLowerCase().startsWith("http")) return "";
+      return val;
     };
 
     let titleKey = findKey([
@@ -57,9 +77,10 @@ export const parseExcelFile = (
 
     const brand = getVal(["hãng xe", "hãng", "brand", "hiệu"]);
     const model = getVal(["dòng xe", "model", "models", "loại xe"]);
-    const partNumber = getVal(["mã phụ tùng", "mã hàng", "mã", "sku", "part"]);
-    const explicitTags = getVal(["thẻ", "tags", "tag", "nhãn"]);
-    const price = getVal(["giá bán", "giá", "price", "đơn giá", "số tiền"]);
+    const partNumber = getVal(["mã phụ tùng", "mã hàng", "sku"]);
+    const priceStr = getVal(["giá bán", "giá niêm yết", "đơn giá"]);
+
+    const price = priceStr.length < 15 ? cleanPrice(priceStr) : "";
 
     const category = brand || "Chưa phân loại";
 
@@ -73,6 +94,7 @@ export const parseExcelFile = (
       dimensions: getVal(["kích thước", "dimensions", "size"]),
       material: getVal(["chất liệu", "material", "vật liệu"]),
       price: price,
+      sku: partNumber,
       carModels: model || getVal(["dòng xe", "models", "loại xe"]),
       carDetail: getVal(["chi tiết dòng xe", "chi tiết", "detail", "mô tả"]),
       shortDescription: getVal([
@@ -82,11 +104,11 @@ export const parseExcelFile = (
         "short_description",
       ]),
       partNumbers: partNumber,
-      video: getVal(["video", "youtube", "clip"]),
-      shopeeLink: getVal(["shopee", "link shopee"]),
-      lazadaLink: getVal(["lzd", "lazada", "link lazada"]),
-      tiktokLink: getVal(["tiktok", "link tiktok"]),
-      imageUrl: getVal([
+      video: getUrlVal(["video", "youtube", "clip"]),
+      shopeeLink: getUrlVal(["shopee", "link shopee"]),
+      lazadaLink: getUrlVal(["lzd", "lazada", "link lazada"]),
+      tiktokLink: getUrlVal(["tiktok", "link tiktok"]),
+      imageUrl: getUrlVal([
         "ảnh đại diện",
         "ảnh chính",
         "ảnh",
@@ -100,9 +122,13 @@ export const parseExcelFile = (
         "gallery",
         "images",
         "danh sách ảnh",
-      ]),
+      ])
+        .split(",")
+        .map((u) => u.trim())
+        .filter((u) => u.toLowerCase().startsWith("http"))
+        .join(","),
       category: category,
-      tags: explicitTags || smartTags,
+      tags: smartTags,
     };
   });
 

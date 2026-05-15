@@ -11,8 +11,11 @@ import {
   Undo2,
   Trash,
   Globe,
+  Download,
 } from "lucide-react";
 import { useJobs } from "../hooks/useJobs";
+import { getJobs } from "../api/getJobs";
+import { exportProductsToExcel } from "../utils/excelExporter";
 import { JobStatusBadge } from "../components/JobStatusBadge";
 import { ExcelImportModal } from "../components/ExcelImportModal";
 import { JobsFilter } from "../components/JobsFilter";
@@ -100,6 +103,31 @@ export const JobsList = () => {
     });
   };
 
+  const handleExport = async () => {
+    try {
+      // Fetch all matching products (high limit)
+      const allData = await getJobs({
+        limit: 1000,
+        status: statusFilter || undefined,
+        search: debouncedSearch || undefined,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+        onlyTrashed,
+      });
+
+      if (allData.items.length === 0) {
+        notify("Thông báo", "Không có dữ liệu để xuất", "info");
+        return;
+      }
+
+      exportProductsToExcel(allData.items);
+      notify("Thành công", "Đã xuất file Excel", "success");
+    } catch (err) {
+      console.error(err);
+      notify("Lỗi", "Không thể xuất file Excel", "error");
+    }
+  };
+
   const jobs = data?.items || [];
   const total = data?.total || 0;
 
@@ -148,7 +176,7 @@ export const JobsList = () => {
                   leftIcon={<FileSpreadsheet className="w-4 h-4" />}
                   className="bg-red-600 hover:bg-red-700 text-white border-none font-bold px-5 h-10 shadow-none transition-all active:scale-95"
                 >
-                  Import Excel
+                  Import Excel / GS
                 </Button>
 
                 <Link to="/create">
@@ -159,6 +187,15 @@ export const JobsList = () => {
                     Thêm mới
                   </Button>
                 </Link>
+
+                <Button
+                  onClick={handleExport}
+                  variant="outline"
+                  leftIcon={<Download className="w-4 h-4" />}
+                  className="text-slate-600 border-slate-200 hover:bg-slate-50 font-bold h-10 shadow-none transition-all active:scale-95"
+                >
+                  Xuất Excel
+                </Button>
               </>
             )}
           </div>
@@ -281,9 +318,9 @@ export const JobsList = () => {
                       {job.sku || "-"}
                     </Table.Cell>
                     <Table.Cell className="px-6 py-3 text-right font-black text-red-600 dark:text-red-500 text-xs">
-                      {job.price
-                        ? `${Number(job.price).toLocaleString()}đ`
-                        : "-"}
+                      {job.price && !isNaN(Number(job.price))
+                        ? `${Number(job.price).toLocaleString("vi-VN")}đ`
+                        : job.price || "-"}
                     </Table.Cell>
                     <Table.Cell className="px-6 py-3 text-center">
                       <JobStatusBadge status={job.status} />

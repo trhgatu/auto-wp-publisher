@@ -98,6 +98,14 @@ export class PrismaProductRepository implements ProductRepository {
     return this.mapToDomain(raw);
   }
 
+  async findBySkus(skus: string[]): Promise<Product[]> {
+    const raws = await this.prisma.product.findMany({
+      where: { sku: { in: skus } },
+    });
+
+    return raws.map((raw) => this.mapToDomain(raw));
+  }
+
   async delete(id: ProductId): Promise<void> {
     await this.prisma.product.delete({
       where: { id: id.value },
