@@ -101,6 +101,11 @@ export class Product extends AggregateRoot<IEvent> {
     this.aiContent = aiContent;
   }
 
+  markAsPending(): void {
+    this.status = ProductStatus.PENDING;
+    this.errorLog = null;
+  }
+
   trash(): void {
     if (!this.deletedAt) {
       this.deletedAt = new Date();

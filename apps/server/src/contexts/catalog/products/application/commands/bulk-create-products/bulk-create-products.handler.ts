@@ -31,39 +31,77 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
   async execute(command: BulkCreateProductsCommand): Promise<string[]> {
     const products = command.data as ImportProductDto[];
     const ids: string[] = [];
+    const newlyCreatedIds = new Set<string>();
 
     for (const data of products) {
       try {
         const htmlContent = this.generateWPContent(data);
-        const productId = this.uuidGenerator.generate();
+        let product: Product | null = null;
 
-        this.logger.log(
-          `Importing product: ${data.title} (SKU: ${data.sku || data.partNumbers || 'N/A'})`,
-        );
-
-        const product = Product.create(
-          productId,
-          data.title,
-          null, // description field not used for now
-          data.shortDescription || null,
-          htmlContent, // rawContent
-          data.imageUrl || null,
-          data.galleryImageUrls || null,
-          data.price ? String(data.price) : null,
+        // 1. Try to find existing product by SKU or Title
+        const skuToSearch =
           data.sku || data.partNumbers
             ? String(data.sku || data.partNumbers)
-            : null,
-          data.material ? String(data.material) : null,
-          data.carModels ? String(data.carModels) : null,
-          data.shopeeLink ? String(data.shopeeLink) : null,
-          data.lazadaLink ? String(data.lazadaLink) : null,
-          data.tiktokLink ? String(data.tiktokLink) : null,
-          data.video ? String(data.video) : null,
-          data.category ?? null,
-          data.tags ?? null,
-        );
+            : null;
+        if (skuToSearch) {
+          product = await this.productRepository.findBySku(skuToSearch);
+        }
+        if (!product) {
+          product = await this.productRepository.findByName(data.title);
+        }
 
-        product.markAsCreated();
+        let productId: string;
+
+        // 2. Only Sync if the product existed BEFORE this import batch
+        if (product && !newlyCreatedIds.has(product.id.value)) {
+          this.logger.log(`Updating existing product: ${data.title}`);
+          productId = product.id.value;
+          product.name = data.title;
+          product.shortDescription =
+            data.shortDescription || product.shortDescription;
+          product.rawContent = htmlContent;
+          product.imageUrl = data.imageUrl || product.imageUrl;
+          product.galleryImageUrls =
+            data.galleryImageUrls || product.galleryImageUrls;
+          product.price = data.price ? String(data.price) : product.price;
+          product.sku = skuToSearch || product.sku;
+          product.material = data.material || product.material;
+          product.carModels = data.carModels || product.carModels;
+          product.shopeeLink = data.shopeeLink || product.shopeeLink;
+          product.lazadaLink = data.lazadaLink || product.lazadaLink;
+          product.tiktokLink = data.tiktokLink || product.tiktokLink;
+          product.videoUrl = data.video || product.videoUrl;
+          product.category = data.category ?? product.category;
+          product.tags = data.tags ?? product.tags;
+          // Set to pending so it gets re-published to WP with new links
+          product.markAsPending();
+        } else {
+          // 3. Create new product
+          productId = this.uuidGenerator.generate();
+          this.logger.log(`Importing new product: ${data.title}`);
+          newlyCreatedIds.add(productId);
+
+          product = Product.create(
+            productId,
+            data.title,
+            null,
+            data.shortDescription || null,
+            htmlContent,
+            data.imageUrl || null,
+            data.galleryImageUrls || null,
+            data.price ? String(data.price) : null,
+            skuToSearch,
+            data.material ? String(data.material) : null,
+            data.carModels ? String(data.carModels) : null,
+            data.shopeeLink ? String(data.shopeeLink) : null,
+            data.lazadaLink ? String(data.lazadaLink) : null,
+            data.tiktokLink ? String(data.tiktokLink) : null,
+            data.video ? String(data.video) : null,
+            data.category ?? null,
+            data.tags ?? null,
+          );
+          product.markAsCreated();
+        }
 
         await this.productRepository.save(product);
         this.publisher.mergeObjectContext(product).commit();
