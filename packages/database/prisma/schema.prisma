@@ -35,6 +35,7 @@ model Product {
   tiktokLink       String?
   videoUrl         String?
   category         String?
+  brand            String?
   status           JobStatus @default(PENDING)
   errorLog         String?
   createdAt        DateTime  @default(now())
@@ -53,6 +54,16 @@ model CategoryMapping {
   updatedAt      DateTime @updatedAt
 
   @@map("catalog_category_mappings")
+}
+
+model BrandMapping {
+  id          String   @id @default(uuid())
+  excelValue  String   @unique
+  wpBrandId   String
+  wpBrandName String
+  updatedAt   DateTime @updatedAt
+
+  @@map("catalog_brand_mappings")
 }
 
 model ApiLog {

@@ -24,6 +24,7 @@ export class Product extends AggregateRoot<IEvent> {
     public tiktokLink: string | null,
     public videoUrl: string | null,
     public category: string | null,
+    public brand: string | null,
     public tags: string | null,
     public status: ProductStatus,
     public errorLog: string | null,
@@ -51,6 +52,7 @@ export class Product extends AggregateRoot<IEvent> {
     tiktokLink: string | null = null,
     videoUrl: string | null = null,
     category: string | null = null,
+    brand: string | null = null,
     tags: string | null = null,
   ): Product {
     return new Product(
@@ -73,6 +75,7 @@ export class Product extends AggregateRoot<IEvent> {
       tiktokLink,
       videoUrl,
       category,
+      brand,
       tags,
       ProductStatus.PENDING,
       null,

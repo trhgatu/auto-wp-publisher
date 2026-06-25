@@ -82,6 +82,7 @@ export const JobsList = () => {
     title: string,
     message: string,
     variant: "danger" | "primary" | "emerald" = "primary",
+    successMessage: string = "Thao tác đã được thực hiện",
   ) => {
     setConfirmConfig({
       isOpen: true,
@@ -92,7 +93,7 @@ export const JobsList = () => {
         try {
           await action();
           queryClient.invalidateQueries({ queryKey: ["jobs"] });
-          notify("Thành công", "Thao tác đã được thực hiện", "success");
+          notify("Thành công", successMessage, "success");
         } catch (err) {
           console.error(err);
           notify("Lỗi", "Không thể thực hiện thao tác", "error");
@@ -350,6 +351,7 @@ export const JobsList = () => {
                                   "Khôi phục sản phẩm",
                                   "Bạn có chắc chắn muốn đưa sản phẩm này trở lại kho hàng?",
                                   "emerald",
+                                  "Đã khôi phục sản phẩm thành công",
                                 )
                               }
                               className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20 transition-colors"
@@ -364,6 +366,7 @@ export const JobsList = () => {
                                   "Xóa vĩnh viễn",
                                   "Sản phẩm này sẽ bị xóa khỏi hệ thống hoàn toàn và không thể khôi phục. Bạn chắc chứ?",
                                   "danger",
+                                  "Đã xóa vĩnh viễn sản phẩm",
                                 )
                               }
                               className="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20 transition-colors"
@@ -392,6 +395,7 @@ export const JobsList = () => {
                                   "Bỏ vào thùng rác",
                                   "Sản phẩm sẽ được chuyển vào khu vực rác. Bạn có thể khôi phục sau này.",
                                   "danger",
+                                  "Đã chuyển sản phẩm vào thùng rác",
                                 )
                               }
                               className="p-1.5 rounded-lg bg-slate-50 text-slate-500 hover:bg-rose-50 hover:text-rose-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-rose-500/10 dark:hover:text-rose-400 transition-colors"

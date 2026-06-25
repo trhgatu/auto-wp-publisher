@@ -51,6 +51,7 @@ export class WordPressService {
     galleryImageUrls: string | null = null,
     categoryName: string | null = null,
     tags: string | null = null,
+    brand: string | null = null,
     shortDescription: string | null = null,
     existingWpId: number | null = null,
   ): Promise<{ id: number; permalink: string }> {
@@ -124,12 +125,36 @@ export class WordPressService {
       }
     }
 
+    const wpBrands: { id: number }[] = [];
+    if (brand) {
+      const names = brand
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => s !== '');
+
+      for (const name of names) {
+        const isNumeric = /^\d+$/.test(name);
+        let brandId: number | null = null;
+
+        if (isNumeric) {
+          brandId = parseInt(name, 10);
+        } else {
+          brandId = await this.getOrCreateBrandId(name, wcApiUrl, authHeader);
+        }
+
+        if (brandId) {
+          wpBrands.push({ id: brandId });
+        }
+      }
+    }
+
     const numericPrice = price ? price.replace(/[^0-9]/g, '') : '';
     const requestBody = {
       name: title,
       type: 'simple',
       regular_price: numericPrice,
       categories: categories,
+      brands: wpBrands,
       tags: wpTags,
       description:
         rawContent ||
@@ -240,15 +265,24 @@ export class WordPressService {
         this.logger.error(
           `WooCommerce API Error [${statusCode}]: ${responseBodyText}`,
         );
-        const errorData = JSON.parse(responseBodyText) as WooCommerceResponse;
+        let errorData: WooCommerceResponse = {};
+        try {
+          errorData = JSON.parse(responseBodyText) as WooCommerceResponse;
+        } catch {
+          this.logger.warn(
+            `Không thể parse JSON từ phản hồi lỗi của WooCommerce: ${responseBodyText}`,
+          );
+        }
 
         const isInvalidIdError =
           errorData.code === 'woocommerce_rest_product_invalid_id' ||
           errorData.code === 'woocommerce_rest_product_invalid_object_id' ||
-          (statusCode === 404 &&
-            errorData.code === 'woocommerce_rest_product_not_found') ||
+          statusCode === 404 ||
+          errorData.code === 'woocommerce_rest_product_not_found' ||
           errorData.message?.toLowerCase().includes('id không hợp lệ') ||
-          errorData.message?.toLowerCase().includes('invalid id');
+          errorData.message?.toLowerCase().includes('invalid id') ||
+          errorData.message?.toLowerCase().includes('không tồn tại') ||
+          errorData.message?.toLowerCase().includes('not found');
 
         if (isUpdate && isInvalidIdError) {
           this.logger.warn(
@@ -279,6 +313,7 @@ export class WordPressService {
             galleryImageUrls,
             categoryName,
             tags,
+            brand,
             shortDescription,
             null,
           );
@@ -399,8 +434,123 @@ export class WordPressService {
     return allCategories;
   }
 
+  async getBrands(): Promise<WCCategory[]> {
+    const wpBaseUrl = process.env.WP_API_URL?.replace(/\/$/, '');
+
+    if (!wpBaseUrl) {
+      throw new Error(
+        'Config missing: WP_API_URL must be defined in environment',
+      );
+    }
+    const wcApiUrl = `${wpBaseUrl.replace(/\/wp\/v2\/?$/, '')}/wc/v3`;
+    const wpUser = process.env.WP_USERNAME;
+    const wpPass = process.env.WP_APP_PASSWORD;
+
+    if (!wpUser) {
+      throw new Error(
+        'Config missing: WP_USERNAME must be defined in environment',
+      );
+    }
+
+    if (!wpPass) {
+      throw new Error('Hệ thống thiếu WP_APP_PASSWORD.');
+    }
+
+    const authHeader =
+      'Basic ' + Buffer.from(`${wpUser}:${wpPass}`).toString('base64');
+
+    const allBrands: WCCategory[] = [];
+    let page = 1;
+    let hasMore = true;
+
+    while (hasMore) {
+      const url = `${wcApiUrl}/products/brands?per_page=100&page=${page}&hide_empty=false`;
+      try {
+        const response = await fetch(url, {
+          headers: { Authorization: authHeader },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch brands: ${response.statusText}`);
+        }
+
+        const brands = (await response.json()) as WCCategory[];
+        allBrands.push(...brands);
+
+        const totalPages = parseInt(
+          response.headers.get('X-WP-TotalPages') || '0',
+          10,
+        );
+        if (page >= totalPages || brands.length < 100) {
+          hasMore = false;
+        } else {
+          page++;
+        }
+      } catch (err) {
+        this.logger.error(`Error fetching brands page ${page}: ${String(err)}`);
+        hasMore = false;
+      }
+    }
+
+    return allBrands;
+  }
+
   private categoryCache: Map<string, number> = new Map();
   private tagCache: Map<string, number> = new Map();
+  private brandCache: Map<string, number> = new Map();
+
+  private async getOrCreateBrandId(
+    name: string,
+    apiUrl: string,
+    auth: string,
+  ): Promise<number | null> {
+    const cacheKey = name.toLowerCase();
+    const cachedId = this.brandCache.get(cacheKey);
+    if (cachedId) return cachedId;
+
+    try {
+      const searchUrl = `${apiUrl}/products/brands?search=${encodeURIComponent(name)}`;
+      const response = await fetch(searchUrl, {
+        headers: { Authorization: auth },
+      });
+
+      if (response.ok) {
+        const brands = (await response.json()) as {
+          id: number;
+          name: string;
+        }[];
+        const exactMatch = brands.find(
+          (b) => b.name.toLowerCase() === name.toLowerCase(),
+        );
+
+        if (exactMatch) {
+          this.brandCache.set(cacheKey, exactMatch.id);
+          return exactMatch.id;
+        }
+      }
+
+      this.logger.log(`Creating new brand: ${name}`);
+      const createResponse = await fetch(`${apiUrl}/products/brands`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: auth,
+        },
+        body: JSON.stringify({ name }),
+      });
+
+      if (createResponse.ok) {
+        const newBrand = (await createResponse.json()) as { id: number };
+        this.brandCache.set(cacheKey, newBrand.id);
+        return newBrand.id;
+      }
+
+      return null;
+    } catch (err) {
+      this.logger.error(`Error getOrCreateBrandId ${name}: ${String(err)}`);
+      return null;
+    }
+  }
 
   private async getOrCreateCategoryId(
     path: string,

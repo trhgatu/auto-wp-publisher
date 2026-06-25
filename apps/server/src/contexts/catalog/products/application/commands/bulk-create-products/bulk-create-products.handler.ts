@@ -9,7 +9,6 @@ import { PublishProductJobData } from '../../../../jobs/publisher.processor';
 import { Logger } from '@nestjs/common';
 import { ImportProductDto as BaseDto } from '@repo/shared';
 
-// Patch: Extend the DTO to include shortDescription if the shared package hasn't been rebuilt in Docker
 type ImportProductDto = BaseDto & { shortDescription?: string; sku?: string };
 
 @CommandHandler(BulkCreateProductsCommand)
@@ -38,7 +37,6 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
         const htmlContent = this.generateWPContent(data);
         let product: Product | null = null;
 
-        // 1. Try to find existing product by SKU or Title
         const skuToSearch =
           data.sku || data.partNumbers
             ? String(data.sku || data.partNumbers)
@@ -52,7 +50,6 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
 
         let productId: string;
 
-        // 2. Only Sync if the product existed BEFORE this import batch
         if (product && !newlyCreatedIds.has(product.id.value)) {
           this.logger.log(`Updating existing product: ${data.title}`);
           productId = product.id.value;
@@ -72,6 +69,7 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
           product.tiktokLink = data.tiktokLink || product.tiktokLink;
           product.videoUrl = data.video || product.videoUrl;
           product.category = data.category ?? product.category;
+          product.brand = data.brand ?? product.brand;
           product.tags = data.tags ?? product.tags;
           // Set to pending so it gets re-published to WP with new links
           product.markAsPending();
@@ -98,6 +96,7 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
             data.tiktokLink ? String(data.tiktokLink) : null,
             data.video ? String(data.video) : null,
             data.category ?? null,
+            data.brand ?? null,
             data.tags ?? null,
           );
           product.markAsCreated();

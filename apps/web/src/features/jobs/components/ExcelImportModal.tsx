@@ -6,9 +6,13 @@ import {
   useMappings,
   useUpsertMappings,
 } from "../hooks/useCategories";
+import {
+  useBrands,
+  useBrandMappings,
+  useUpsertBrandMappings,
+} from "../hooks/useBrands";
 import { useImportStore } from "../hooks/useImportStore";
 
-// Sub-components
 import { ImportStepsIndicator } from "./excel-import/ImportStepsIndicator";
 import { UploadStep } from "./excel-import/UploadStep";
 import { PreviewStep } from "./excel-import/PreviewStep";
@@ -26,13 +30,16 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
   onSuccess,
 }) => {
   // Store
-  const { step, data, categoryMapping, reset } = useImportStore();
+  const { step, data, categoryMapping, brandMapping, reset } = useImportStore();
 
   // API Hooks
   const mutation = useBulkCreateJobs();
   const upsertMappingsMutation = useUpsertMappings();
+  const upsertBrandMappingsMutation = useUpsertBrandMappings();
   const { data: wpCategories = [] } = useCategories();
   const { data: savedMappings = [] } = useMappings();
+  const { data: wpBrands = [] } = useBrands();
+  const { data: savedMappingsBrands = [] } = useBrandMappings();
 
   // Reset store when modal closes
   useEffect(() => {
@@ -67,6 +74,13 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
     return sorted;
   }, [wpCategories]);
 
+  const brandOptions = useMemo(() => {
+    return wpBrands.map((b) => ({
+      label: b.name,
+      value: String(b.id),
+    }));
+  }, [wpBrands]);
+
   const handleImport = async () => {
     if (data.length === 0) return;
 
@@ -89,8 +103,30 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
         },
       );
 
+      const brandMappingsToSave = Object.entries(brandMapping).map(
+        ([excelName, wpId]) => {
+          const wpIdStr = Array.isArray(wpId) ? wpId.join(",") : String(wpId);
+          return {
+            excelValue: excelName,
+            wpBrandId: wpIdStr,
+            wpBrandName: wpIdStr
+              .split(",")
+              .map(
+                (id) =>
+                  wpBrands.find((b) => String(b.id) === id.trim())?.name ||
+                  "N/A",
+              )
+              .join(", "),
+          };
+        },
+      );
+
       if (mappingsToSave.length > 0) {
         await upsertMappingsMutation.mutateAsync(mappingsToSave);
+      }
+
+      if (brandMappingsToSave.length > 0) {
+        await upsertBrandMappingsMutation.mutateAsync(brandMappingsToSave);
       }
 
       const finalData = data.map((product) => {
@@ -99,9 +135,15 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
           ? mappedCat.join(",")
           : mappedCat || product.category;
 
+        const mappedBrand = brandMapping[product.category || ""];
+        const finalBrand = Array.isArray(mappedBrand)
+          ? mappedBrand.join(",")
+          : mappedBrand || product.brand;
+
         return {
           ...product,
           category: finalCat,
+          brand: finalBrand,
         };
       });
 
@@ -130,15 +172,20 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
             <PreviewStep
               wpCategories={wpCategories}
               savedMappings={savedMappings}
+              wpBrands={wpBrands}
+              savedMappingsBrands={savedMappingsBrands}
             />
           )}
 
           {step === "mapping" && (
             <MappingStep
               categoryOptions={categoryOptions}
+              brandOptions={brandOptions}
               onImport={handleImport}
               isImporting={
-                mutation.isPending || upsertMappingsMutation.isPending
+                mutation.isPending ||
+                upsertMappingsMutation.isPending ||
+                upsertBrandMappingsMutation.isPending
               }
             />
           )}
