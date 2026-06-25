@@ -35,18 +35,14 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
     for (const data of products) {
       try {
         const htmlContent = this.generateWPContent(data);
-        let product: Product | null = null;
-
+        // 1. Try to find existing product by Name/Title
+        let product: Product | null = await this.productRepository.findByName(
+          data.title,
+        );
         const skuToSearch =
           data.sku || data.partNumbers
             ? String(data.sku || data.partNumbers)
             : null;
-        if (skuToSearch) {
-          product = await this.productRepository.findBySku(skuToSearch);
-        }
-        if (!product) {
-          product = await this.productRepository.findByName(data.title);
-        }
 
         let productId: string;
 
