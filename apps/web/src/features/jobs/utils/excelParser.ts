@@ -51,11 +51,11 @@ export const parseExcelFile = (
     };
 
     let titleKey = findKey([
-      "dòng xe",
       "tên sản phẩm",
       "tên hàng",
       "tiêu đề",
       "chi tiết dòng xe",
+      "dòng xe",
       "product",
       "title",
     ]);
@@ -75,16 +75,18 @@ export const parseExcelFile = (
 
     if (!title || String(title).trim() === "") return null;
 
-    const brand = getVal(["hãng xe", "hãng", "brand", "hiệu"]);
+    const carMake = getVal(["hãng xe", "hãng"]);
+    const excelBrand = getVal(["thương hiệu", "brand", "hiệu", "nhãn hiệu"]);
     const model = getVal(["dòng xe", "model", "models", "loại xe"]);
     const partNumber = getVal(["mã phụ tùng", "mã hàng", "sku"]);
     const priceStr = getVal(["giá bán", "giá niêm yết", "đơn giá"]);
 
     const price = priceStr.length < 15 ? cleanPrice(priceStr) : "";
 
-    const category = brand || "Chưa phân loại";
+    const category =
+      getVal(["danh mục", "nhóm hàng"]) || carMake || "Chưa phân loại";
 
-    const smartTags = [brand, model, partNumber]
+    const smartTags = [carMake, model, partNumber]
       .map((t) => (t ? String(t).trim() : ""))
       .filter((t) => t !== "")
       .join(", ");
@@ -128,6 +130,7 @@ export const parseExcelFile = (
         .filter((u) => u.toLowerCase().startsWith("http"))
         .join(","),
       category: category,
+      brand: excelBrand,
       tags: smartTags,
     };
   });

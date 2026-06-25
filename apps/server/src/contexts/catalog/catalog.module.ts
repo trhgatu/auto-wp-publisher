@@ -4,6 +4,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { PublisherProcessor } from './jobs/publisher.processor';
 import { ProductsController } from './products/infrastructure/http/controllers/products.controller';
 import { CategoriesController } from './products/infrastructure/http/controllers/categories.controller';
+import { BrandsController } from './products/infrastructure/http/controllers/brands.controller';
 import { CreateProductHandler } from './products/application/commands/create-product/create-product.handler';
 import { BulkCreateProductsHandler } from './products/application/commands/bulk-create-products/bulk-create-products.handler';
 import { GetProductsHandler } from './products/application/queries/get-products/get-products.handler';
@@ -15,6 +16,9 @@ import { ApiLogsModule } from './api-logs/api-logs.module';
 import { EventsGateway } from './jobs/events.gateway';
 import { GetDashboardStatsHandler } from './products/application/queries/get-dashboard-stats/get-dashboard-stats.handler';
 import { GetProductsBySkusHandler } from './products/application/queries/get-products-by-skus/get-products-by-skus.handler';
+import { TrashProductHandler } from './products/application/commands/trash-product/trash-product.handler';
+import { RestoreProductHandler } from './products/application/commands/restore-product/restore-product.handler';
+import { PermanentlyDeleteProductHandler } from './products/application/commands/permanently-delete-product/permanently-delete-product.handler';
 
 @Module({
   imports: [
@@ -24,7 +28,7 @@ import { GetProductsBySkusHandler } from './products/application/queries/get-pro
       name: 'wp-publisher',
     }),
   ],
-  controllers: [ProductsController, CategoriesController],
+  controllers: [ProductsController, CategoriesController, BrandsController],
   providers: [
     EventsGateway,
     WordPressService,
@@ -34,6 +38,9 @@ import { GetProductsBySkusHandler } from './products/application/queries/get-pro
     GetProductsHandler,
     GetProductByIdHandler,
     GetDashboardStatsHandler,
+    TrashProductHandler,
+    RestoreProductHandler,
+    PermanentlyDeleteProductHandler,
     GetProductsBySkusHandler,
     {
       provide: ProductRepository,

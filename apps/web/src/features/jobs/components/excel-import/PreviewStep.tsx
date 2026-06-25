@@ -8,25 +8,33 @@ import {
 import { useShallow } from "zustand/react/shallow";
 import type { WCCategory } from "../../api/getWpCategories";
 import type { CategoryMapping } from "../../api/getMappings";
+import type { WCBrand } from "../../api/getWpBrands";
+import type { BrandMapping } from "../../api/getBrandMappings";
 import { checkSkus, type ExistingProductInfo } from "../../api/checkSkus";
 
 interface PreviewStepProps {
   wpCategories: WCCategory[];
   savedMappings: CategoryMapping[];
+  wpBrands: WCBrand[];
+  savedMappingsBrands: BrandMapping[];
 }
 
 export const PreviewStep: React.FC<PreviewStepProps> = ({
   wpCategories,
   savedMappings,
+  wpBrands,
+  savedMappingsBrands,
 }) => {
-  const { data, setStep, setData, setFullMapping } = useImportStore(
-    useShallow((state) => ({
-      data: state.data,
-      setStep: state.setStep,
-      setData: state.setData,
-      setFullMapping: state.setFullMapping,
-    })),
-  );
+  const { data, setStep, setData, setFullMapping, setFullBrandMapping } =
+    useImportStore(
+      useShallow((state) => ({
+        data: state.data,
+        setStep: state.setStep,
+        setData: state.setData,
+        setFullMapping: state.setFullMapping,
+        setFullBrandMapping: state.setFullBrandMapping,
+      })),
+    );
   const [existingProducts, setExistingProducts] = React.useState<
     ExistingProductInfo[]
   >([]);
@@ -72,7 +80,49 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
       }
     });
 
+    const nextBrandMapping: Record<string, string> = {};
+    uniqueExcelCategories.forEach((excelCat) => {
+      const saved = savedMappingsBrands.find((m) => m.excelValue === excelCat);
+      if (saved) {
+        nextBrandMapping[excelCat] = String(saved.wpBrandId);
+      } else {
+        const categoryBrands = Array.from(
+          new Set(
+            data
+              .filter((p) => p.category === excelCat && p.brand)
+              .map((p) => p.brand!.trim()),
+          ),
+        );
+
+        const resolvedIds: string[] = [];
+        categoryBrands.forEach((excelBrand) => {
+          const savedBrand = savedMappingsBrands.find(
+            (m) => m.excelValue === excelBrand,
+          );
+          if (savedBrand) {
+            resolvedIds.push(String(savedBrand.wpBrandId));
+          } else {
+            const normalize = (s: string) =>
+              s.toLowerCase().replace(/[^a-z0-9]/g, "");
+            const normalizedExcel = normalize(excelBrand);
+            const match = wpBrands.find(
+              (wp) =>
+                normalize(wp.name) === normalizedExcel ||
+                normalize(wp.name).includes(normalizedExcel) ||
+                normalizedExcel.includes(normalize(wp.name)),
+            );
+            if (match) {
+              resolvedIds.push(String(match.id));
+            }
+          }
+        });
+
+        nextBrandMapping[excelCat] = resolvedIds.join(",");
+      }
+    });
+
     setFullMapping(nextMapping);
+    setFullBrandMapping(nextBrandMapping);
     setStep("mapping");
   };
 
@@ -102,6 +152,9 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
               </Table.HeadCell>
               <Table.HeadCell className="w-40 text-center">
                 Danh mục Excel
+              </Table.HeadCell>
+              <Table.HeadCell className="w-32 text-center">
+                Thương hiệu
               </Table.HeadCell>
               <Table.HeadCell className="w-32 text-center">
                 Trạng thái
@@ -143,6 +196,11 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
                   </span>
                 </Table.Cell>
                 <Table.Cell className="text-center">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-orange-50 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400 border border-orange-100/20">
+                    {row.brand || "-"}
+                  </span>
+                </Table.Cell>
+                <Table.Cell className="text-center">
                   {existingProducts.find((ex) => ex.sku === row.partNumbers) ? (
                     <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20">
                       Đã có (Update)
@@ -174,7 +232,8 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
           onClick={handleNext}
           className="px-6 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-md transition-all flex items-center gap-2"
         >
-          Tiếp theo: Chọn danh mục <ArrowRight className="w-4 h-4" />
+          Tiếp theo: Chọn danh mục & thương hiệu{" "}
+          <ArrowRight className="w-4 h-4" />
         </button>
       </div>
     </>

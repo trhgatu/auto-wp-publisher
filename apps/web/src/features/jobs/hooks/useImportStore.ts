@@ -2,6 +2,8 @@ import { create } from "zustand";
 import type { ImportProductDto } from "@repo/shared";
 import type { WCCategory } from "../api/getWpCategories";
 import type { CategoryMapping } from "../api/getMappings";
+import type { WCBrand } from "../api/getWpBrands";
+import type { BrandMapping } from "../api/getBrandMappings";
 
 type Step = "upload" | "preview" | "mapping";
 
@@ -10,6 +12,7 @@ interface ImportState {
   data: ImportProductDto[];
   isDragging: boolean;
   categoryMapping: Record<string, string>;
+  brandMapping: Record<string, string>;
 
   // Actions
   setStep: (step: Step) => void;
@@ -17,6 +20,8 @@ interface ImportState {
   setIsDragging: (isDragging: boolean) => void;
   setMapping: (excelCat: string, wpId: string) => void;
   setFullMapping: (mapping: Record<string, string>) => void;
+  setBrandMapping: (excelBrand: string, wpId: string) => void;
+  setFullBrandMapping: (mapping: Record<string, string>) => void;
   reset: () => void;
 }
 
@@ -25,6 +30,7 @@ export const useImportStore = create<ImportState>((set) => ({
   data: [],
   isDragging: false,
   categoryMapping: {},
+  brandMapping: {},
 
   setStep: (step) => set({ step }),
   setData: (data) => set({ data }),
@@ -34,12 +40,18 @@ export const useImportStore = create<ImportState>((set) => ({
       categoryMapping: { ...state.categoryMapping, [excelCat]: wpId },
     })),
   setFullMapping: (categoryMapping) => set({ categoryMapping }),
+  setBrandMapping: (excelBrand, wpId) =>
+    set((state) => ({
+      brandMapping: { ...state.brandMapping, [excelBrand]: wpId },
+    })),
+  setFullBrandMapping: (brandMapping) => set({ brandMapping }),
   reset: () =>
     set({
       step: "upload",
       data: [],
       isDragging: false,
       categoryMapping: {},
+      brandMapping: {},
     }),
 }));
 
@@ -49,6 +61,11 @@ export const selectUniqueExcelCategories = (state: ImportState) => {
     .map((d) => d.category || "")
     .filter((c) => c !== "");
   return Array.from(new Set(categories)).sort();
+};
+
+export const selectUniqueExcelBrands = (state: ImportState) => {
+  const brands = state.data.map((d) => d.brand || "").filter((b) => b !== "");
+  return Array.from(new Set(brands)).sort();
 };
 
 export const selectAllMapped = (
@@ -71,6 +88,30 @@ export const selectAllMapped = (
         normalize(cat).includes(normalize(wp.name)),
     );
     const hasSavedMatch = savedMappings.some((m) => m.excelValue === cat);
+    return hasDirectMatch || hasSavedMatch;
+  });
+};
+
+export const selectAllBrandsMapped = (
+  state: ImportState,
+  wpBrands: WCBrand[],
+  savedMappings: BrandMapping[],
+) => {
+  const uniqueBrands = selectUniqueExcelBrands(state);
+  if (uniqueBrands.length === 0) return true; // If no brands in Excel, it's considered mapped
+
+  return uniqueBrands.every((brand) => {
+    const mappingId = state.brandMapping[brand];
+    if (!mappingId) return false;
+
+    const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+    const hasDirectMatch = wpBrands.some(
+      (wp) =>
+        normalize(wp.name).includes(normalize(brand)) ||
+        normalize(brand).includes(normalize(wp.name)),
+    );
+    const hasSavedMatch = savedMappings.some((m) => m.excelValue === brand);
     return hasDirectMatch || hasSavedMatch;
   });
 };
