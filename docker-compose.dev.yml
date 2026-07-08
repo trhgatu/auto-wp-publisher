@@ -14,7 +14,7 @@ services:
     networks:
       - wp-network
 
-  redis:
+  cache:
     image: redis:7-alpine
     container_name: wp-publish-redis
     restart: always
@@ -43,14 +43,15 @@ services:
       - NODE_ENV=development
       - WATCHPACK_POLLING=true
       - CHOKIDAR_USEPOLLING=true
+      - CI=true
       - DATABASE_URL=postgresql://admin:admin_password@database:5432/wp_publisher_db?schema=public
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://cache:6379
     ports:
       - "3000:3000"
       - "5555:5555"
     depends_on:
       - database
-      - redis
+      - cache
     networks:
       - wp-network
     command: >

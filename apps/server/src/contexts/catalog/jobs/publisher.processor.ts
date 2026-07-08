@@ -3,6 +3,7 @@ import { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
 import { ProductRepository } from '../products/domain/product.repository';
 import { WordPressService } from './services/wordpress.service';
+import { GeminiService } from './services/gemini.service';
 import { ProductId } from '../products/domain/value-objects/product-id.vo';
 import { EventsGateway } from './events.gateway';
 
@@ -17,6 +18,7 @@ export class PublisherProcessor extends WorkerHost {
   constructor(
     private readonly productRepo: ProductRepository,
     private readonly wpService: WordPressService,
+    private readonly geminiService: GeminiService,
     private readonly eventsGateway: EventsGateway,
   ) {
     super();
@@ -45,9 +47,32 @@ export class PublisherProcessor extends WorkerHost {
         message: `Đang xử lý bài viết: ${product.name}`,
       });
 
+      this.logger.log(
+        `🤖 Generating AI product description for: ${product.name}`,
+      );
+      const aiDescription = await this.geminiService.generateProductDescription(
+        {
+          title: product.name,
+          sku: product.sku,
+          material: product.material,
+          carModels: product.carModels,
+          shortDescription: product.shortDescription,
+        },
+      );
+
+      const finalDescription = aiDescription || product.rawContent;
+
+      if (aiDescription) {
+        this.logger.log(`✅ AI description generated successfully.`);
+      } else {
+        this.logger.warn(
+          `⚠️ Falling back to default specifications table template.`,
+        );
+      }
+
       const wpProduct = await this.wpService.publishProduct(
         product.name,
-        product.rawContent,
+        finalDescription || '',
         product.price,
         product.material,
         product.carModels,
@@ -71,7 +96,7 @@ export class PublisherProcessor extends WorkerHost {
       product.markAsCompleted(
         wpProduct.id,
         wpProduct.permalink,
-        `<p>Sản phẩm đã lên sóng: <a href="${wpProduct.permalink}" target="_blank">${wpProduct.permalink}</a></p>`,
+        aiDescription || '',
       );
       await this.productRepo.save(product);
 
