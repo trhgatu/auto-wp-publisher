@@ -3,7 +3,7 @@ import { ProductRepository } from '../../domain/product.repository';
 import { Product } from '../../domain/entities/product.entity';
 import { ProductId } from '../../domain/value-objects/product-id.vo';
 import { PrismaService } from '../../../../../shared/infrastructure/prisma/prisma.service';
-import { Product as PrismaProduct, JobStatus } from '@repo/database';
+import { Product as PrismaProduct } from '@repo/database';
 import { ProductStatus } from '../../domain/types/product-status.enum';
 
 @Injectable()
@@ -34,7 +34,7 @@ export class PrismaProductRepository implements ProductRepository {
         category: product.category,
         brand: product.brand,
         tags: product.tags,
-        status: product.status as unknown as JobStatus,
+        status: product.status,
         errorLog: product.errorLog,
         updatedAt: product.updatedAt,
         deletedAt: product.deletedAt,
@@ -61,7 +61,7 @@ export class PrismaProductRepository implements ProductRepository {
         category: product.category,
         brand: product.brand,
         tags: product.tags,
-        status: product.status as unknown as JobStatus,
+        status: product.status,
         errorLog: product.errorLog,
         createdAt: product.createdAt,
         updatedAt: product.updatedAt,

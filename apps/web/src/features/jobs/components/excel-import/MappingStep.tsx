@@ -1,12 +1,11 @@
 import React from "react";
+import { Alert, Select, Button, Card, Row, Col } from "antd";
 import {
-  AlertCircle,
-  ArrowRight,
-  ArrowLeft,
-  Loader2,
-  Check,
-} from "lucide-react";
-import { SearchableSelect } from "../../../../components/shared/SearchableSelect";
+  ArrowRightOutlined,
+  ArrowLeftOutlined,
+  CheckOutlined,
+  InfoCircleOutlined,
+} from "@ant-design/icons";
 import {
   useImportStore,
   selectUniqueExcelCategories,
@@ -40,105 +39,150 @@ export const MappingStep: React.FC<MappingStepProps> = ({
 
   return (
     <>
-      <div className="flex-1 overflow-auto px-12 py-8 bg-gray-50/30">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <div className="bg-red-50/50 p-4 rounded-lg border border-red-100 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
-            <div className="text-sm text-red-800">
-              <p className="font-semibold">Ánh xạ thuộc tính sản phẩm</p>
-              <p>
+      <div className="flex-1 overflow-auto px-10 py-6 bg-slate-50/50 dark:bg-slate-900/10">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <Alert
+            message={
+              <span className="font-bold text-sm text-red-800 dark:text-red-200">
+                Ánh xạ thuộc tính sản phẩm
+              </span>
+            }
+            description={
+              <span className="text-xs text-red-700 dark:text-red-300">
                 Hãy đối chiếu Danh mục và Thương hiệu từ file Excel của bạn sang
                 các giá trị tương ứng trên WordPress.
-              </p>
-            </div>
-          </div>
+              </span>
+            }
+            type="info"
+            showIcon
+            icon={<InfoCircleOutlined className="text-red-600" />}
+            style={{
+              backgroundColor: "rgba(220, 38, 38, 0.05)",
+              border: "1px solid rgba(220, 38, 38, 0.15)",
+              borderRadius: "12px",
+            }}
+          />
 
           {/* CATEGORIES MAPPING SECTION */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-700 dark:text-slate-200 border-l-4 border-red-500 pl-3">
-              Ánh xạ danh mục WordPress
+            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest border-l-4 border-red-500 pl-3">
+              Ánh xạ danh mục & thương hiệu WordPress
             </h3>
+
             {uniqueExcelCategories.map((excelCat) => (
-              <div
+              <Card
                 key={excelCat}
-                className="flex items-center gap-6 p-4 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-xl hover:border-red-200 shadow-sm transition-colors"
+                bordered={false}
+                className="shadow-sm hover:border-red-200 transition-colors"
+                bodyStyle={{ padding: "20px" }}
               >
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
-                    Danh mục Excel
-                  </p>
-                  <p className="text-base font-semibold text-gray-800 dark:text-slate-100 truncate">
-                    {excelCat}
-                  </p>
-                  <p className="text-[10px] text-gray-500 mt-1 line-clamp-2">
-                    {useImportStore
-                      .getState()
-                      .data.filter((d) => d.category === excelCat)
-                      .map((d) => d.carModels)
-                      .filter(
-                        (val, index, self) =>
-                          val && self.indexOf(val) === index,
-                      )
-                      .join(", ") || "Không có thông tin dòng xe"}
-                  </p>
-                </div>
+                <Row gutter={[24, 16]} align="middle">
+                  <Col xs={24} md={8}>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                        Danh mục Excel
+                      </p>
+                      <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 m-0 truncate">
+                        {excelCat}
+                      </h4>
+                      <p className="text-[10px] text-slate-500 mt-2 line-clamp-2 leading-relaxed">
+                        {useImportStore
+                          .getState()
+                          .data.filter((d) => d.category === excelCat)
+                          .map((d) => d.carModels)
+                          .filter(
+                            (val, index, self) =>
+                              val && self.indexOf(val) === index,
+                          )
+                          .join(", ") || "Không có thông tin dòng xe"}
+                      </p>
+                    </div>
+                  </Col>
 
-                <div className="flex-shrink-0 text-gray-300">
-                  <ArrowRight className="w-6 h-6" />
-                </div>
+                  <Col xs={24} md={2} className="text-center hidden md:block">
+                    <ArrowRightOutlined className="text-slate-300 text-lg" />
+                  </Col>
 
-                <div className="flex-1 space-y-4">
-                  <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
-                      Danh mục wordpress
-                    </p>
-                    <SearchableSelect
-                      options={categoryOptions}
-                      value={categoryMapping[excelCat] || ""}
-                      onChange={(val) => setMapping(excelCat, val)}
-                      placeholder="Tìm danh mục WP..."
-                      multiple={true}
-                    />
-                  </div>
+                  <Col xs={24} md={14} className="space-y-4">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                        Danh mục wordpress
+                      </p>
+                      <Select
+                        mode="multiple"
+                        showSearch
+                        optionFilterProp="label"
+                        style={{ width: "100%" }}
+                        placeholder="Chọn danh mục WP..."
+                        value={
+                          categoryMapping[excelCat]
+                            ? typeof categoryMapping[excelCat] === "string"
+                              ? (categoryMapping[excelCat] as string)
+                                  .split(",")
+                                  .filter(Boolean)
+                              : categoryMapping[excelCat]
+                            : []
+                        }
+                        onChange={(val) => setMapping(excelCat, val.join(","))}
+                        options={categoryOptions}
+                      />
+                    </div>
 
-                  <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
-                      Thương hiệu wordpress
-                    </p>
-                    <SearchableSelect
-                      options={brandOptions}
-                      value={brandMapping[excelCat] || ""}
-                      onChange={(val) => setBrandMapping(excelCat, val)}
-                      placeholder="Tìm thương hiệu WP..."
-                      multiple={true}
-                    />
-                  </div>
-                </div>
-              </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                        Thương hiệu wordpress
+                      </p>
+                      <Select
+                        mode="multiple"
+                        showSearch
+                        optionFilterProp="label"
+                        style={{ width: "100%" }}
+                        placeholder="Chọn thương hiệu WP..."
+                        value={
+                          brandMapping[excelCat]
+                            ? typeof brandMapping[excelCat] === "string"
+                              ? (brandMapping[excelCat] as string)
+                                  .split(",")
+                                  .filter(Boolean)
+                              : brandMapping[excelCat]
+                            : []
+                        }
+                        onChange={(val) =>
+                          setBrandMapping(excelCat, val.join(","))
+                        }
+                        options={brandOptions}
+                      />
+                    </div>
+                  </Col>
+                </Row>
+              </Card>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="px-6 py-4 border-t border-gray-100 dark:border-white/5 flex justify-between bg-white dark:bg-transparent">
-        <button
+      <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex justify-between bg-white dark:bg-[#141414]">
+        <Button
           onClick={() => setStep("preview")}
-          className="px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 border border-gray-200 rounded-md flex items-center gap-2 transition-colors"
+          icon={<ArrowLeftOutlined />}
+          size="large"
+          className="font-bold text-xs uppercase tracking-tight"
         >
-          <ArrowLeft className="w-4 h-4" /> Quay lại
-        </button>
-        <button
+          Quay lại
+        </Button>
+
+        <Button
+          type="primary"
+          danger
           onClick={onImport}
           disabled={isImporting}
-          className="px-10 py-2.5 text-base font-semibold text-white bg-red-600 hover:bg-red-700 rounded-md transition-all disabled:opacity-50 flex items-center gap-2"
+          loading={isImporting}
+          icon={<CheckOutlined />}
+          size="large"
+          className="font-bold text-xs uppercase tracking-tight px-10"
         >
-          {isImporting ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <Check className="w-5 h-5" />
-          )}
           XÁC NHẬN & IMPORT
-        </button>
+        </Button>
       </div>
     </>
   );
