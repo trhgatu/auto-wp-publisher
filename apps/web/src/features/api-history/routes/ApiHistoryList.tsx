@@ -13,14 +13,7 @@ import {
   Tag,
   Space,
 } from "antd";
-import {
-  SearchOutlined,
-  HistoryOutlined,
-  CheckCircleOutlined,
-  ThunderboltOutlined,
-  ClockCircleOutlined,
-  CodeOutlined,
-} from "@ant-design/icons";
+import { ClockCircleOutlined, CodeOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useApiLogs } from "../hooks/useApiLogs";
 import type { ApiLogItem } from "../api/getApiLogs";
@@ -187,21 +180,20 @@ export const ApiHistoryList = () => {
       {/* Control Center */}
       <PageHeader
         title="Lịch sử API"
+        description="Theo dõi lịch sử gọi API, phản hồi từ hệ thống và chẩn đoán lỗi truyền thông."
         breadcrumbs={[{ title: "Workspace" }, { title: "Giám sát API" }]}
-        icon={<HistoryOutlined />}
       />
 
       {/* Filters */}
       <Card
-        bordered={false}
-        className="shadow-sm border-t-2 border-red-500 bg-slate-500/5 dark:bg-slate-500/10"
+        bordered={true}
+        className="shadow-sm bg-white dark:bg-[#1F1F1F]"
         bodyStyle={{ padding: "16px 24px" }}
       >
         <Row gutter={[16, 16]} align="middle">
           <Col xs={24} lg={12}>
             <Input
               placeholder="Tìm kiếm theo endpoint hoặc thông điệp lỗi..."
-              prefix={<SearchOutlined className="text-slate-400" />}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               allowClear
@@ -244,49 +236,55 @@ export const ApiHistoryList = () => {
       {/* Stats Cards */}
       <Row gutter={[16, 16]}>
         <Col xs={24} md={8}>
-          <Card bordered={false} className="shadow-sm">
+          <Card
+            bordered={true}
+            className="shadow-sm bg-white dark:bg-[#1F1F1F]"
+          >
             <Statistic
               title={
-                <span className="text-xs font-black uppercase text-slate-400">
+                <span className="text-xs font-bold text-[#8C8C8C] uppercase tracking-wider">
                   Tổng yêu cầu
                 </span>
               }
               value={total}
-              prefix={<HistoryOutlined className="text-blue-500 mr-2" />}
-              valueStyle={{ fontWeight: 900 }}
+              valueStyle={{ fontWeight: 700, color: "#262626" }}
             />
           </Card>
         </Col>
         <Col xs={24} md={8}>
-          <Card bordered={false} className="shadow-sm">
+          <Card
+            bordered={true}
+            className="shadow-sm bg-white dark:bg-[#1F1F1F]"
+          >
             <Statistic
               title={
-                <span className="text-xs font-black uppercase text-slate-400">
+                <span className="text-xs font-bold text-[#8C8C8C] uppercase tracking-wider">
                   Tỷ lệ thành công
                 </span>
               }
               value={stats.successRate}
               suffix="%"
-              prefix={<CheckCircleOutlined className="text-emerald-500 mr-2" />}
               valueStyle={{
-                fontWeight: 900,
-                color: stats.successRate > 90 ? "#22c55e" : "#f59e0b",
+                fontWeight: 700,
+                color: stats.successRate > 90 ? "#C62828" : "#262626",
               }}
             />
           </Card>
         </Col>
         <Col xs={24} md={8}>
-          <Card bordered={false} className="shadow-sm">
+          <Card
+            bordered={true}
+            className="shadow-sm bg-white dark:bg-[#1F1F1F]"
+          >
             <Statistic
               title={
-                <span className="text-xs font-black uppercase text-slate-400">
+                <span className="text-xs font-bold text-[#8C8C8C] uppercase tracking-wider">
                   Độ trễ trung bình
                 </span>
               }
               value={stats.avgDuration}
               suffix="ms"
-              prefix={<ThunderboltOutlined className="text-amber-500 mr-2" />}
-              valueStyle={{ fontWeight: 900 }}
+              valueStyle={{ fontWeight: 700, color: "#262626" }}
             />
           </Card>
         </Col>
@@ -294,9 +292,9 @@ export const ApiHistoryList = () => {
 
       {/* Logs Table */}
       <Card
-        bordered={false}
+        bordered={true}
         bodyStyle={{ padding: 0 }}
-        className="shadow-sm overflow-hidden"
+        className="shadow-sm overflow-hidden bg-white dark:bg-[#1F1F1F]"
       >
         <Table
           dataSource={logs}

@@ -32,4 +32,4 @@ EXPOSE 3000
 EXPOSE 5555
 
 # Force sync database (bỏ qua lịch sử migration bị lỗi trên production)
-CMD ["sh", "-c", "cd packages/database && npx prisma db push --accept-data-loss && cd ../.. && node apps/server/dist/main"]
+CMD ["sh", "-c", "cd packages/database && npx prisma db push --accept-data-loss && cd ../.. && node apps/server/dist/src/main"]

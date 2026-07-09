@@ -97,3 +97,13 @@ model AiSetting {
 
   @@map("catalog_ai_settings")
 }
+
+model WpSetting {
+  id          String   @id @default("default")
+  apiUrl      String
+  username    String
+  appPassword String
+  updatedAt   DateTime @updatedAt
+
+  @@map("catalog_wp_settings")
+}

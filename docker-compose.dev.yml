@@ -65,6 +65,7 @@ services:
              pnpm -F @repo/database db:push &&
              pnpm -F @repo/server dev"
 
+
 networks:
   wp-network:
     driver: bridge

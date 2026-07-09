@@ -28,6 +28,7 @@ import {
 import dayjs from "dayjs";
 import { useJobs } from "../hooks/useJobs";
 import { getJobs } from "../api/getJobs";
+import type { JobItem } from "../api/getJobs";
 import { exportProductsToExcel } from "../utils/excelExporter";
 import { JobStatusBadge } from "../components/JobStatusBadge";
 import { ExcelImportModal } from "../components/ExcelImportModal";
@@ -134,14 +135,13 @@ export const JobsList = () => {
       title: "Ảnh",
       dataIndex: "imageUrl",
       key: "imageUrl",
-      width: 80,
+      width: 70,
       render: (url: string) => (
         <Avatar
           shape="square"
-          size={48}
+          size={40}
           src={url}
-          icon={<DatabaseOutlined />}
-          className="border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800"
+          className="border border-[#ECECEC] dark:border-[#303030] bg-[#F6F7FB]"
         />
       ),
     },
@@ -149,11 +149,12 @@ export const JobsList = () => {
       title: "Tên Sản Phẩm",
       dataIndex: "name",
       key: "name",
+      sorter: (a: JobItem, b: JobItem) => a.name.localeCompare(b.name),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (name: string, record: any) => (
         <Link
           to={`/jobs/${record.id}`}
-          className="font-bold text-slate-700 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-500 transition-colors uppercase tracking-tight text-xs"
+          className="font-bold text-[#262626] dark:text-[#E5E5E5] hover:text-[#C62828] dark:hover:text-[#D32F2F] transition-colors text-xs uppercase tracking-tight line-clamp-2"
           title={name}
         >
           {name}
@@ -161,24 +162,15 @@ export const JobsList = () => {
       ),
     },
     {
-      title: "SKU",
-      dataIndex: "sku",
-      key: "sku",
-      width: 150,
-      render: (sku: string) => (
-        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">
-          {sku || "-"}
-        </span>
-      ),
-    },
-    {
       title: "Giá bán",
       dataIndex: "price",
       key: "price",
-      width: 150,
+      width: 120,
       align: "right" as const,
+      sorter: (a: JobItem, b: JobItem) =>
+        Number(a.price || 0) - Number(b.price || 0),
       render: (price: string) => (
-        <span className="font-black text-red-600 dark:text-red-500 text-xs">
+        <span className="font-bold text-[#C62828] text-xs">
           {price && !isNaN(Number(price))
             ? `${Number(price).toLocaleString("vi-VN")}đ`
             : price || "-"}
@@ -189,29 +181,28 @@ export const JobsList = () => {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      width: 130,
+      width: 140,
       align: "center" as const,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (status: any) => <JobStatusBadge status={status} />,
     },
     {
-      title: "Cập nhật lúc",
+      title: "Cập nhật",
       dataIndex: "updatedAt",
       key: "updatedAt",
-      width: 180,
+      width: 150,
+      sorter: (a: JobItem, b: JobItem) =>
+        new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
       render: (date: string) => (
-        <div className="flex flex-col text-[10px] font-bold text-slate-500">
-          <span className="text-slate-800 dark:text-slate-200">
-            {dayjs(date).format("HH:mm:ss")}
-          </span>
-          <span className="opacity-50">{dayjs(date).format("DD/MM/YYYY")}</span>
-        </div>
+        <span className="text-xs text-slate-500 dark:text-slate-400">
+          {dayjs(date).format("HH:mm DD/MM/YYYY")}
+        </span>
       ),
     },
     {
       title: "Hành động",
       key: "actions",
-      width: 130,
+      width: 120,
       align: "center" as const,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (record: any) => (
@@ -404,22 +395,29 @@ export const JobsList = () => {
 
       {/* Table Data */}
       <Card
-        bordered={false}
+        bordered={true}
         bodyStyle={{ padding: 0 }}
-        className="shadow-sm overflow-hidden"
+        className="shadow-sm overflow-hidden bg-white dark:bg-[#1F1F1F]"
       >
         <Table
           dataSource={jobs}
           columns={columns}
           rowKey="id"
           loading={isLoading || isFetching}
+          rowSelection={{
+            type: "checkbox",
+            onChange: (selectedRowKeys) => {
+              console.log("Selected row keys:", selectedRowKeys);
+            },
+          }}
+          sticky
           pagination={{
             current: page,
             pageSize: pageSize,
             total: total,
             onChange: (p) => setPage(p),
             showSizeChanger: false,
-            position: ["bottomCenter"],
+            position: ["bottomRight"],
           }}
         />
       </Card>

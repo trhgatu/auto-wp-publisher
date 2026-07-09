@@ -83,7 +83,7 @@ export const CreateJob = () => {
         />
       )}
 
-      <Card bordered={false} className="shadow-sm">
+      <Card bordered={false} className="shadow-sm border-t-2 border-red-500">
         <Form
           form={form}
           layout="vertical"
