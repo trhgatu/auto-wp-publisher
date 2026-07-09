@@ -1,5 +1,13 @@
-import { Bell, UserCircle, Sun, Moon } from "lucide-react";
+import { Layout, Button, Badge, Avatar } from "antd";
+import {
+  SunOutlined,
+  MoonOutlined,
+  BellOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { useTheme } from "../../hooks/useTheme";
+
+const { Header: AntdHeader } = Layout;
 
 export const Header = () => {
   const { theme, setTheme } = useTheme();
@@ -11,9 +19,23 @@ export const Header = () => {
       window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   return (
-    <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 flex items-center justify-between px-8 transition-colors">
-      <div className="flex-1 flex items-center gap-4">
-        <h2 className="text-xs font-bold text-slate-400 dark:text-slate-500 hidden sm:block uppercase tracking-widest">
+    <AntdHeader
+      style={{
+        padding: "0 32px",
+        background: "var(--antd-color-bg-container)",
+        borderBottom: "1px solid rgba(5, 5, 5, 0.06)",
+        height: 64,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "between",
+        position: "sticky",
+        top: 0,
+        zIndex: 40,
+      }}
+      className="dark:bg-slate-900 dark:border-slate-800 transition-colors"
+    >
+      <div className="flex-grow flex items-center">
+        <h2 className="text-xs font-bold text-slate-400 dark:text-slate-500 hidden sm:block uppercase tracking-widest m-0">
           Workspace /{" "}
           <span className="text-slate-800 dark:text-slate-200">
             Auto WP Publisher
@@ -22,24 +44,36 @@ export const Header = () => {
       </div>
 
       <div className="flex items-center gap-4">
-        <button
+        <Button
+          type="text"
+          shape="circle"
+          icon={
+            isDark ? (
+              <SunOutlined className="text-lg" />
+            ) : (
+              <MoonOutlined className="text-lg" />
+            )
+          }
           onClick={() => setTheme(isDark ? "light" : "dark")}
-          className="relative p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all"
-        >
-          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-        </button>
+          className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+        />
 
-        <button className="relative p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-2 right-2.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white dark:ring-slate-900"></span>
-        </button>
+        <Badge dot color="red">
+          <Button
+            type="text"
+            shape="circle"
+            icon={<BellOutlined className="text-lg" />}
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+          />
+        </Badge>
+
         <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2" />
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700">
-            <UserCircle className="w-5 h-5" />
-          </div>
-        </div>
+
+        <Avatar
+          icon={<UserOutlined />}
+          className="cursor-pointer bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+        />
       </div>
-    </header>
+    </AntdHeader>
   );
 };

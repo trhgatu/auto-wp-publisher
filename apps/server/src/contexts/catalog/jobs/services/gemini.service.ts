@@ -1,8 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { PrismaService } from 'src/shared/infrastructure/prisma/prisma.service';
 
 @Injectable()
 export class GeminiService {
   private readonly logger = new Logger(GeminiService.name);
+
+  constructor(private readonly prisma: PrismaService) {}
 
   async generateProductDescription(data: {
     title: string;
@@ -20,24 +23,48 @@ export class GeminiService {
       return null;
     }
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-
-    const prompt = `Bạn là một chuyên gia viết nội dung mô tả sản phẩm tối ưu SEO cho cửa hàng phụ tùng ô tô.
+    let promptTemplate = `Bạn là một chuyên gia viết nội dung mô tả sản phẩm tối ưu SEO cho cửa hàng phụ tùng ô tô.
 Hãy viết một mô tả sản phẩm chi tiết, chuyên nghiệp và cuốn hút bằng ngôn ngữ tiếng Việt (HTML format, chỉ sử dụng các thẻ cơ bản như <p>, <h3>, <ul>, <li>, <strong>, <em>, không viết thẻ <html> hay <body>).
 
 Thông tin sản phẩm:
-- Tên sản phẩm: ${data.title}
-${data.sku ? `- Mã phụ tùng (SKU): ${data.sku}` : ''}
-${data.material ? `- Chất liệu: ${data.material}` : ''}
-${data.carModels ? `- Dòng xe tương thích: ${data.carModels}` : ''}
-${data.dimensions ? `- Kích thước: ${data.dimensions}` : ''}
-${data.shortDescription ? `- Mô tả ngắn/Ghi chú: ${data.shortDescription}` : ''}
+- Tên sản phẩm: {title}
+- Mã phụ tùng (SKU): {sku}
+- Chất liệu: {material}
+- Dòng xe tương thích: {carModels}
+- Kích thước: {dimensions}
+- Mô tả ngắn/Ghi chú: {shortDescription}
 
 Yêu cầu bài viết:
 1. Có tiêu đề và đoạn giới thiệu sản phẩm lôi cuốn.
 2. Nêu bật ưu điểm và đặc tính nổi bật của sản phẩm.
 3. Cung cấp hướng dẫn sử dụng hoặc lưu ý tương thích dòng xe rõ ràng (nếu có).
 4. Định dạng HTML rõ ràng, dễ đọc, không chứa markdown (như \`\`\`html).`;
+
+    let temperature = 0.7;
+    let modelName = 'gemini-2.5-flash';
+
+    try {
+      const setting = await this.prisma.aiSetting.findUnique({
+        where: { id: 'default' },
+      });
+      if (setting) {
+        promptTemplate = setting.systemPrompt;
+        temperature = setting.temperature;
+        modelName = setting.modelName;
+      }
+    } catch (err) {
+      this.logger.error(`Error loading AI Settings: ${String(err)}`);
+    }
+
+    const prompt = promptTemplate
+      .replace(/{title}/g, data.title || '')
+      .replace(/{sku}/g, data.sku || '')
+      .replace(/{material}/g, data.material || '')
+      .replace(/{carModels}/g, data.carModels || '')
+      .replace(/{dimensions}/g, data.dimensions || '')
+      .replace(/{shortDescription}/g, data.shortDescription || '');
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
     try {
       const response = await fetch(url, {
@@ -56,7 +83,7 @@ Yêu cầu bài viết:
             },
           ],
           generationConfig: {
-            temperature: 0.7,
+            temperature: Number(temperature),
             maxOutputTokens: 4096,
           },
         }),
@@ -84,7 +111,6 @@ Yêu cầu bài viết:
         return null;
       }
 
-      // Clean up markdown wrapper if model returns it
       return generatedText
         .replace(/```html/gi, '')
         .replace(/```/g, '')

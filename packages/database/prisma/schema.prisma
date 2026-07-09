@@ -87,3 +87,13 @@ enum JobStatus {
   COMPLETED
   FAILED
 }
+
+model AiSetting {
+  id           String   @id @default("default")
+  systemPrompt String
+  temperature  Float    @default(0.7)
+  modelName    String   @default("gemini-2.5-flash")
+  updatedAt    DateTime @updatedAt
+
+  @@map("catalog_ai_settings")
+}

@@ -37,8 +37,12 @@ services:
       - /app/node_modules
       - /app/apps/server/node_modules
       - /app/apps/server/dist
+      - /app/apps/web/node_modules
       - /app/packages/database/node_modules
       - /app/packages/shared/node_modules
+      - /app/packages/eslint-config/node_modules
+      - /app/packages/typescript-config/node_modules
+      - /app/packages/ui/node_modules
     environment:
       - NODE_ENV=development
       - WATCHPACK_POLLING=true
@@ -56,6 +60,7 @@ services:
       - wp-network
     command: >
       sh -c "pnpm install &&
+             pnpm -F @repo/shared build &&
              pnpm -F @repo/database db:generate &&
              pnpm -F @repo/database db:push &&
              pnpm -F @repo/server dev"

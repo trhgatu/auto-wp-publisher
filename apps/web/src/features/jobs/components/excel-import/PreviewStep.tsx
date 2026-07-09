@@ -1,6 +1,6 @@
 import React from "react";
-import { ArrowRight } from "lucide-react";
-import { Table } from "../../../../components/shared/Table";
+import { Table, Button, Tag } from "antd";
+import { ArrowRightOutlined, UndoOutlined } from "@ant-design/icons";
 import {
   useImportStore,
   selectUniqueExcelCategories,
@@ -51,7 +51,6 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
   );
 
   const handleNext = () => {
-    // Initialize mapping logic (moved from parent)
     const nextMapping: Record<string, string> = {};
     uniqueExcelCategories.forEach((excelCat) => {
       const saved = savedMappings.find((m) => m.excelValue === excelCat);
@@ -126,115 +125,158 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
     setStep("mapping");
   };
 
+  const columns = [
+    {
+      title: "Tên sản phẩm",
+      dataIndex: "title",
+      key: "title",
+      width: 250,
+      render: (text: string) => (
+        <span className="text-xs font-medium">{text}</span>
+      ),
+    },
+    {
+      title: "Mã hàng",
+      dataIndex: "partNumbers",
+      key: "partNumbers",
+      width: 110,
+      align: "center" as const,
+      render: (text: string) => (
+        <span className="font-mono text-[10px] text-slate-500">
+          {text || "-"}
+        </span>
+      ),
+    },
+    {
+      title: "Dòng xe",
+      dataIndex: "carModels",
+      key: "carModels",
+      width: 150,
+      render: (text: string) => (
+        <span className="text-[10px] text-slate-600 dark:text-slate-400">
+          {text || "-"}
+        </span>
+      ),
+    },
+    {
+      title: "Mô tả ngắn",
+      dataIndex: "shortDescription",
+      key: "shortDescription",
+      width: 200,
+      render: (text: string) => (
+        <span
+          className="text-[10px] text-slate-400 truncate block max-w-[200px]"
+          title={text}
+        >
+          {text || "-"}
+        </span>
+      ),
+    },
+    {
+      title: "Chất liệu",
+      dataIndex: "material",
+      key: "material",
+      width: 100,
+      align: "center" as const,
+      render: (text: string) => (
+        <span className="text-[10px] text-slate-500">{text || "-"}</span>
+      ),
+    },
+    {
+      title: "Giá bán",
+      dataIndex: "price",
+      key: "price",
+      width: 110,
+      align: "right" as const,
+      render: (price: string) => (
+        <span className="font-black text-red-600 text-xs">
+          {price && !isNaN(Number(price))
+            ? `${Number(price).toLocaleString("vi-VN")}đ`
+            : price || "-"}
+        </span>
+      ),
+    },
+    {
+      title: "Danh mục Excel",
+      dataIndex: "category",
+      key: "category",
+      width: 150,
+      render: (cat: string) => (
+        <Tag color="default" style={{ fontWeight: "bold", fontSize: "10px" }}>
+          {cat}
+        </Tag>
+      ),
+    },
+    {
+      title: "Thương hiệu",
+      dataIndex: "brand",
+      key: "brand",
+      width: 120,
+      render: (brand: string) => (
+        <Tag color="warning" style={{ fontWeight: "bold", fontSize: "10px" }}>
+          {brand || "-"}
+        </Tag>
+      ),
+    },
+    {
+      title: "Trạng thái",
+      key: "status",
+      width: 120,
+      align: "center" as const,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render: (record: any) => {
+        const exists = existingProducts.find(
+          (ex) => ex.sku === record.partNumbers,
+        );
+        return exists ? (
+          <Tag color="blue" style={{ fontWeight: "bold", fontSize: "10px" }}>
+            Đã có (Update)
+          </Tag>
+        ) : (
+          <Tag color="green" style={{ fontWeight: "bold", fontSize: "10px" }}>
+            Mới (Import)
+          </Tag>
+        );
+      },
+    },
+  ];
+
   return (
     <>
-      <div className="flex-1 overflow-auto p-0 border-b border-gray-100 dark:border-white/5">
-        <Table containerClassName="h-full">
-          <Table.Header>
-            <Table.Row>
-              <Table.HeadCell className="min-w-[300px]">
-                Tên sản phẩm
-              </Table.HeadCell>
-              <Table.HeadCell className="w-32 text-center">
-                Mã hàng
-              </Table.HeadCell>
-              <Table.HeadCell className="w-32 text-center">
-                Dòng xe
-              </Table.HeadCell>
-              <Table.HeadCell className="w-48 text-center">
-                Mô tả ngắn
-              </Table.HeadCell>
-              <Table.HeadCell className="w-32 text-center">
-                Chất liệu
-              </Table.HeadCell>
-              <Table.HeadCell className="w-28 text-center">
-                Giá bán
-              </Table.HeadCell>
-              <Table.HeadCell className="w-40 text-center">
-                Danh mục Excel
-              </Table.HeadCell>
-              <Table.HeadCell className="w-32 text-center">
-                Thương hiệu
-              </Table.HeadCell>
-              <Table.HeadCell className="w-32 text-center">
-                Trạng thái
-              </Table.HeadCell>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {data.map((row, idx) => (
-              <Table.Row key={idx}>
-                <Table.Cell className="font-medium text-xs">
-                  {row.title}
-                </Table.Cell>
-                <Table.Cell className="text-center font-mono text-[10px] text-gray-500">
-                  {row.partNumbers}
-                </Table.Cell>
-                <Table.Cell className="text-center">
-                  <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400">
-                    {row.carModels || "-"}
-                  </span>
-                </Table.Cell>
-                <Table.Cell className="text-center">
-                  <span className="text-[10px] text-gray-500 line-clamp-2 max-w-[200px]">
-                    {row.shortDescription || "-"}
-                  </span>
-                </Table.Cell>
-                <Table.Cell className="text-center">
-                  <span className="text-[10px] text-gray-500">
-                    {row.material || "-"}
-                  </span>
-                </Table.Cell>
-                <Table.Cell className="text-center font-bold text-red-600 text-xs">
-                  {row.price && !isNaN(Number(row.price))
-                    ? Number(row.price).toLocaleString("vi-VN")
-                    : row.price || "-"}
-                </Table.Cell>
-                <Table.Cell className="text-center">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                    {row.category}
-                  </span>
-                </Table.Cell>
-                <Table.Cell className="text-center">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-orange-50 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400 border border-orange-100/20">
-                    {row.brand || "-"}
-                  </span>
-                </Table.Cell>
-                <Table.Cell className="text-center">
-                  {existingProducts.find((ex) => ex.sku === row.partNumbers) ? (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20">
-                      Đã có (Update)
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400 border border-green-100 dark:border-green-500/20">
-                      Mới (Import)
-                    </span>
-                  )}
-                </Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
-        </Table>
+      <div className="flex-1 overflow-auto bg-slate-50/50 dark:bg-slate-900/10">
+        <Table
+          dataSource={data}
+          columns={columns}
+          rowKey={(_, idx) => idx?.toString() || ""}
+          pagination={{ pageSize: 10, showSizeChanger: false }}
+          size="small"
+          scroll={{ x: 1100, y: "calc(85vh - 280px)" }}
+        />
       </div>
 
-      <div className="px-6 py-4 flex justify-end gap-3 bg-white dark:bg-transparent border-t border-gray-100 dark:border-white/5">
-        <button
+      <div className="px-6 py-4 flex justify-end gap-3 bg-white dark:bg-[#141414] border-t border-slate-100 dark:border-slate-800">
+        <Button
           onClick={() => {
             setData([]);
             setStep("upload");
           }}
-          className="px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 border border-gray-200 rounded-md transition-colors"
+          icon={<UndoOutlined />}
+          size="large"
+          className="font-bold text-xs uppercase tracking-tight"
         >
           Tải tệp khác
-        </button>
+        </Button>
 
-        <button
+        <Button
+          type="primary"
+          danger
           onClick={handleNext}
-          className="px-6 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-md transition-all flex items-center gap-2"
+          icon={<ArrowRightOutlined />}
+          size="large"
+          className="font-bold text-xs uppercase tracking-tight"
         >
-          Tiếp theo: Chọn danh mục & thương hiệu{" "}
-          <ArrowRight className="w-4 h-4" />
-        </button>
+          Tiếp theo: Chọn danh mục & thương hiệu
+        </Button>
       </div>
     </>
   );
