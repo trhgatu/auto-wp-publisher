@@ -6,8 +6,9 @@
 
 @layer base {
   body {
-    @apply bg-[#f8fafc] dark:bg-slate-950 text-slate-800 dark:text-slate-200 antialiased font-sans isolate selection:bg-red-500/30;
+    @apply bg-[#f1f5f9] dark:bg-[#070a13] text-slate-800 dark:text-slate-200 antialiased font-sans isolate selection:bg-red-500/30;
     font-family: 'Inter', system-ui, sans-serif;
+    background-image: radial-gradient(at 0% 0%, rgba(220, 38, 38, 0.015) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(100, 116, 139, 0.01) 0px, transparent 50%);
   }
 
   /* Custom Scrollbar */

@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect } from "react";
-import { createPortal } from "react-dom";
+import { Modal } from "antd";
 import { useBulkCreateJobs } from "../hooks/useBulkCreateJobs";
 import {
   useCategories,
@@ -12,6 +12,7 @@ import {
   useUpsertBrandMappings,
 } from "../hooks/useBrands";
 import { useImportStore } from "../hooks/useImportStore";
+import { useNotification } from "../../../hooks/useNotification";
 
 import { ImportStepsIndicator } from "./excel-import/ImportStepsIndicator";
 import { UploadStep } from "./excel-import/UploadStep";
@@ -31,6 +32,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
 }) => {
   // Store
   const { step, data, categoryMapping, brandMapping, reset } = useImportStore();
+  const { notify } = useNotification();
 
   // API Hooks
   const mutation = useBulkCreateJobs();
@@ -154,15 +156,28 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
       console.error("Import error:", err);
       const errorMsg =
         err instanceof Error ? err.message : "Đã có lỗi xảy ra không xác định.";
-      alert(`Lỗi khi kết thúc Import: ${errorMsg}`);
+      notify("Lỗi", `Lỗi khi kết thúc Import: ${errorMsg}`, "error");
     }
   };
 
-  if (!isOpen) return null;
-
-  return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/45 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-[#141414] rounded-lg shadow-xl w-full max-w-6xl max-h-[92vh] flex flex-col overflow-hidden transition-all border border-gray-200 dark:border-white/10">
+  return (
+    <Modal
+      open={isOpen}
+      onCancel={onClose}
+      footer={null}
+      width={1200}
+      destroyOnClose
+      centered
+      closable={false}
+      styles={{
+        body: {
+          padding: 0,
+          overflow: "hidden",
+        },
+      }}
+      className="dark:bg-[#141414]"
+    >
+      <div className="bg-white dark:bg-[#141414] rounded-lg w-full max-h-[85vh] flex flex-col overflow-hidden transition-all">
         <ImportStepsIndicator onClose={onClose} />
 
         <div className="flex-1 overflow-hidden flex flex-col">
@@ -191,7 +206,6 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
           )}
         </div>
       </div>
-    </div>,
-    document.body,
+    </Modal>
   );
 };

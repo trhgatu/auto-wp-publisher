@@ -5,6 +5,7 @@ import { PublisherProcessor } from './jobs/publisher.processor';
 import { ProductsController } from './products/infrastructure/http/controllers/products.controller';
 import { CategoriesController } from './products/infrastructure/http/controllers/categories.controller';
 import { BrandsController } from './products/infrastructure/http/controllers/brands.controller';
+import { AiSettingsController } from './products/infrastructure/http/controllers/ai-settings.controller';
 import { CreateProductHandler } from './products/application/commands/create-product/create-product.handler';
 import { BulkCreateProductsHandler } from './products/application/commands/bulk-create-products/bulk-create-products.handler';
 import { GetProductsHandler } from './products/application/queries/get-products/get-products.handler';
@@ -29,7 +30,12 @@ import { PermanentlyDeleteProductHandler } from './products/application/commands
       name: 'wp-publisher',
     }),
   ],
-  controllers: [ProductsController, CategoriesController, BrandsController],
+  controllers: [
+    ProductsController,
+    CategoriesController,
+    BrandsController,
+    AiSettingsController,
+  ],
   providers: [
     EventsGateway,
     WordPressService,

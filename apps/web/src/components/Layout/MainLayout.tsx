@@ -1,19 +1,32 @@
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
+import { Layout } from "antd";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 
+const { Content } = Layout;
+
 export const MainLayout = () => {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 flex overflow-hidden relative selection:bg-indigo-500/30 transition-colors">
-      <Sidebar />
-      <div className="flex-1 ml-64 flex flex-col min-h-screen relative w-[calc(100%-16rem)]">
+    <Layout hasSider style={{ minHeight: "100vh" }}>
+      <Sidebar collapsed={collapsed} onCollapse={setCollapsed} />
+      <Layout
+        style={{
+          marginLeft: collapsed ? 80 : 256,
+          minHeight: "100vh",
+          transition: "margin-left 0.2s",
+        }}
+        className="transition-colors bg-slate-50 dark:bg-slate-950"
+      >
         <Header />
-        <main className="flex-1 p-6 overflow-y-auto">
-          <div className="max-w-[1400px] space-y-8 animate-in fade-in duration-700">
+        <Content style={{ padding: "24px 32px", overflow: "initial" }}>
+          <div className="max-w-[1400px] mx-auto space-y-8 animate-in fade-in duration-700">
             <Outlet />
           </div>
-        </main>
-      </div>
-    </div>
+        </Content>
+      </Layout>
+    </Layout>
   );
 };

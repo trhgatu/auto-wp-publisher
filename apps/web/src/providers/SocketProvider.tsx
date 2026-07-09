@@ -6,7 +6,9 @@ import { useNotification } from "../hooks/useNotification";
 
 import { SocketContext } from "../contexts/SocketContext";
 
-const SOCKET_URL = import.meta.env.VITE_API_URL?.replace("/api/v1", "");
+const SOCKET_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1"
+).replace("/api/v1", "");
 
 export const SocketProvider: React.FC<{ children: ReactNode }> = ({
   children,

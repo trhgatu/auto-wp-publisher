@@ -1,64 +1,54 @@
-import { Clock, CheckCircle2, XCircle, Loader2 } from "lucide-react";
-import { clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { Tag } from "antd";
+import {
+  ClockCircleOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  SyncOutlined,
+} from "@ant-design/icons";
 import type { JobItem } from "../api/getJobs";
 
 const statusConfig: Record<
   JobItem["status"],
-  { icon: React.ElementType; color: string; bg: string; spin?: boolean }
+  { icon: React.ReactNode; color: string; text: string }
 > = {
   PENDING: {
-    icon: Clock,
-    color: "text-amber-700 dark:text-amber-400",
-    bg: "bg-amber-50 dark:bg-amber-900/20",
+    icon: <ClockCircleOutlined />,
+    color: "warning",
+    text: "Đang chờ",
   },
   PROCESSING: {
-    icon: Loader2,
-    color: "text-blue-700 dark:text-blue-400",
-    bg: "bg-blue-50 dark:bg-blue-900/20",
-    spin: true,
+    icon: <SyncOutlined spin />,
+    color: "processing",
+    text: "Đang đăng bài",
   },
   COMPLETED: {
-    icon: CheckCircle2,
-    color: "text-emerald-700 dark:text-emerald-400",
-    bg: "bg-emerald-50 dark:bg-emerald-900/20",
+    icon: <CheckCircleOutlined />,
+    color: "success",
+    text: "Hoàn tất",
   },
   FAILED: {
-    icon: XCircle,
-    color: "text-rose-700 dark:text-rose-400",
-    bg: "bg-rose-50 dark:bg-rose-900/20",
+    icon: <CloseCircleOutlined />,
+    color: "error",
+    text: "Thất bại",
   },
 };
 
 export const JobStatusBadge = ({ status }: { status: JobItem["status"] }) => {
   const config = statusConfig[status];
-  const StatusIcon = config.icon;
-  const statusMap: Record<JobItem["status"], string> = {
-    PENDING: "Đang chờ",
-    PROCESSING: "Đang đăng bài",
-    COMPLETED: "Hoàn tất",
-    FAILED: "Thất bại",
-  };
 
   return (
-    <span
-      className={twMerge(
-        clsx(
-          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider whitespace-nowrap border transition-all duration-300",
-          config.bg,
-          config.color,
-          status === "COMPLETED"
-            ? "border-emerald-200 dark:border-emerald-800"
-            : status === "FAILED"
-              ? "border-rose-200 dark:border-rose-800"
-              : status === "PROCESSING"
-                ? "border-blue-200 dark:border-blue-800"
-                : "border-amber-200 dark:border-amber-800",
-        ),
-      )}
+    <Tag
+      icon={config.icon}
+      color={config.color}
+      style={{
+        fontWeight: "bold",
+        textTransform: "uppercase",
+        letterSpacing: "0.05em",
+        fontSize: "10px",
+        padding: "2px 8px",
+      }}
     >
-      <StatusIcon className={clsx("w-3 h-3", config.spin && "animate-spin")} />
-      {statusMap[status]}
-    </span>
+      {config.text}
+    </Tag>
   );
 };
