@@ -7,7 +7,6 @@ import {
   Slider,
   Select,
   Alert,
-  Spin,
   Row,
   Col,
   Tag,
@@ -22,6 +21,7 @@ import { axios } from "../../../lib/axios";
 import { useNotification } from "../../../hooks/useNotification";
 
 import { PageHeader } from "../../../components/shared/PageHeader";
+import { Loading } from "../../../components/shared/Loading";
 
 export const AiSettings = () => {
   const [form] = Form.useForm();
@@ -90,11 +90,7 @@ Yêu cầu bài viết để tối ưu hóa SEO trên WordPress:
   };
 
   if (loading) {
-    return (
-      <div className="flex flex-col justify-center items-center h-80">
-        <Spin size="large" tip="Đang tải cấu hình AI..." />
-      </div>
-    );
+    return <Loading tip="Đang tải cấu hình AI..." height={320} />;
   }
 
   const variables = [

@@ -10,24 +10,20 @@ import {
   List,
   Tag,
   Alert,
-  Spin,
   Result,
 } from "antd";
 import { useJob } from "../hooks/useJob";
 import { JobStatusBadge } from "../components/JobStatusBadge";
 
 import { PageHeader } from "../../../components/shared/PageHeader";
+import { Loading } from "../../../components/shared/Loading";
 
 export function JobDetail() {
   const { id } = useParams<{ id: string }>();
   const { data: job, isLoading, error } = useJob(id);
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col justify-center items-center h-80">
-        <Spin size="large" tip="Đang tải chi tiết..." />
-      </div>
-    );
+    return <Loading tip="Đang tải chi tiết..." height={320} />;
   }
 
   if (error || !job) {
@@ -63,7 +59,7 @@ export function JobDetail() {
         description="Xem chi tiết nội dung, thuộc tính và liên kết xuất bản của sản phẩm."
         breadcrumbs={[
           { title: "Workspace" },
-          { title: "Kho sản phẩm", href: "/jobs" },
+          { title: "Kho Sản Phẩm", href: "/jobs" },
           { title: job.sku || job.id.slice(0, 8) },
         ]}
         extra={

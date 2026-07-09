@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Card, Form, Input, Button, Spin, Alert } from "antd";
+import { Card, Form, Input, Button, Alert } from "antd";
 import { axios } from "../../../lib/axios";
 import { useNotification } from "../../../hooks/useNotification";
 import { PageHeader } from "../../../components/shared/PageHeader";
+import { Loading } from "../../../components/shared/Loading";
 
 export const WpSettings = () => {
   const [form] = Form.useForm();
@@ -74,11 +75,7 @@ export const WpSettings = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex flex-col justify-center items-center h-80">
-        <Spin size="large" tip="Đang tải cấu hình WordPress..." />
-      </div>
-    );
+    return <Loading tip="Đang tải cấu hình WordPress..." height={320} />;
   }
 
   return (
