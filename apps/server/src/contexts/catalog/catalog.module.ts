@@ -6,6 +6,7 @@ import { ProductsController } from './products/infrastructure/http/controllers/p
 import { CategoriesController } from './products/infrastructure/http/controllers/categories.controller';
 import { BrandsController } from './products/infrastructure/http/controllers/brands.controller';
 import { AiSettingsController } from './products/infrastructure/http/controllers/ai-settings.controller';
+import { WpSettingsController } from './products/infrastructure/http/controllers/wp-settings.controller';
 import { CreateProductHandler } from './products/application/commands/create-product/create-product.handler';
 import { BulkCreateProductsHandler } from './products/application/commands/bulk-create-products/bulk-create-products.handler';
 import { GetProductsHandler } from './products/application/queries/get-products/get-products.handler';
@@ -35,6 +36,7 @@ import { PermanentlyDeleteProductHandler } from './products/application/commands
     CategoriesController,
     BrandsController,
     AiSettingsController,
+    WpSettingsController,
   ],
   providers: [
     EventsGateway,

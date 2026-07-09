@@ -31,19 +31,9 @@ export const Sidebar = ({ collapsed, onCollapse }: SidebarProps) => {
       label: <Link to="/jobs">Kho Sản Phẩm</Link>,
     },
     {
-      key: "/websites",
-      icon: <GlobalOutlined />,
-      label: <Link to="/websites">Cấu hình WordPress</Link>,
-    },
-    {
       key: "/api-history",
       icon: <HistoryOutlined />,
       label: <Link to="/api-history">Lịch sử API</Link>,
-    },
-    {
-      key: "/ai-settings",
-      icon: <RobotOutlined />,
-      label: <Link to="/ai-settings">Cấu hình AI Prompt</Link>,
     },
   ];
 
@@ -57,7 +47,8 @@ export const Sidebar = ({ collapsed, onCollapse }: SidebarProps) => {
 
   return (
     <Sider
-      width={256}
+      width={240}
+      collapsedWidth={72}
       theme="dark"
       collapsible
       collapsed={collapsed}
@@ -69,21 +60,22 @@ export const Sidebar = ({ collapsed, onCollapse }: SidebarProps) => {
         top: 0,
         bottom: 0,
         zIndex: 50,
-        borderRight: "1px solid rgba(255, 255, 255, 0.05)",
+        borderRight: "1px solid #303030",
+        background: "#1F1F1F",
       }}
-      className="bg-[#0f172a] dark:bg-[#090d16]"
+      className="bg-[#1F1F1F]"
     >
-      <div className="h-20 flex items-center px-6 border-b border-slate-800 bg-[#0f172a] dark:bg-[#090d16] transition-colors overflow-hidden">
+      <div className="h-16 flex items-center px-5 border-b border-[#303030] bg-[#1F1F1F] transition-colors overflow-hidden">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center flex-shrink-0">
-            <DatabaseOutlined className="text-xl text-white" />
+          <div className="w-8 h-8 rounded bg-[#C62828] flex items-center justify-center flex-shrink-0">
+            <DatabaseOutlined className="text-base text-white" />
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-lg font-black tracking-tighter text-slate-100 dark:text-white leading-none">
+              <span className="text-sm font-bold tracking-tight text-white leading-none">
                 AUTO WP
               </span>
-              <span className="text-[10px] font-bold text-red-500 tracking-widest uppercase mt-0.5">
+              <span className="text-[9px] font-bold text-[#C62828] tracking-wider uppercase mt-0.5">
                 Publisher
               </span>
             </div>
@@ -93,7 +85,7 @@ export const Sidebar = ({ collapsed, onCollapse }: SidebarProps) => {
 
       <div
         className="flex flex-col justify-between"
-        style={{ height: "calc(100vh - 130px)" }}
+        style={{ height: "calc(100vh - 120px)" }}
       >
         <Menu
           mode="inline"
@@ -103,7 +95,7 @@ export const Sidebar = ({ collapsed, onCollapse }: SidebarProps) => {
           style={{ borderRight: 0, paddingTop: 16, background: "transparent" }}
         />
 
-        <div className="p-4 border-t border-slate-800 bg-black/10">
+        <div className="p-3 border-t border-[#303030] bg-black/10">
           <Menu
             mode="inline"
             theme="dark"
@@ -111,16 +103,21 @@ export const Sidebar = ({ collapsed, onCollapse }: SidebarProps) => {
             style={{ borderRight: 0, background: "transparent" }}
             items={[
               {
-                key: "/settings",
+                key: "settings-submenu",
                 icon: <SettingOutlined />,
-                label: !collapsed ? (
-                  <Link
-                    to="/settings"
-                    className="font-bold uppercase tracking-wider text-xs"
-                  >
-                    Cấu hình
-                  </Link>
-                ) : null,
+                label: "Cấu hình",
+                children: [
+                  {
+                    key: "/ai-settings",
+                    icon: <RobotOutlined />,
+                    label: <Link to="/ai-settings">AI Prompt</Link>,
+                  },
+                  {
+                    key: "/websites",
+                    icon: <GlobalOutlined />,
+                    label: <Link to="/websites">WordPress</Link>,
+                  },
+                ],
               },
             ]}
           />

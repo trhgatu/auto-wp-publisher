@@ -6,17 +6,21 @@ Hãy viết một mô tả sản phẩm chi tiết, chuyên nghiệp và cuốn 
 
 Thông tin sản phẩm:
 - Tên sản phẩm: {title}
-{sku ? \`- Mã phụ tùng (SKU): {sku}\` : ''}
-{material ? \`- Chất liệu: {material}\` : ''}
-{carModels ? \`- Dòng xe tương thích: {carModels}\` : ''}
-{dimensions ? \`- Kích thước: {dimensions}\` : ''}
-{shortDescription ? \`- Mô tả ngắn/Ghi chú: {shortDescription}\` : ''}
+- Mã phụ tùng (SKU): {sku}
+- Chất liệu: {material}
+- Dòng xe tương thích: {carModels}
+- Kích thước: {dimensions}
+- Mô tả ngắn/Ghi chú: {shortDescription}
+- Từ khóa chính SEO (Focus Keyword): {focusKeyword}
 
-Yêu cầu bài viết:
+Yêu cầu bài viết để tối ưu hóa SEO trên WordPress:
 1. Có tiêu đề và đoạn giới thiệu sản phẩm lôi cuốn.
-2. Nêu bật ưu điểm và đặc tính nổi bật của sản phẩm.
-3. Cung cấp hướng dẫn sử dụng hoặc lưu ý tương thích dòng xe rõ ràng (nếu có).
-4. Định dạng HTML rõ ràng, dễ đọc, không chứa markdown (như \`\`\`html).`;
+2. BẮT BUỘC sử dụng từ khóa chính "{focusKeyword}" ngay ở phần đầu tiên của bài viết (trong 50 từ đầu tiên).
+3. Lặp lại từ khóa chính "{focusKeyword}" khoảng 3-5 lần một cách tự nhiên xuyên suốt bài viết (trong các tiêu đề h3 hoặc đoạn văn).
+4. Viết mô tả sản phẩm có độ dài tối thiểu là 650 từ để đảm bảo tối ưu hóa RankMath/Yoast SEO.
+5. Nêu bật ưu điểm và đặc tính nổi bật của sản phẩm.
+6. Cung cấp hướng dẫn sử dụng hoặc lưu ý tương thích dòng xe rõ ràng (nếu có).
+7. Định dạng HTML rõ ràng, dễ đọc, không chứa markdown (như \`\`\`html).`;
 
 @Controller('ai-settings')
 export class AiSettingsController {

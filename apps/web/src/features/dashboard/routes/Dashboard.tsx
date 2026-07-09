@@ -18,10 +18,7 @@ import {
   Skeleton,
 } from "antd";
 import {
-  DatabaseOutlined,
   CheckCircleOutlined,
-  Loading3QuartersOutlined,
-  WarningOutlined,
   RiseOutlined,
   AlertOutlined,
   InfoCircleOutlined,
@@ -99,14 +96,13 @@ export const Dashboard = () => {
       {/* 1. Header Card */}
       <PageHeader
         title="Bảng điều hành"
+        description="Xem tổng quan trạng thái xuất bản bài viết và phân tích hiệu suất hệ thống."
         breadcrumbs={[{ title: "Workspace" }, { title: "Tổng quan" }]}
-        icon={<RiseOutlined />}
         extra={
           <Button
             type="primary"
             size="large"
             danger
-            icon={<RiseOutlined />}
             className="font-bold text-xs uppercase tracking-tight"
           >
             Xuất báo cáo chi tiết
@@ -123,17 +119,16 @@ export const Dashboard = () => {
           >
             <Statistic
               title={
-                <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                <span className="text-xs font-bold text-[#8C8C8C] uppercase tracking-wider">
                   Tổng Sản Phẩm
                 </span>
               }
               value={data.stats.totalProducts}
-              prefix={<DatabaseOutlined className="text-red-600 mr-2" />}
-              valueStyle={{ fontWeight: 900, color: "#dc2626" }}
+              valueStyle={{ fontWeight: 700, color: "#C62828" }}
             />
-            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800/40 flex items-center justify-between text-xs">
-              <span className="text-slate-400">Trong DB</span>
-              <span className="font-bold text-red-600 bg-red-50 dark:bg-red-950/30 px-1.5 py-0.5 rounded">
+            <div className="pt-3 mt-3 border-t border-[#ECECEC]/60 dark:border-[#303030]/40 flex items-center justify-between text-xs">
+              <span className="text-[#8C8C8C]">Trong DB</span>
+              <span className="font-bold text-[#C62828] bg-red-50 dark:bg-red-950/30 px-1.5 py-0.5 rounded">
                 Thực tế
               </span>
             </div>
@@ -147,16 +142,15 @@ export const Dashboard = () => {
           >
             <Statistic
               title={
-                <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                <span className="text-xs font-bold text-[#8C8C8C] uppercase tracking-wider">
                   Thành Công
                 </span>
               }
               value={data.stats.completedProducts}
-              prefix={<CheckCircleOutlined className="text-emerald-500 mr-2" />}
-              valueStyle={{ fontWeight: 900, color: "#10b981" }}
+              valueStyle={{ fontWeight: 700, color: "#10b981" }}
             />
-            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800/40 flex items-center justify-between text-xs">
-              <span className="text-slate-400">Tỷ lệ hoàn tất</span>
+            <div className="pt-3 mt-3 border-t border-[#ECECEC]/60 dark:border-[#303030]/40 flex items-center justify-between text-xs">
+              <span className="text-[#8C8C8C]">Tỷ lệ hoàn tất</span>
               <span className="font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.5 rounded">
                 {data.stats.totalProducts
                   ? `${Math.round((data.stats.completedProducts / data.stats.totalProducts) * 100)}%`
@@ -173,18 +167,15 @@ export const Dashboard = () => {
           >
             <Statistic
               title={
-                <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                <span className="text-xs font-bold text-[#8C8C8C] uppercase tracking-wider">
                   Đang Xử Lý
                 </span>
               }
               value={data.stats.processingProducts}
-              prefix={
-                <Loading3QuartersOutlined spin className="text-blue-500 mr-2" />
-              }
-              valueStyle={{ fontWeight: 900, color: "#3b82f6" }}
+              valueStyle={{ fontWeight: 700, color: "#3b82f6" }}
             />
-            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800/40 flex items-center justify-between text-xs">
-              <span className="text-slate-400">Đang bận</span>
+            <div className="pt-3 mt-3 border-t border-[#ECECEC]/60 dark:border-[#303030]/40 flex items-center justify-between text-xs">
+              <span className="text-[#8C8C8C]">Đang bận</span>
               <span className="font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/30 px-1.5 py-0.5 rounded">
                 Queue
               </span>
@@ -199,16 +190,15 @@ export const Dashboard = () => {
           >
             <Statistic
               title={
-                <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                <span className="text-xs font-bold text-[#8C8C8C] uppercase tracking-wider">
                   Lỗi Pushing
                 </span>
               }
               value={data.stats.failedProducts}
-              prefix={<WarningOutlined className="text-amber-500 mr-2" />}
-              valueStyle={{ fontWeight: 900, color: "#f59e0b" }}
+              valueStyle={{ fontWeight: 700, color: "#f59e0b" }}
             />
-            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800/40 flex items-center justify-between text-xs">
-              <span className="text-slate-400">Ngay lập tức</span>
+            <div className="pt-3 mt-3 border-t border-[#ECECEC]/60 dark:border-[#303030]/40 flex items-center justify-between text-xs">
+              <span className="text-[#8C8C8C]">Ngay lập tức</span>
               <span className="font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/30 px-1.5 py-0.5 rounded">
                 Cần xử lý
               </span>
