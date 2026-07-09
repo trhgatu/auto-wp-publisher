@@ -23,6 +23,30 @@ export class WordPressService {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  private async getSettings(): Promise<{
+    apiUrl: string;
+    username: string;
+    appPassword: string;
+  }> {
+    const setting = await this.prisma.wpSetting.findUnique({
+      where: { id: 'default' },
+    });
+
+    if (setting && setting.apiUrl && setting.username && setting.appPassword) {
+      return {
+        apiUrl: setting.apiUrl,
+        username: setting.username,
+        appPassword: setting.appPassword,
+      };
+    }
+
+    return {
+      apiUrl: process.env.WP_API_URL || '',
+      username: process.env.WP_USERNAME || '',
+      appPassword: process.env.WP_APP_PASSWORD || '',
+    };
+  }
+
   private isValidUrl(url: string | null | undefined): boolean {
     if (!url) return false;
     const trimmed = url.trim();
@@ -55,12 +79,14 @@ export class WordPressService {
     shortDescription: string | null = null,
     existingWpId: number | null = null,
   ): Promise<{ id: number; permalink: string }> {
-    const wpBaseUrl = process.env.WP_API_URL?.replace(/\/$/, '');
+    const words = title.split(/[-|/]/)[0].trim().split(/\s+/);
+    const focusKeyword = words.slice(0, Math.min(4, words.length)).join(' ');
+
+    const settings = await this.getSettings();
+    const wpBaseUrl = settings.apiUrl.replace(/\/$/, '');
 
     if (!wpBaseUrl) {
-      throw new Error(
-        'Config missing: WP_API_URL must be defined in environment',
-      );
+      throw new Error('Cấu hình thiếu: WordPress API URL chưa được thiết lập.');
     }
 
     const wcApiUrl = `${wpBaseUrl.replace(/\/wp\/v2\/?$/, '')}/wc/v3`;
@@ -73,18 +99,18 @@ export class WordPressService {
       `Final WooCommerce Endpoint: ${endpoint} (Method: ${isUpdate ? 'PUT' : 'POST'})`,
     );
 
-    const wpUser = process.env.WP_USERNAME;
-    const wpPass = process.env.WP_APP_PASSWORD;
+    const wpUser = settings.username;
+    const wpPass = settings.appPassword;
 
     if (!wpUser) {
       throw new Error(
-        'Config missing: WP_USERNAME must be defined in environment',
+        'Cấu hình thiếu: WordPress Username chưa được thiết lập.',
       );
     }
 
     if (!wpPass) {
       throw new Error(
-        'Hệ thống thiếu WP_APP_PASSWORD. Vui lòng khai báo trong file .env',
+        'Cấu hình thiếu: WordPress Application Password chưa được thiết lập.',
       );
     }
 
@@ -181,6 +207,16 @@ export class WordPressService {
           : []),
       ],
       meta_data: [
+        // RankMath SEO
+        { key: 'rank_math_title', value: `%title%` },
+        { key: 'rank_math_description', value: `%excerpt%` },
+        { key: 'rank_math_focus_keyword', value: focusKeyword },
+
+        // Yoast SEO
+        { key: '_yoast_wpseo_title', value: `%%title%%` },
+        { key: '_yoast_wpseo_metadesc', value: `%%excerpt%%` },
+        { key: '_yoast_wpseo_focuskw', value: focusKeyword },
+
         ...(shopeeLink
           ? [
               { key: 'shopee', value: shopeeLink },
@@ -372,25 +408,26 @@ export class WordPressService {
   }
 
   async getCategories(): Promise<WCCategory[]> {
-    const wpBaseUrl = process.env.WP_API_URL?.replace(/\/$/, '');
+    const settings = await this.getSettings();
+    const wpBaseUrl = settings.apiUrl.replace(/\/$/, '');
 
     if (!wpBaseUrl) {
-      throw new Error(
-        'Config missing: WP_API_URL must be defined in environment',
-      );
+      throw new Error('Cấu hình thiếu: WordPress API URL chưa được thiết lập.');
     }
     const wcApiUrl = `${wpBaseUrl.replace(/\/wp\/v2\/?$/, '')}/wc/v3`;
-    const wpUser = process.env.WP_USERNAME;
-    const wpPass = process.env.WP_APP_PASSWORD;
+    const wpUser = settings.username;
+    const wpPass = settings.appPassword;
 
     if (!wpUser) {
       throw new Error(
-        'Config missing: WP_USERNAME must be defined in environment',
+        'Cấu hình thiếu: WordPress Username chưa được thiết lập.',
       );
     }
 
     if (!wpPass) {
-      throw new Error('Hệ thống thiếu WP_APP_PASSWORD.');
+      throw new Error(
+        'Cấu hình thiếu: WordPress Application Password chưa được thiết lập.',
+      );
     }
 
     const authHeader =
@@ -435,25 +472,26 @@ export class WordPressService {
   }
 
   async getBrands(): Promise<WCCategory[]> {
-    const wpBaseUrl = process.env.WP_API_URL?.replace(/\/$/, '');
+    const settings = await this.getSettings();
+    const wpBaseUrl = settings.apiUrl.replace(/\/$/, '');
 
     if (!wpBaseUrl) {
-      throw new Error(
-        'Config missing: WP_API_URL must be defined in environment',
-      );
+      throw new Error('Cấu hình thiếu: WordPress API URL chưa được thiết lập.');
     }
     const wcApiUrl = `${wpBaseUrl.replace(/\/wp\/v2\/?$/, '')}/wc/v3`;
-    const wpUser = process.env.WP_USERNAME;
-    const wpPass = process.env.WP_APP_PASSWORD;
+    const wpUser = settings.username;
+    const wpPass = settings.appPassword;
 
     if (!wpUser) {
       throw new Error(
-        'Config missing: WP_USERNAME must be defined in environment',
+        'Cấu hình thiếu: WordPress Username chưa được thiết lập.',
       );
     }
 
     if (!wpPass) {
-      throw new Error('Hệ thống thiếu WP_APP_PASSWORD.');
+      throw new Error(
+        'Cấu hình thiếu: WordPress Application Password chưa được thiết lập.',
+      );
     }
 
     const authHeader =

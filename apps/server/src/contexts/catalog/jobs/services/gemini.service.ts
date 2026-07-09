@@ -23,6 +23,9 @@ export class GeminiService {
       return null;
     }
 
+    const words = data.title.split(/[-|/]/)[0].trim().split(/\s+/);
+    const focusKeyword = words.slice(0, Math.min(4, words.length)).join(' ');
+
     let promptTemplate = `Bạn là một chuyên gia viết nội dung mô tả sản phẩm tối ưu SEO cho cửa hàng phụ tùng ô tô.
 Hãy viết một mô tả sản phẩm chi tiết, chuyên nghiệp và cuốn hút bằng ngôn ngữ tiếng Việt (HTML format, chỉ sử dụng các thẻ cơ bản như <p>, <h3>, <ul>, <li>, <strong>, <em>, không viết thẻ <html> hay <body>).
 
@@ -33,12 +36,16 @@ Thông tin sản phẩm:
 - Dòng xe tương thích: {carModels}
 - Kích thước: {dimensions}
 - Mô tả ngắn/Ghi chú: {shortDescription}
+- Từ khóa chính SEO (Focus Keyword): {focusKeyword}
 
-Yêu cầu bài viết:
+Yêu cầu bài viết để tối ưu hóa SEO trên WordPress:
 1. Có tiêu đề và đoạn giới thiệu sản phẩm lôi cuốn.
-2. Nêu bật ưu điểm và đặc tính nổi bật của sản phẩm.
-3. Cung cấp hướng dẫn sử dụng hoặc lưu ý tương thích dòng xe rõ ràng (nếu có).
-4. Định dạng HTML rõ ràng, dễ đọc, không chứa markdown (như \`\`\`html).`;
+2. BẮT BUỘC sử dụng từ khóa chính "{focusKeyword}" ngay ở phần đầu tiên của bài viết (trong 50 từ đầu tiên).
+3. Lặp lại từ khóa chính "{focusKeyword}" khoảng 3-5 lần một cách tự nhiên xuyên suốt bài viết (trong các tiêu đề h3 hoặc đoạn văn).
+4. Viết mô tả sản phẩm có độ dài tối thiểu là 650 từ để đảm bảo tối ưu hóa RankMath/Yoast SEO.
+5. Nêu bật ưu điểm và đặc tính nổi bật của sản phẩm.
+6. Cung cấp hướng dẫn sử dụng hoặc lưu ý tương thích dòng xe rõ ràng (nếu có).
+7. Định dạng HTML rõ ràng, dễ đọc, không chứa markdown (như \`\`\`html).`;
 
     let temperature = 0.7;
     let modelName = 'gemini-2.5-flash';
@@ -53,6 +60,13 @@ Yêu cầu bài viết:
         modelName = setting.modelName;
       }
     } catch (err) {
+      this.prisma.aiSetting
+        .upsert({
+          where: { id: 'default' },
+          update: { systemPrompt: promptTemplate },
+          create: { id: 'default', systemPrompt: promptTemplate },
+        })
+        .catch(() => {});
       this.logger.error(`Error loading AI Settings: ${String(err)}`);
     }
 
@@ -62,7 +76,8 @@ Yêu cầu bài viết:
       .replace(/{material}/g, data.material || '')
       .replace(/{carModels}/g, data.carModels || '')
       .replace(/{dimensions}/g, data.dimensions || '')
-      .replace(/{shortDescription}/g, data.shortDescription || '');
+      .replace(/{shortDescription}/g, data.shortDescription || '')
+      .replace(/{focusKeyword}/g, focusKeyword);
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 

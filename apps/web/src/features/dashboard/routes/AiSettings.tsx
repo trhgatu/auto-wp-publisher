@@ -74,12 +74,16 @@ Thông tin sản phẩm:
 - Dòng xe tương thích: {carModels}
 - Kích thước: {dimensions}
 - Mô tả ngắn/Ghi chú: {shortDescription}
+- Từ khóa chính SEO (Focus Keyword): {focusKeyword}
 
-Yêu cầu bài viết:
+Yêu cầu bài viết để tối ưu hóa SEO trên WordPress:
 1. Có tiêu đề và đoạn giới thiệu sản phẩm lôi cuốn.
-2. Nêu bật ưu điểm và đặc tính nổi bật của sản phẩm.
-3. Cung cấp hướng dẫn sử dụng hoặc lưu ý tương thích dòng xe rõ ràng (nếu có).
-4. Định dạng HTML rõ ràng, dễ đọc, không chứa markdown (như \`\`\`html).`,
+2. BẮT BUỘC sử dụng từ khóa chính "{focusKeyword}" ngay ở phần đầu tiên của bài viết (trong 50 từ đầu tiên).
+3. Lặp lại từ khóa chính "{focusKeyword}" khoảng 3-5 lần một cách tự nhiên xuyên suốt bài viết (trong các tiêu đề h3 hoặc đoạn văn).
+4. Viết mô tả sản phẩm có độ dài tối thiểu là 650 từ để đảm bảo tối ưu hóa RankMath/Yoast SEO.
+5. Nêu bật ưu điểm và đặc tính nổi bật của sản phẩm.
+6. Cung cấp hướng dẫn sử dụng hoặc lưu ý tương thích dòng xe rõ ràng (nếu có).
+7. Định dạng HTML rõ ràng, dễ đọc, không chứa markdown (như \`\`\`html).`,
       temperature: 0.7,
       modelName: "gemini-2.5-flash",
     });
@@ -100,6 +104,10 @@ Yêu cầu bài viết:
     { tag: "{carModels}", desc: "Dòng xe/Model xe tương thích" },
     { tag: "{dimensions}", desc: "Kích thước sản phẩm" },
     { tag: "{shortDescription}", desc: "Mô tả sơ bộ/Mô tả ngắn" },
+    {
+      tag: "{focusKeyword}",
+      desc: "Từ khóa chính SEO (được tự động trích xuất từ tên sản phẩm)",
+    },
   ];
 
   return (
@@ -113,7 +121,10 @@ Yêu cầu bài viết:
 
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={16}>
-          <Card bordered={false} className="shadow-sm">
+          <Card
+            bordered={false}
+            className="shadow-sm border-t-2 border-red-500"
+          >
             <Form form={form} layout="vertical" onFinish={handleSave}>
               <Form.Item
                 label={
@@ -221,7 +232,7 @@ Yêu cầu bài viết:
           {/* Guide variables */}
           <Card
             bordered={false}
-            className="shadow-sm"
+            className="shadow-sm border-t-2 border-red-500"
             title={
               <span className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-slate-100">
                 Các biến tương thích

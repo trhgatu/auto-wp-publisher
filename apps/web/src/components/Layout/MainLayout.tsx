@@ -14,15 +14,16 @@ export const MainLayout = () => {
       <Sidebar collapsed={collapsed} onCollapse={setCollapsed} />
       <Layout
         style={{
-          marginLeft: collapsed ? 80 : 256,
+          marginLeft: collapsed ? 72 : 240,
           minHeight: "100vh",
           transition: "margin-left 0.2s",
         }}
-        className="transition-colors bg-slate-50 dark:bg-slate-950"
       >
         <Header />
-        <Content style={{ padding: "24px 32px", overflow: "initial" }}>
-          <div className="max-w-[1400px] mx-auto space-y-8 animate-in fade-in duration-700">
+        <Content
+          style={{ padding: "88px 32px 32px 32px", overflow: "initial" }}
+        >
+          <div className="max-w-[1400px] mx-auto space-y-8 animate-in fade-in duration-500">
             <Outlet />
           </div>
         </Content>
