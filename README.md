@@ -24,9 +24,9 @@ graph TD
     Server -->|REST API & DB Check| WP[WordPress / WooCommerce Site]
     
     subgraph Packages [Shared Packages]
-        DBConfig[@repo/database]
-        SharedLib[@repo/shared]
-        TSConfig[@repo/typescript-config]
+        DBConfig["@repo/database"]
+        SharedLib["@repo/shared"]
+        TSConfig["@repo/typescript-config"]
     end
     Server -.-> Packages
     Client -.-> Packages
@@ -78,10 +78,10 @@ Mỗi Bounded Context (như `contexts/catalog/products`) được tổ chức th
 ### 1. Luồng nhập liệu Job từ Excel (Excel Import & Mapping Pipeline)
 ```mermaid
 sequenceDiagram
-    actor User as Người dùng
+    participant User as Người dùng
     participant Fe as Frontend (React)
     participant Be as Backend (NestJS)
-    database Db as PostgreSQL
+    participant Db as PostgreSQL
     
     User->>Fe: Tải lên file Excel (.xlsx)
     Fe->>Fe: Phân tích file (Preview dữ liệu & chọn Cột Mapping)
@@ -96,7 +96,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant Worker as Job Processor (Be)
-    database Db as PostgreSQL
+    participant Db as PostgreSQL
     participant AI as Gemini API
     participant WP as WordPress REST API
     
