@@ -17,11 +17,14 @@ import {
   Result,
   Skeleton,
 } from "antd";
+import { Link } from "react-router-dom";
 import {
   CheckCircleOutlined,
   RiseOutlined,
-  AlertOutlined,
-  InfoCircleOutlined,
+  PlusOutlined,
+  DatabaseOutlined,
+  GlobalOutlined,
+  RobotOutlined,
 } from "@ant-design/icons";
 
 import { PageHeader } from "../../../components/shared/PageHeader";
@@ -109,18 +112,69 @@ export const Dashboard = () => {
           </Button>
         }
       />
+      {/* 4. Quick Actions Grid (Row 3 - Full-width horizontal action bar) */}
+      <Row gutter={[24, 24]}>
+        <Col span={24}>
+          {/* Quick Actions Card */}
+          <Card
+            bordered={true}
+            className="shadow-sm bg-white dark:bg-[#1F1F1F]"
+            title={
+              <span className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-slate-100">
+                Thao tác nhanh
+              </span>
+            }
+          >
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Link to="/create">
+                <Button
+                  className="w-full flex flex-col items-center justify-center h-20 gap-2 text-xs font-semibold hover:border-[#C62828] hover:text-[#C62828]"
+                  type="default"
+                >
+                  <PlusOutlined className="text-lg text-red-600" />
+                  Tạo Job
+                </Button>
+              </Link>
+              <Link to="/jobs">
+                <Button
+                  className="w-full flex flex-col items-center justify-center h-20 gap-2 text-xs font-semibold hover:border-[#C62828] hover:text-[#C62828]"
+                  type="default"
+                >
+                  <DatabaseOutlined className="text-lg text-blue-600" />
+                  Quản lý Job
+                </Button>
+              </Link>
+              <Link to="/websites">
+                <Button
+                  className="w-full flex flex-col items-center justify-center h-20 gap-2 text-xs font-semibold hover:border-[#C62828] hover:text-[#C62828]"
+                  type="default"
+                >
+                  <GlobalOutlined className="text-lg text-emerald-600" />
+                  Cấu hình Wordpress
+                </Button>
+              </Link>
+              <Link to="/ai-settings">
+                <Button
+                  className="w-full flex flex-col items-center justify-center h-20 gap-2 text-xs font-semibold hover:border-[#C62828] hover:text-[#C62828]"
+                  type="default"
+                >
+                  <RobotOutlined className="text-lg text-amber-600" />
+                  Cấu hình AI
+                </Button>
+              </Link>
+            </div>
+          </Card>
+        </Col>
+      </Row>
 
       {/* 2. Stats Grid */}
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} lg={6}>
-          <Card
-            bordered={false}
-            className="shadow-sm border-l-4 border-red-600 bg-red-50/20 dark:bg-red-950/10"
-          >
+          <Card bordered={false}>
             <Statistic
               title={
                 <span className="text-xs font-bold text-[#8C8C8C] uppercase tracking-wider">
-                  Tổng Sản Phẩm
+                  Tổng Job
                 </span>
               }
               value={data.stats.totalProducts}
@@ -136,10 +190,7 @@ export const Dashboard = () => {
         </Col>
 
         <Col xs={24} sm={12} lg={6}>
-          <Card
-            bordered={false}
-            className="shadow-sm border-l-4 border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/10"
-          >
+          <Card bordered={false}>
             <Statistic
               title={
                 <span className="text-xs font-bold text-[#8C8C8C] uppercase tracking-wider">
@@ -161,10 +212,7 @@ export const Dashboard = () => {
         </Col>
 
         <Col xs={24} sm={12} lg={6}>
-          <Card
-            bordered={false}
-            className="shadow-sm border-l-4 border-blue-500 bg-blue-50/20 dark:bg-blue-950/10"
-          >
+          <Card bordered={false}>
             <Statistic
               title={
                 <span className="text-xs font-bold text-[#8C8C8C] uppercase tracking-wider">
@@ -184,10 +232,7 @@ export const Dashboard = () => {
         </Col>
 
         <Col xs={24} sm={12} lg={6}>
-          <Card
-            bordered={false}
-            className="shadow-sm border-l-4 border-amber-500 bg-amber-50/20 dark:bg-amber-950/10"
-          >
+          <Card bordered={false}>
             <Statistic
               title={
                 <span className="text-xs font-bold text-[#8C8C8C] uppercase tracking-wider">
@@ -332,12 +377,17 @@ export const Dashboard = () => {
             </div>
           </Card>
         </Col>
-
-        <Col xs={24} lg={8} className="flex flex-col gap-6">
+        <Col xs={24} lg={8}>
           {/* Error Analysis Card */}
           <Card
-            bordered={false}
-            className="shadow-sm flex-grow"
+            bordered={true}
+            className="shadow-sm h-full"
+            bodyStyle={{
+              height: "calc(100% - 57px)",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
             title={
               <span className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-slate-100">
                 Phân tích lỗi
@@ -378,49 +428,6 @@ export const Dashboard = () => {
                     Hệ thống ổn định, không có lỗi.
                   </span>
                 </div>
-              )}
-            </div>
-          </Card>
-
-          {/* AI Helper Card */}
-          <Card
-            bordered={false}
-            style={{
-              background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
-              color: "#fff",
-            }}
-            className="shadow-sm"
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <AlertOutlined className="text-red-500 animate-pulse text-lg" />
-              <h4 className="text-[10px] font-black text-white/40 uppercase tracking-widest m-0">
-                Trợ lý AI hệ thống
-              </h4>
-            </div>
-            <div className="text-xs text-white/80 leading-relaxed font-medium">
-              {errorAnalysisMapped.length > 0 &&
-              errorAnalysisMapped[0]?.label.includes("SKU") ? (
-                <p className="m-0">
-                  Tỷ lệ lỗi do{" "}
-                  <span className="text-red-400 font-bold">Trùng SKU</span> tăng
-                  mạnh trong 24h qua. Đề xuất kiểm tra lại tệp nguồn Excel trước
-                  khi tiếp tục import để tiết kiệm băng thông API.
-                </p>
-              ) : errorAnalysisMapped.length > 0 ? (
-                <p className="m-0">
-                  Phần lớn lỗi gần đây liên quan đến{" "}
-                  <span className="text-amber-400 font-bold">
-                    {errorAnalysisMapped[0].label}
-                  </span>
-                  . Hãy kiểm tra và xem lại log chi tiết để có giải pháp khắc
-                  phục.
-                </p>
-              ) : (
-                <p className="text-emerald-400/90 m-0 flex items-center gap-1.5">
-                  <InfoCircleOutlined />
-                  Hiệu suất API đạt mức tuyệt đối. Toàn bộ tính năng đang vận
-                  hành trơn tru.
-                </p>
               )}
             </div>
           </Card>

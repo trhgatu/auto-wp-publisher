@@ -284,12 +284,11 @@ export const JobsList = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Control Center */}
       <PageHeader
-        title={onlyTrashed ? "Thùng Rác" : "Kho Sản Phẩm"}
+        title={onlyTrashed ? "Thùng Rác" : "Quản lý Job"}
         breadcrumbs={[
           { title: "Workspace" },
-          { title: onlyTrashed ? "Thùng Rác" : "Kho Sản Phẩm" },
+          { title: onlyTrashed ? "Thùng Rác" : "Quản lý Job" },
         ]}
         icon={<DatabaseOutlined />}
         extra={
@@ -300,7 +299,6 @@ export const JobsList = () => {
                 setPage(1);
               }}
               icon={onlyTrashed ? <DatabaseOutlined /> : <RestOutlined />}
-              className="font-bold h-10 shadow-none transition-all active:scale-95"
             >
               {onlyTrashed ? "Về Kho" : "Thùng Rác"}
             </Button>
@@ -312,27 +310,17 @@ export const JobsList = () => {
                   icon={<FileExcelOutlined />}
                   type="primary"
                   danger
-                  className="font-bold h-10 shadow-none transition-all active:scale-95"
                 >
                   Import Excel
                 </Button>
 
                 <Link to="/create">
-                  <Button
-                    icon={<PlusOutlined />}
-                    type="primary"
-                    danger
-                    className="font-bold h-10 shadow-none transition-all active:scale-95"
-                  >
+                  <Button icon={<PlusOutlined />} type="primary" danger>
                     Thêm mới
                   </Button>
                 </Link>
 
-                <Button
-                  onClick={handleExport}
-                  icon={<DownloadOutlined />}
-                  className="font-bold h-10 shadow-none transition-all active:scale-95"
-                >
+                <Button onClick={handleExport} icon={<DownloadOutlined />}>
                   Xuất Excel
                 </Button>
               </>
@@ -342,11 +330,7 @@ export const JobsList = () => {
       />
 
       {/* Filters */}
-      <Card
-        bordered={false}
-        className="shadow-sm border-t-2 border-red-500 bg-slate-500/5 dark:bg-slate-500/10"
-        bodyStyle={{ padding: "16px 24px" }}
-      >
+      <Card bordered={false} bodyStyle={{ padding: "16px 24px" }}>
         <Row gutter={[16, 16]} align="middle">
           <Col xs={24} lg={12}>
             <Input
