@@ -1,4 +1,4 @@
-import { Layout, Button, Badge, Avatar, Breadcrumb, Input } from "antd";
+import { Layout, Button, Badge, Avatar, Input } from "antd";
 import {
   SunOutlined,
   MoonOutlined,
@@ -36,12 +36,7 @@ export const Header = () => {
         transition: "background 0.2s, border 0.2s",
       }}
     >
-      <div className="flex items-center gap-4">
-        <Breadcrumb
-          items={[{ title: "Workspace" }, { title: "Auto WP Publisher" }]}
-          className="text-xs font-medium tracking-wide"
-        />
-      </div>
+      <div className="flex items-center gap-4"></div>
 
       <div className="flex items-center gap-4">
         <Input

@@ -43,7 +43,7 @@ export function AntdProvider({ children }: { children: ReactNode }) {
         },
         components: {
           Layout: {
-            siderBg: "#1F1F1F", // Dark theme always for sidebar (#1F1F1F)
+            siderBg: "#1F1F1F",
             headerBg: isDark ? "#1F1F1F" : "#FFFFFF",
             headerHeight: 64,
           },
@@ -52,18 +52,9 @@ export function AntdProvider({ children }: { children: ReactNode }) {
             paddingLG: 24,
           },
           Table: {
-            headerBg: isDark ? "#2A2A2A" : "#F6F7FB",
+            headerBg: isDark ? "#262626" : "#FAFAFA",
             headerColor: isDark ? "#E5E5E5" : "#262626",
             headerBorderRadius: 8,
-          },
-          Menu: {
-            itemHeight: 46,
-            darkItemBg: "#1F1F1F",
-            darkItemSelectedBg: "rgba(198, 40, 40, 0.12)",
-            darkItemSelectedColor: "#C62828",
-            darkItemColor: "#8C8C8C",
-            darkItemHoverColor: "#C62828",
-            darkItemHoverBg: "rgba(255, 255, 255, 0.04)",
           },
           Button: {
             controlHeight: 40,
