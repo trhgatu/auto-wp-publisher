@@ -59,7 +59,7 @@ export function JobDetail() {
         description="Xem chi tiết nội dung, thuộc tính và liên kết xuất bản của sản phẩm."
         breadcrumbs={[
           { title: "Workspace" },
-          { title: "Kho Sản Phẩm", href: "/jobs" },
+          { title: "Quản lý Job", href: "/jobs" },
           { title: job.sku || job.id.slice(0, 8) },
         ]}
         extra={

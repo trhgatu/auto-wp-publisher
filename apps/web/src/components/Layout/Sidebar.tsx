@@ -8,6 +8,7 @@ import {
   RobotOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
+import { useTheme } from "../../hooks/useTheme";
 
 const { Sider } = Layout;
 
@@ -18,6 +19,8 @@ interface SidebarProps {
 
 export const Sidebar = ({ collapsed, onCollapse }: SidebarProps) => {
   const location = useLocation();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const menuItems = [
     {
@@ -28,7 +31,7 @@ export const Sidebar = ({ collapsed, onCollapse }: SidebarProps) => {
     {
       key: "/jobs",
       icon: <DatabaseOutlined />,
-      label: <Link to="/jobs">Kho Sản Phẩm</Link>,
+      label: <Link to="/jobs">Quản lý Job</Link>,
     },
     {
       key: "/api-history",
@@ -49,7 +52,7 @@ export const Sidebar = ({ collapsed, onCollapse }: SidebarProps) => {
     <Sider
       width={240}
       collapsedWidth={72}
-      theme="dark"
+      theme={isDark ? "dark" : "light"}
       collapsible
       collapsed={collapsed}
       onCollapse={onCollapse}
@@ -60,19 +63,27 @@ export const Sidebar = ({ collapsed, onCollapse }: SidebarProps) => {
         top: 0,
         bottom: 0,
         zIndex: 50,
-        borderRight: "1px solid #303030",
-        background: "#1F1F1F",
+        borderRight: isDark ? "1px solid #303030" : "1px solid #ECECEC",
+        background: isDark ? "#1F1F1F" : "#FFFFFF",
       }}
-      className="bg-[#1F1F1F]"
+      className={isDark ? "bg-[#1F1F1F]" : "bg-white"}
     >
-      <div className="h-16 flex items-center px-5 border-b border-[#303030] bg-[#1F1F1F] transition-colors overflow-hidden">
+      <div
+        className={`h-16 flex items-center px-5 border-b transition-colors overflow-hidden ${
+          isDark ? "border-[#303030] bg-[#1F1F1F]" : "border-[#ECECEC] bg-white"
+        }`}
+      >
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded bg-[#C62828] flex items-center justify-center flex-shrink-0">
             <DatabaseOutlined className="text-base text-white" />
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-sm font-bold tracking-tight text-white leading-none">
+              <span
+                className={`text-sm font-bold tracking-tight leading-none ${
+                  isDark ? "text-white" : "text-[#262626]"
+                }`}
+              >
                 AUTO WP
               </span>
               <span className="text-[9px] font-bold text-[#C62828] tracking-wider uppercase mt-0.5">
@@ -89,18 +100,16 @@ export const Sidebar = ({ collapsed, onCollapse }: SidebarProps) => {
       >
         <Menu
           mode="inline"
-          theme="dark"
+          theme={isDark ? "dark" : "light"}
           selectedKeys={[activeKey]}
           items={menuItems}
           style={{ borderRight: 0, paddingTop: 16, background: "transparent" }}
         />
 
-        <div className="p-3 border-t border-[#303030] bg-black/10">
+        <div>
           <Menu
             mode="inline"
-            theme="dark"
             selectedKeys={[location.pathname]}
-            style={{ borderRight: 0, background: "transparent" }}
             items={[
               {
                 key: "settings-submenu",

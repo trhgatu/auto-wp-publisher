@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Card,
   Form,
@@ -10,12 +10,14 @@ import {
   Row,
   Col,
   Tag,
+  Tooltip,
 } from "antd";
 import {
   RobotOutlined,
   SaveOutlined,
   InfoCircleOutlined,
   UndoOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import { axios } from "../../../lib/axios";
 import { useNotification } from "../../../hooks/useNotification";
@@ -28,6 +30,8 @@ export const AiSettings = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const { notify } = useNotification();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const textareaRef = useRef<any>(null);
 
   const fetchSettings = async () => {
     setLoading(true);
@@ -89,6 +93,24 @@ Yêu cầu bài viết để tối ưu hóa SEO trên WordPress:
     });
   };
 
+  const handleInsertTag = (tag: string) => {
+    const textarea = textareaRef.current?.resizableTextArea?.textArea;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = form.getFieldValue("systemPrompt") || "";
+    const newText = text.substring(0, start) + tag + text.substring(end);
+
+    form.setFieldsValue({ systemPrompt: newText });
+
+    // Focus back and position cursor after inserted tag
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + tag.length, start + tag.length);
+    }, 0);
+  };
+
   if (loading) {
     return <Loading tip="Đang tải cấu hình AI..." height={320} />;
   }
@@ -118,13 +140,13 @@ Yêu cầu bài viết để tối ưu hóa SEO trên WordPress:
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={16}>
           <Card
-            bordered={false}
-            className="shadow-sm border-t-2 border-red-500"
+            bordered={true}
+            className="shadow-sm bg-white dark:bg-[#1F1F1F]"
           >
             <Form form={form} layout="vertical" onFinish={handleSave}>
               <Form.Item
                 label={
-                  <span className="font-bold text-xs uppercase tracking-wider">
+                  <span className="font-bold text-xs uppercase tracking-wider text-slate-800 dark:text-slate-200">
                     Mô tả và hướng dẫn Prompt (System Prompt)
                   </span>
                 }
@@ -133,7 +155,8 @@ Yêu cầu bài viết để tối ưu hóa SEO trên WordPress:
                 tooltip="Mẫu mô tả prompt hướng dẫn AI cách biên tập lại bài viết."
               >
                 <Input.TextArea
-                  rows={15}
+                  ref={textareaRef}
+                  rows={16}
                   placeholder="Hãy nhập Prompt chi tiết tại đây..."
                   style={{ fontFamily: "monospace", fontSize: "13px" }}
                 />
@@ -143,7 +166,7 @@ Yêu cầu bài viết để tối ưu hóa SEO trên WordPress:
                 <Col xs={24} md={12}>
                   <Form.Item
                     label={
-                      <span className="font-bold text-xs uppercase tracking-wider">
+                      <span className="font-bold text-xs uppercase tracking-wider text-slate-800 dark:text-slate-200">
                         AI Model
                       </span>
                     }
@@ -151,7 +174,6 @@ Yêu cầu bài viết để tối ưu hóa SEO trên WordPress:
                     required
                   >
                     <Select
-                      size="large"
                       options={[
                         {
                           label: "Gemini 2.5 Flash (Khuyên dùng - Nhanh, Rẻ)",
@@ -174,7 +196,7 @@ Yêu cầu bài viết để tối ưu hóa SEO trên WordPress:
                 <Col xs={24} md={12}>
                   <Form.Item
                     label={
-                      <span className="font-bold text-xs uppercase tracking-wider">
+                      <span className="font-bold text-xs uppercase tracking-wider text-slate-800 dark:text-slate-200">
                         Độ sáng tạo (Temperature)
                       </span>
                     }
@@ -200,11 +222,7 @@ Yêu cầu bài viết để tối ưu hóa SEO trên WordPress:
               </Row>
 
               <div className="pt-6 mt-6 border-t border-slate-100 dark:border-slate-800 flex justify-between gap-4">
-                <Button
-                  onClick={handleResetDefault}
-                  icon={<UndoOutlined />}
-                  size="large"
-                >
+                <Button onClick={handleResetDefault} icon={<UndoOutlined />}>
                   Đặt lại mặc định
                 </Button>
 
@@ -214,8 +232,6 @@ Yêu cầu bài viết để tối ưu hóa SEO trên WordPress:
                   htmlType="submit"
                   loading={saving}
                   icon={<SaveOutlined />}
-                  size="large"
-                  className="font-bold text-xs uppercase tracking-tight"
                 >
                   Lưu cấu hình
                 </Button>
@@ -227,8 +243,8 @@ Yêu cầu bài viết để tối ưu hóa SEO trên WordPress:
         <Col xs={24} lg={8} className="space-y-6">
           {/* Guide variables */}
           <Card
-            bordered={false}
-            className="shadow-sm border-t-2 border-red-500"
+            bordered={true}
+            className="shadow-sm bg-white dark:bg-[#1F1F1F]"
             title={
               <span className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-slate-100">
                 Các biến tương thích
@@ -236,33 +252,45 @@ Yêu cầu bài viết để tối ưu hóa SEO trên WordPress:
             }
           >
             <Alert
-              message="Hướng dẫn sử dụng biến"
-              description="Các thẻ dưới đây sẽ tự động thay thế bằng thông tin thực tế từ Excel/Job của sản phẩm tương ứng."
+              message="Chèn nhanh biến"
+              description="Bấm vào tên biến hoặc nút cộng (+) để chèn nhanh vào vị trí con trỏ chuột trong ô soạn thảo Prompt."
               type="info"
               showIcon
               icon={<InfoCircleOutlined />}
-              className="border-none bg-slate-50 dark:bg-slate-800/40 mb-4"
+              className="border-none bg-[#F6F7FB] dark:bg-slate-800/40 mb-4 text-xs"
             />
 
             <div className="space-y-4">
               {variables.map((v, i) => (
                 <div
                   key={i}
-                  className="flex flex-col gap-1 border-b border-slate-100 dark:border-slate-800 pb-2 last:border-0 last:pb-0"
+                  className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 last:border-0 last:pb-0"
                 >
-                  <Tag
-                    color="red"
-                    style={{
-                      fontFamily: "monospace",
-                      width: "fit-content",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {v.tag}
-                  </Tag>
-                  <span className="text-xs text-slate-500 font-medium">
-                    {v.desc}
-                  </span>
+                  <div className="flex flex-col gap-1.5 flex-1 pr-2">
+                    <Tooltip title="Click để chèn vào prompt">
+                      <Tag
+                        color="red"
+                        className="cursor-pointer hover:scale-102 active:scale-98 transition-transform font-bold font-mono px-2 py-0.5 border-none bg-red-50 text-[#C62828] dark:bg-red-950/20 dark:text-red-400"
+                        onClick={() => handleInsertTag(v.tag)}
+                      >
+                        {v.tag}
+                      </Tag>
+                    </Tooltip>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                      {v.desc}
+                    </span>
+                  </div>
+                  <Tooltip title="Chèn biến này">
+                    <Button
+                      type="text"
+                      shape="circle"
+                      size="small"
+                      icon={
+                        <PlusOutlined className="text-slate-400 hover:text-[#C62828]" />
+                      }
+                      onClick={() => handleInsertTag(v.tag)}
+                    />
+                  </Tooltip>
                 </div>
               ))}
             </div>

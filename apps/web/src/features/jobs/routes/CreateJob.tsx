@@ -63,7 +63,7 @@ export const CreateJob = () => {
         title="Tạo Bài Viết Mới"
         breadcrumbs={[
           { title: "Workspace" },
-          { title: "Kho Sản Phẩm", href: "/jobs" },
+          { title: "Quản lý Job", href: "/jobs" },
           { title: "Tạo mới" },
         ]}
         icon={
