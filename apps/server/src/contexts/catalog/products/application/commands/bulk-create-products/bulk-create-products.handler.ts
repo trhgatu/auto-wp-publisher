@@ -101,16 +101,18 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
         await this.productRepository.save(product);
         this.publisher.mergeObjectContext(product).commit();
 
-        await this.wpPublisherQueue.add(
-          'publish-product',
-          { productId },
-          {
-            removeOnComplete: true,
-            removeOnFail: false,
-            attempts: 3,
-            backoff: { type: 'exponential', delay: 2000 },
-          },
-        );
+        if (!command.delayQueue) {
+          await this.wpPublisherQueue.add(
+            'publish-product',
+            { productId },
+            {
+              removeOnComplete: true,
+              removeOnFail: false,
+              attempts: 3,
+              backoff: { type: 'exponential', delay: 2000 },
+            },
+          );
+        }
         ids.push(productId);
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : String(err);

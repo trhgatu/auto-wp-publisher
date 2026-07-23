@@ -1,6 +1,10 @@
 import React from "react";
-import { Table, Button, Tag } from "antd";
-import { ArrowRightOutlined, UndoOutlined } from "@ant-design/icons";
+import { Table, Button, Tag, Upload } from "antd";
+import {
+  ArrowRightOutlined,
+  UndoOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import {
   useImportStore,
   selectUniqueExcelCategories,
@@ -25,16 +29,31 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
   wpBrands,
   savedMappingsBrands,
 }) => {
-  const { data, setStep, setData, setFullMapping, setFullBrandMapping } =
-    useImportStore(
-      useShallow((state) => ({
-        data: state.data,
-        setStep: state.setStep,
-        setData: state.setData,
-        setFullMapping: state.setFullMapping,
-        setFullBrandMapping: state.setFullBrandMapping,
-      })),
-    );
+  const {
+    data,
+    setStep,
+    setData,
+    setFullMapping,
+    setFullBrandMapping,
+    rowFeaturedFile,
+    setRowFeaturedFile,
+    rowGalleryFiles,
+    setRowGalleryFiles,
+    addRowGalleryFile,
+  } = useImportStore(
+    useShallow((state) => ({
+      data: state.data,
+      setStep: state.setStep,
+      setData: state.setData,
+      setFullMapping: state.setFullMapping,
+      setFullBrandMapping: state.setFullBrandMapping,
+      rowFeaturedFile: state.rowFeaturedFile,
+      setRowFeaturedFile: state.setRowFeaturedFile,
+      rowGalleryFiles: state.rowGalleryFiles,
+      setRowGalleryFiles: state.setRowGalleryFiles,
+      addRowGalleryFile: state.addRowGalleryFile,
+    })),
+  );
   const [existingProducts, setExistingProducts] = React.useState<
     ExistingProductInfo[]
   >([]);
@@ -217,6 +236,77 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
           {brand || "-"}
         </Tag>
       ),
+    },
+    {
+      title: "Ảnh đại diện",
+      key: "featuredImage",
+      width: 180,
+      render: (_: unknown, __: unknown, index: number) => {
+        const file = rowFeaturedFile[index] || null;
+        return (
+          <Upload
+            listType="picture"
+            maxCount={1}
+            fileList={
+              file
+                ? [
+                    {
+                      uid: "-1",
+                      name: file.name,
+                      status: "done",
+                      url: URL.createObjectURL(file),
+                    },
+                  ]
+                : []
+            }
+            beforeUpload={(newFile) => {
+              setRowFeaturedFile(index, newFile);
+              return false;
+            }}
+            onRemove={() => {
+              setRowFeaturedFile(index, null);
+            }}
+          >
+            {!file && (
+              <Button size="small" icon={<UploadOutlined />}>
+                Chọn ảnh
+              </Button>
+            )}
+          </Upload>
+        );
+      },
+    },
+    {
+      title: "Thư viện ảnh",
+      key: "galleryImages",
+      width: 220,
+      render: (_: unknown, __: unknown, index: number) => {
+        const files = rowGalleryFiles[index] || [];
+        return (
+          <Upload
+            listType="picture"
+            multiple
+            fileList={files.map((file, i) => ({
+              uid: `${i}`,
+              name: file.name,
+              status: "done",
+              url: URL.createObjectURL(file),
+            }))}
+            beforeUpload={(file) => {
+              addRowGalleryFile(index, file);
+              return false; // Prevent auto-upload
+            }}
+            onRemove={(file) => {
+              const updatedFiles = files.filter((f) => f.name !== file.name);
+              setRowGalleryFiles(index, updatedFiles);
+            }}
+          >
+            <Button size="small" icon={<UploadOutlined />}>
+              Chọn ảnh phụ
+            </Button>
+          </Upload>
+        );
+      },
     },
     {
       title: "Trạng thái",

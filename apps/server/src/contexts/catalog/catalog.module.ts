@@ -15,6 +15,7 @@ import { ProductRepository } from './products/domain/product.repository';
 import { PrismaProductRepository } from './products/infrastructure/repositories/prisma-product.repository';
 import { WordPressService } from './jobs/services/wordpress.service';
 import { GeminiService } from './jobs/services/gemini.service';
+import { MediaUploadService } from './jobs/services/media-upload.service';
 import { ApiLogsModule } from './api-logs/api-logs.module';
 import { EventsGateway } from './jobs/events.gateway';
 import { GetDashboardStatsHandler } from './products/application/queries/get-dashboard-stats/get-dashboard-stats.handler';
@@ -42,6 +43,7 @@ import { PermanentlyDeleteProductHandler } from './products/application/commands
     EventsGateway,
     WordPressService,
     GeminiService,
+    MediaUploadService,
     PublisherProcessor,
     CreateProductHandler,
     BulkCreateProductsHandler,

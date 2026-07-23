@@ -1,16 +1,28 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Card, Form, Input, Button, Alert, Row, Col } from "antd";
+import {
+  Card,
+  Form,
+  Input,
+  Button,
+  Alert,
+  Row,
+  Col,
+  Upload,
+  message,
+} from "antd";
 import {
   SendOutlined,
   FileTextOutlined,
   LinkOutlined,
   InfoCircleOutlined,
   ArrowLeftOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import { ImportProductSchema } from "@repo/shared";
 import type { ImportProductDto } from "@repo/shared";
 import { createJob } from "../api/createJob";
+import { uploadImage } from "../api/uploadImage";
 import { PageHeader } from "../../../components/shared/PageHeader";
 
 export const CreateJob = () => {
@@ -18,6 +30,10 @@ export const CreateJob = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>("");
+  const [galleryUrls, setGalleryUrls] = useState<string[]>([]);
+  const [uploadingMain, setUploadingMain] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = async (values: any) => {
@@ -31,6 +47,10 @@ export const CreateJob = () => {
       tags: values.tags,
       ...(values.sku ? { sku: values.sku } : {}),
       ...(values.sourceUrl ? { sourceUrl: values.sourceUrl } : {}),
+      ...(imageUrl ? { imageUrl } : {}),
+      ...(galleryUrls.length > 0
+        ? { galleryImageUrls: galleryUrls.join(", ") }
+        : {}),
     };
 
     // Use safeParse to avoid class Monorepo issues
@@ -161,6 +181,104 @@ export const CreateJob = () => {
             <Col xs={24}>
               <Form.Item label="Thẻ (Tags)" name="tags">
                 <Input placeholder="tag1, tag2, tag3..." size="large" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="Ảnh đại diện sản phẩm"
+                tooltip="Tải ảnh chính lên WordPress Media Library"
+              >
+                <Upload
+                  name="file"
+                  listType="picture-card"
+                  showUploadList={false}
+                  customRequest={async ({ file, onSuccess, onError }) => {
+                    setUploadingMain(true);
+                    try {
+                      const url = await uploadImage(file as File);
+                      setImageUrl(url);
+                      onSuccess?.(url);
+                      message.success(
+                        "Tải ảnh đại diện lên WordPress thành công!",
+                      );
+                    } catch (err) {
+                      onError?.(err as Error);
+                      message.error("Lỗi khi tải ảnh lên WordPress.");
+                    } finally {
+                      setUploadingMain(false);
+                    }
+                  }}
+                >
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt="avatar"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        borderRadius: "8px",
+                      }}
+                    />
+                  ) : (
+                    <div>
+                      <UploadOutlined
+                        style={{ fontSize: "24px", color: "#8c8c8c" }}
+                      />
+                      <div style={{ marginTop: 8 }}>
+                        {uploadingMain ? "Đang tải..." : "Tải ảnh từ máy"}
+                      </div>
+                    </div>
+                  )}
+                </Upload>
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="Thư viện ảnh phụ"
+                tooltip="Tải nhiều ảnh phụ lên WordPress Media Library"
+              >
+                <Upload
+                  name="file"
+                  listType="picture"
+                  multiple
+                  fileList={galleryUrls.map((url, i) => ({
+                    uid: `${i}`,
+                    name: `Ảnh phụ ${i + 1}`,
+                    status: "done",
+                    url: url,
+                  }))}
+                  onRemove={(file) => {
+                    const index = galleryUrls.indexOf(file.url || "");
+                    if (index > -1) {
+                      const newUrls = [...galleryUrls];
+                      newUrls.splice(index, 1);
+                      setGalleryUrls(newUrls);
+                    }
+                  }}
+                  customRequest={async ({ file, onSuccess, onError }) => {
+                    setUploadingGallery(true);
+                    try {
+                      const url = await uploadImage(file as File);
+                      setGalleryUrls((prev) => [...prev, url]);
+                      onSuccess?.(url);
+                      message.success("Tải ảnh phụ lên WordPress thành công!");
+                    } catch (err) {
+                      onError?.(err as Error);
+                      message.error("Lỗi khi tải ảnh lên WordPress.");
+                    } finally {
+                      setUploadingGallery(false);
+                    }
+                  }}
+                >
+                  <Button icon={<UploadOutlined />} loading={uploadingGallery}>
+                    Tải ảnh từ máy
+                  </Button>
+                </Upload>
               </Form.Item>
             </Col>
           </Row>
