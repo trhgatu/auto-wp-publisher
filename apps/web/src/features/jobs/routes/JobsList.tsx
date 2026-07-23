@@ -35,6 +35,8 @@ import { ExcelImportModal } from "../components/ExcelImportModal";
 import { trashJob } from "../api/trashJob";
 import { restoreJob } from "../api/restoreJob";
 import { permanentlyDeleteJob } from "../api/permanentlyDeleteJob";
+import { trashAllJobs } from "../api/trashAllJobs";
+import { permanentlyDeleteAllJobs } from "../api/permanentlyDeleteAllJobs";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNotification } from "../../../hooks/useNotification";
 
@@ -293,15 +295,44 @@ export const JobsList = () => {
         icon={<DatabaseOutlined />}
         extra={
           <>
-            <Button
-              onClick={() => {
-                setOnlyTrashed(!onlyTrashed);
-                setPage(1);
-              }}
-              icon={onlyTrashed ? <DatabaseOutlined /> : <RestOutlined />}
-            >
-              {onlyTrashed ? "Về Kho" : "Thùng Rác"}
-            </Button>
+            {onlyTrashed ? (
+              <>
+                <Button
+                  onClick={() =>
+                    handleAction(
+                      () => permanentlyDeleteAllJobs(),
+                      "Dọn sạch thùng rác",
+                      "Hành động này sẽ XÓA CỨNG toàn bộ sản phẩm trong thùng rác và không thể khôi phục. Bạn chắc chắn chứ?",
+                      "Đã dọn sạch thùng rác thành công",
+                    )
+                  }
+                  icon={<DeleteOutlined />}
+                  type="primary"
+                  danger
+                >
+                  Dọn sạch thùng rác
+                </Button>
+                <Button
+                  onClick={() => {
+                    setOnlyTrashed(false);
+                    setPage(1);
+                  }}
+                  icon={<DatabaseOutlined />}
+                >
+                  Về Kho
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={() => {
+                  setOnlyTrashed(!onlyTrashed);
+                  setPage(1);
+                }}
+                icon={<RestOutlined />}
+              >
+                Thùng Rác
+              </Button>
+            )}
 
             {!onlyTrashed && (
               <>
@@ -309,7 +340,7 @@ export const JobsList = () => {
                   onClick={() => setImportModalOpen(true)}
                   icon={<FileExcelOutlined />}
                   type="primary"
-                  danger
+                  style={{ backgroundColor: "#107C41", borderColor: "#107C41" }}
                 >
                   Import Excel
                 </Button>
@@ -322,6 +353,21 @@ export const JobsList = () => {
 
                 <Button onClick={handleExport} icon={<DownloadOutlined />}>
                   Xuất Excel
+                </Button>
+
+                <Button
+                  onClick={() =>
+                    handleAction(
+                      () => trashAllJobs(),
+                      "Xóa tất cả sản phẩm",
+                      "Bạn có chắc chắn muốn chuyển toàn bộ sản phẩm hiện tại vào thùng rác?",
+                      "Đã chuyển tất cả vào thùng rác",
+                    )
+                  }
+                  icon={<RestOutlined />}
+                  danger
+                >
+                  Xóa tất cả
                 </Button>
               </>
             )}

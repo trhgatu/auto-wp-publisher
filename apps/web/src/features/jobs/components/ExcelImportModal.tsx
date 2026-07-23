@@ -1,5 +1,7 @@
 import React, { useMemo, useEffect } from "react";
-import { Modal } from "antd";
+import { Modal, message } from "antd";
+import { uploadImage } from "../api/uploadImage";
+import { publishJob } from "../api/publishJob";
 import { useBulkCreateJobs } from "../hooks/useBulkCreateJobs";
 import {
   useCategories,
@@ -149,7 +151,63 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
         };
       });
 
-      await mutation.mutateAsync(finalData);
+      const { rowFeaturedFile, rowGalleryFiles } = useImportStore.getState();
+      const hasFeaturedFiles = Object.values(rowFeaturedFile).some(
+        (file) => file !== null,
+      );
+      const hasGalleryFiles = Object.values(rowGalleryFiles).some(
+        (files) => files && files.length > 0,
+      );
+      const hasFiles = hasFeaturedFiles || hasGalleryFiles;
+
+      const createdIds = await mutation.mutateAsync({
+        data: finalData,
+        delayQueue: hasFiles,
+      });
+
+      if (hasFiles) {
+        const hideLoading = message.loading("Đang tải ảnh lên WordPress...", 0);
+
+        const allIndices = Array.from(
+          new Set([
+            ...Object.keys(rowFeaturedFile).map(Number),
+            ...Object.keys(rowGalleryFiles).map(Number),
+          ]),
+        );
+
+        const uploadPromises = allIndices.map(async (index) => {
+          const id = createdIds[index];
+          if (!id) return;
+
+          const featuredFile = rowFeaturedFile[index];
+          const galleryFiles = rowGalleryFiles[index] || [];
+
+          try {
+            // 1. Upload featured image if it exists
+            if (featuredFile) {
+              await uploadImage(featuredFile, id, "imageUrl");
+            }
+
+            // 2. Upload gallery images
+            for (const file of galleryFiles) {
+              await uploadImage(file, id, "gallery");
+            }
+
+            // 3. Dispatch job to worker now that images are uploaded!
+            await publishJob(id);
+          } catch (uploadErr) {
+            console.error(
+              `Failed to upload images or publish job ${id}:`,
+              uploadErr,
+            );
+          }
+        });
+
+        await Promise.all(uploadPromises);
+        hideLoading();
+        message.success("Đã tải ảnh lên WordPress và hoàn tất import!");
+      }
+
       onSuccess?.();
       onClose();
     } catch (err) {

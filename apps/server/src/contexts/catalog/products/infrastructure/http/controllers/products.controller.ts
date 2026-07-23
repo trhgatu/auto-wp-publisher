@@ -1,5 +1,17 @@
-import { Controller, Post, Get, Body, Query, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Query,
+  Param,
+  UseInterceptors,
+  UploadedFile,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateProductCommand } from '../../../application/commands/create-product/create-product.command';
 import { BulkCreateProductsCommand } from '../../../application/commands/bulk-create-products/bulk-create-products.command';
 import { GetProductsQuery } from '../../../application/queries/get-products/get-products.query';
@@ -18,12 +30,20 @@ import {
 } from '@repo/shared';
 import { ZodValidationPipe } from 'src/shared/infrastructure/pipes/zod-validation.pipe';
 import { z } from 'zod';
+import { PrismaService } from 'src/shared/infrastructure/prisma/prisma.service';
+import { MediaUploadService } from '../../../../jobs/services/media-upload.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Controller('products')
 export class ProductsController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly prisma: PrismaService,
+    private readonly mediaUploadService: MediaUploadService,
+    @InjectQueue('wp-publisher')
+    private readonly wpPublisherQueue: Queue,
   ) {}
 
   @Get()
@@ -90,10 +110,26 @@ export class ProductsController {
       new ZodValidationPipe(BulkImportProductSchema as unknown as z.ZodSchema),
     )
     data: BulkImportProductDto,
+    @Query('delayQueue') delayQueue?: string,
   ): Promise<string[]> {
     return this.commandBus.execute<BulkCreateProductsCommand, string[]>(
-      new BulkCreateProductsCommand(data),
+      new BulkCreateProductsCommand(data, delayQueue === 'true'),
     );
+  }
+
+  @Post(':id/publish')
+  async publishProduct(@Param('id') id: string) {
+    await this.wpPublisherQueue.add(
+      'publish-product',
+      { productId: id },
+      {
+        removeOnComplete: true,
+        removeOnFail: false,
+        attempts: 3,
+        backoff: { type: 'exponential', delay: 2000 },
+      },
+    );
+    return { success: true };
   }
 
   @Post(':id/restore')
@@ -109,5 +145,98 @@ export class ProductsController {
   @Post(':id/permanent-delete')
   async permanentlyDeleteProduct(@Param('id') id: string): Promise<void> {
     return this.commandBus.execute(new PermanentlyDeleteProductCommand(id));
+  }
+
+  @Post('trash-all')
+  async trashAllProducts(): Promise<void> {
+    await this.prisma.product.updateMany({
+      where: { deletedAt: null },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  @Post('permanent-delete-all')
+  async permanentlyDeleteAllProducts(): Promise<void> {
+    await this.prisma.product.deleteMany({
+      where: { deletedAt: { not: null } },
+    });
+  }
+
+  @Post('upload-image')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadTempImage(
+    @UploadedFile()
+    file: {
+      buffer: Buffer;
+      originalname: string;
+      mimetype: string;
+    },
+  ) {
+    if (!file) {
+      throw new HttpException(
+        'File không hợp lệ hoặc thiếu.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const uploadedUrl = await this.mediaUploadService.uploadToWordPress(
+      file.buffer,
+      file.originalname,
+      file.mimetype,
+    );
+
+    return { url: uploadedUrl };
+  }
+
+  @Post(':id/upload-image')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadImage(
+    @Param('id') id: string,
+    @UploadedFile()
+    file: { buffer: Buffer; originalname: string; mimetype: string },
+    @Query('type') type: 'imageUrl' | 'gallery' = 'imageUrl',
+  ) {
+    if (!file) {
+      throw new HttpException(
+        'File không hợp lệ hoặc thiếu.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const uploadedUrl = await this.mediaUploadService.uploadToWordPress(
+      file.buffer,
+      file.originalname,
+      file.mimetype,
+    );
+
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+    });
+
+    if (!product) {
+      throw new HttpException('Không tìm thấy sản phẩm.', HttpStatus.NOT_FOUND);
+    }
+
+    if (type === 'gallery') {
+      const currentGallery = product.galleryImageUrls
+        ? product.galleryImageUrls
+            .split(',')
+            .map((u) => u.trim())
+            .filter(Boolean)
+        : [];
+      currentGallery.push(uploadedUrl);
+      const updatedGallery = currentGallery.join(', ');
+      await this.prisma.product.update({
+        where: { id },
+        data: { galleryImageUrls: updatedGallery },
+      });
+    } else {
+      await this.prisma.product.update({
+        where: { id },
+        data: { imageUrl: uploadedUrl },
+      });
+    }
+
+    return { url: uploadedUrl };
   }
 }
