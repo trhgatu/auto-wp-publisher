@@ -13,6 +13,8 @@ interface ImportState {
   isDragging: boolean;
   categoryMapping: Record<string, string>;
   brandMapping: Record<string, string>;
+  rowFeaturedFile: Record<number, File | null>;
+  rowGalleryFiles: Record<number, File[]>;
 
   // Actions
   setStep: (step: Step) => void;
@@ -22,6 +24,9 @@ interface ImportState {
   setFullMapping: (mapping: Record<string, string>) => void;
   setBrandMapping: (excelBrand: string, wpId: string) => void;
   setFullBrandMapping: (mapping: Record<string, string>) => void;
+  setRowFeaturedFile: (index: number, file: File | null) => void;
+  setRowGalleryFiles: (index: number, files: File[]) => void;
+  addRowGalleryFile: (index: number, file: File) => void;
   reset: () => void;
 }
 
@@ -31,6 +36,8 @@ export const useImportStore = create<ImportState>((set) => ({
   isDragging: false,
   categoryMapping: {},
   brandMapping: {},
+  rowFeaturedFile: {},
+  rowGalleryFiles: {},
 
   setStep: (step) => set({ step }),
   setData: (data) => set({ data }),
@@ -45,6 +52,24 @@ export const useImportStore = create<ImportState>((set) => ({
       brandMapping: { ...state.brandMapping, [excelBrand]: wpId },
     })),
   setFullBrandMapping: (brandMapping) => set({ brandMapping }),
+  setRowFeaturedFile: (index, file) =>
+    set((state) => ({
+      rowFeaturedFile: { ...state.rowFeaturedFile, [index]: file },
+    })),
+  setRowGalleryFiles: (index, files) =>
+    set((state) => ({
+      rowGalleryFiles: { ...state.rowGalleryFiles, [index]: files },
+    })),
+  addRowGalleryFile: (index, file) =>
+    set((state) => {
+      const currentFiles = state.rowGalleryFiles[index] || [];
+      return {
+        rowGalleryFiles: {
+          ...state.rowGalleryFiles,
+          [index]: [...currentFiles, file],
+        },
+      };
+    }),
   reset: () =>
     set({
       step: "upload",
@@ -52,6 +77,8 @@ export const useImportStore = create<ImportState>((set) => ({
       isDragging: false,
       categoryMapping: {},
       brandMapping: {},
+      rowFeaturedFile: {},
+      rowGalleryFiles: {},
     }),
 }));
 
