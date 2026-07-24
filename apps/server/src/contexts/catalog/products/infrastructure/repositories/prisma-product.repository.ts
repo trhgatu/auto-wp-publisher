@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ProductRepository } from '../../domain/product.repository';
 import { Product } from '../../domain/entities/product.entity';
 import { ProductId } from '../../domain/value-objects/product-id.vo';
-import { PrismaService } from '../../../../../shared/infrastructure/prisma/prisma.service';
+import { PrismaService } from '@shared/infrastructure/prisma/prisma.service';
 import { Product as PrismaProduct } from '@repo/database';
 import { ProductStatus } from '../../domain/types/product-status.enum';
 
@@ -34,6 +34,7 @@ export class PrismaProductRepository implements ProductRepository {
         category: product.category,
         brand: product.brand,
         tags: product.tags,
+        templateId: product.templateId,
         status: product.status,
         errorLog: product.errorLog,
         updatedAt: product.updatedAt,
@@ -61,6 +62,7 @@ export class PrismaProductRepository implements ProductRepository {
         category: product.category,
         brand: product.brand,
         tags: product.tags,
+        templateId: product.templateId,
         status: product.status,
         errorLog: product.errorLog,
         createdAt: product.createdAt,
@@ -142,6 +144,7 @@ export class PrismaProductRepository implements ProductRepository {
       raw.createdAt,
       raw.updatedAt,
       raw.deletedAt,
+      raw.templateId,
     );
   }
 }

@@ -4,6 +4,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { SharedModule } from './shared/shared.module';
 import { IamModule } from './contexts/iam/iam.module';
 import { CatalogModule } from './contexts/catalog/catalog.module';
+import { SettingsModule } from './contexts/settings/settings.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { CatalogModule } from './contexts/catalog/catalog.module';
     SharedModule,
     IamModule,
     CatalogModule,
+    SettingsModule,
   ],
   controllers: [],
 })

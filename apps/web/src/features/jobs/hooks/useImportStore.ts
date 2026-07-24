@@ -15,6 +15,7 @@ interface ImportState {
   brandMapping: Record<string, string>;
   rowFeaturedFile: Record<number, File | null>;
   rowGalleryFiles: Record<number, File[]>;
+  selectedTemplateId: string | null;
 
   // Actions
   setStep: (step: Step) => void;
@@ -27,6 +28,7 @@ interface ImportState {
   setRowFeaturedFile: (index: number, file: File | null) => void;
   setRowGalleryFiles: (index: number, files: File[]) => void;
   addRowGalleryFile: (index: number, file: File) => void;
+  setSelectedTemplateId: (id: string | null) => void;
   reset: () => void;
 }
 
@@ -38,6 +40,7 @@ export const useImportStore = create<ImportState>((set) => ({
   brandMapping: {},
   rowFeaturedFile: {},
   rowGalleryFiles: {},
+  selectedTemplateId: null,
 
   setStep: (step) => set({ step }),
   setData: (data) => set({ data }),
@@ -58,7 +61,7 @@ export const useImportStore = create<ImportState>((set) => ({
     })),
   setRowGalleryFiles: (index, files) =>
     set((state) => ({
-      rowGalleryFiles: { ...state.rowGalleryFiles, [index]: files },
+      rowGalleryFiles: { ...state.rowGalleryFiles, [index]: [...files] },
     })),
   addRowGalleryFile: (index, file) =>
     set((state) => {
@@ -70,6 +73,7 @@ export const useImportStore = create<ImportState>((set) => ({
         },
       };
     }),
+  setSelectedTemplateId: (selectedTemplateId) => set({ selectedTemplateId }),
   reset: () =>
     set({
       step: "upload",
@@ -79,6 +83,7 @@ export const useImportStore = create<ImportState>((set) => ({
       brandMapping: {},
       rowFeaturedFile: {},
       rowGalleryFiles: {},
+      selectedTemplateId: null,
     }),
 }));
 
