@@ -1,24 +1,30 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
-import { ProductRepository } from '../products/domain/product.repository';
-import { WordPressService } from './services/wordpress.service';
-import { GeminiService } from './services/gemini.service';
-import { ProductId } from '../products/domain/value-objects/product-id.vo';
+import { ProductRepository, ProductId } from '@catalog/products/domain';
+import { WpProductService, GeminiService } from '@catalog/integrations';
+import { ProductTemplateService } from '@catalog/templates';
 import { EventsGateway } from './events.gateway';
 
 export interface PublishProductJobData {
   productId: string;
 }
 
-@Processor('wp-publisher')
+@Processor('wp-publisher', {
+  concurrency: 1,
+  limiter: {
+    max: 10,
+    duration: 60000,
+  },
+})
 export class PublisherProcessor extends WorkerHost {
   private readonly logger = new Logger(PublisherProcessor.name);
 
   constructor(
     private readonly productRepo: ProductRepository,
-    private readonly wpService: WordPressService,
+    private readonly wpProductService: WpProductService,
     private readonly geminiService: GeminiService,
+    private readonly templateService: ProductTemplateService,
     private readonly eventsGateway: EventsGateway,
   ) {
     super();
@@ -47,47 +53,69 @@ export class PublisherProcessor extends WorkerHost {
         message: `Đang xử lý bài viết: ${product.name}`,
       });
 
-      this.logger.log(
-        `🤖 Generating AI product description for: ${product.name}`,
-      );
-      const aiDescription = await this.geminiService.generateProductDescription(
-        {
-          title: product.name,
-          sku: product.sku,
-          material: product.material,
-          carModels: product.carModels,
-          shortDescription: product.shortDescription,
-        },
-      );
+      let finalDescription: string | null = null;
 
-      const finalDescription = aiDescription || product.rawContent;
-
-      if (aiDescription) {
-        this.logger.log(`✅ AI description generated successfully.`);
-      } else {
-        this.logger.warn(
-          `⚠️ Falling back to default specifications table template.`,
+      if (product.templateId) {
+        this.logger.log(
+          `📄 Product is assigned to Batch Template ID: ${product.templateId}. Rendering direct template...`,
         );
+        finalDescription = await this.templateService.renderTemplateById(
+          product.templateId,
+          {
+            title: product.name,
+            sku: product.sku,
+            material: product.material,
+            carModels: product.carModels,
+            shortDescription: product.shortDescription,
+          },
+        );
+      } else {
+        this.logger.log(
+          `🤖 Generating AI product description for: ${product.name}`,
+        );
+        const aiDescription =
+          await this.geminiService.generateProductDescription({
+            title: product.name,
+            sku: product.sku,
+            material: product.material,
+            carModels: product.carModels,
+            shortDescription: product.shortDescription,
+          });
+
+        finalDescription = aiDescription;
+
+        if (aiDescription) {
+          this.logger.log(`✅ AI description generated successfully.`);
+        } else {
+          this.logger.warn(`⚠️ Falling back to rich Product Template Service.`);
+          finalDescription = await this.templateService.renderFallbackHtml({
+            title: product.name,
+            sku: product.sku,
+            material: product.material,
+            carModels: product.carModels,
+            shortDescription: product.shortDescription,
+          });
+        }
       }
 
-      const wpProduct = await this.wpService.publishProduct(
-        product.name,
-        finalDescription || '',
-        product.price,
-        product.material,
-        product.carModels,
-        product.shopeeLink,
-        product.lazadaLink,
-        product.tiktokLink,
-        product.videoUrl,
-        product.imageUrl,
-        product.galleryImageUrls,
-        product.category,
-        product.tags,
-        product.brand,
-        product.shortDescription,
-        product.wpPostId,
-      );
+      const wpProduct = await this.wpProductService.publishProduct({
+        title: product.name,
+        rawContent: finalDescription || '',
+        price: product.price,
+        material: product.material,
+        carModels: product.carModels,
+        shopeeLink: product.shopeeLink,
+        lazadaLink: product.lazadaLink,
+        tiktokLink: product.tiktokLink,
+        videoUrl: product.videoUrl,
+        imageUrl: product.imageUrl,
+        galleryImageUrls: product.galleryImageUrls,
+        categoryName: product.category,
+        tags: product.tags,
+        brand: product.brand,
+        shortDescription: product.shortDescription,
+        existingWpId: product.wpPostId,
+      });
 
       this.logger.log(
         `🔗 WooCommerce created product ID: ${wpProduct.id} - URL: ${wpProduct.permalink}`,
@@ -96,7 +124,7 @@ export class PublisherProcessor extends WorkerHost {
       product.markAsCompleted(
         wpProduct.id,
         wpProduct.permalink,
-        aiDescription || '',
+        finalDescription || '',
       );
       await this.productRepo.save(product);
 

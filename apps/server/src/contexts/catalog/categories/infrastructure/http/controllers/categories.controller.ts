@@ -1,17 +1,17 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
-import { WordPressService } from '../../../../jobs/services/wordpress.service';
-import { PrismaService } from 'src/shared/infrastructure/prisma/prisma.service';
+import { WpCategoryService } from '@catalog/integrations';
+import { PrismaService } from '@shared/infrastructure/prisma/prisma.service';
 
 @Controller('categories')
 export class CategoriesController {
   constructor(
-    private readonly wpService: WordPressService,
+    private readonly wpCategoryService: WpCategoryService,
     private readonly prisma: PrismaService,
   ) {}
 
   @Get('wp')
   async getWpCategories() {
-    return this.wpService.getCategories();
+    return this.wpCategoryService.getCategories();
   }
 
   @Get('mappings')

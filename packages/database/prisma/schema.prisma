@@ -41,6 +41,7 @@ model Product {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   tags             String?
+  templateId       String?
   deletedAt        DateTime?
 
   @@map("catalog_products")
@@ -106,4 +107,15 @@ model WpSetting {
   updatedAt   DateTime @updatedAt
 
   @@map("catalog_wp_settings")
+}
+
+model ProductTemplate {
+  id          String   @id @default(uuid())
+  name        String
+  content     String
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("catalog_product_templates")
 }

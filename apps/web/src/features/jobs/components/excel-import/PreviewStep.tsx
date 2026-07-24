@@ -58,6 +58,26 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
     ExistingProductInfo[]
   >([]);
 
+  const blobUrlsRef = React.useRef<Map<File, string>>(new Map());
+
+  const getBlobUrl = React.useCallback((file: File) => {
+    if (!blobUrlsRef.current.has(file)) {
+      const url = URL.createObjectURL(file);
+      blobUrlsRef.current.set(file, url);
+    }
+    return blobUrlsRef.current.get(file)!;
+  }, []);
+
+  React.useEffect(() => {
+    const urls = blobUrlsRef.current;
+    return () => {
+      urls.forEach((url) => {
+        URL.revokeObjectURL(url);
+      });
+      urls.clear();
+    };
+  }, []);
+
   React.useEffect(() => {
     const skus = data.map((p) => p.partNumbers).filter(Boolean) as string[];
     if (skus.length > 0) {
@@ -254,7 +274,7 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
                       uid: "-1",
                       name: file.name,
                       status: "done",
-                      url: URL.createObjectURL(file),
+                      url: getBlobUrl(file),
                     },
                   ]
                 : []
@@ -264,6 +284,13 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
               return false;
             }}
             onRemove={() => {
+              if (file) {
+                const url = blobUrlsRef.current.get(file);
+                if (url) {
+                  URL.revokeObjectURL(url);
+                  blobUrlsRef.current.delete(file);
+                }
+              }
               setRowFeaturedFile(index, null);
             }}
           >
@@ -290,14 +317,26 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
               uid: `${i}`,
               name: file.name,
               status: "done",
-              url: URL.createObjectURL(file),
+              url: getBlobUrl(file),
             }))}
             beforeUpload={(file) => {
               addRowGalleryFile(index, file);
               return false; // Prevent auto-upload
             }}
-            onRemove={(file) => {
-              const updatedFiles = files.filter((f) => f.name !== file.name);
+            onRemove={(fileToRemove) => {
+              const originalFile = files.find(
+                (f) => f.name === fileToRemove.name,
+              );
+              if (originalFile) {
+                const url = blobUrlsRef.current.get(originalFile);
+                if (url) {
+                  URL.revokeObjectURL(url);
+                  blobUrlsRef.current.delete(originalFile);
+                }
+              }
+              const updatedFiles = files.filter(
+                (f) => f.name !== fileToRemove.name,
+              );
               setRowGalleryFiles(index, updatedFiles);
             }}
           >

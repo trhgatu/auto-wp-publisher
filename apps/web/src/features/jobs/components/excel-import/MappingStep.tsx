@@ -5,12 +5,15 @@ import {
   ArrowLeftOutlined,
   CheckOutlined,
   InfoCircleOutlined,
+  CodeOutlined,
+  RobotOutlined,
 } from "@ant-design/icons";
 import {
   useImportStore,
   selectUniqueExcelCategories,
 } from "../../hooks/useImportStore";
 import { useShallow } from "zustand/react/shallow";
+import { useTemplates } from "@/features/templates/hooks/useTemplates";
 
 interface MappingStepProps {
   categoryOptions: { label: string; value: string }[];
@@ -31,7 +34,11 @@ export const MappingStep: React.FC<MappingStepProps> = ({
     brandMapping,
     setBrandMapping,
     setStep,
+    selectedTemplateId,
+    setSelectedTemplateId,
   } = useImportStore();
+
+  const { data: templates = [] } = useTemplates();
 
   const uniqueExcelCategories = useImportStore(
     useShallow((state) => selectUniqueExcelCategories(state)),
@@ -41,6 +48,60 @@ export const MappingStep: React.FC<MappingStepProps> = ({
     <>
       <div className="flex-1 overflow-auto px-10 py-6 bg-slate-50/50 dark:bg-slate-900/10">
         <div className="max-w-4xl mx-auto space-y-6">
+          {/* Template Selection */}
+          <Card
+            bordered={true}
+            className="shadow-sm border-red-100 dark:border-red-900/30"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <CodeOutlined className="text-xl text-red-500" />
+              <div>
+                <h4 className="font-bold text-slate-800 dark:text-slate-100 m-0">
+                  Mẫu bài viết áp dụng cho lô hàng
+                </h4>
+                <p className="text-xs text-slate-500 m-0">
+                  Chọn mẫu bài viết thiết kế sẵn cho nguyên lô sản phẩm hoặc để
+                  AI sinh tự động.
+                </p>
+              </div>
+            </div>
+
+            <Select
+              className="w-full"
+              size="large"
+              value={selectedTemplateId || ""}
+              onChange={(val) => setSelectedTemplateId(val || null)}
+              options={[
+                {
+                  value: "",
+                  label: (
+                    <div className="flex items-center gap-2 font-medium text-slate-700">
+                      <RobotOutlined className="text-blue-500" />
+                      <span>
+                        Tự động dùng AI Gemini (Tự động Fallback về Mẫu mặc
+                        định)
+                      </span>
+                    </div>
+                  ),
+                },
+                ...templates.map((t) => ({
+                  value: t.id,
+                  label: (
+                    <div className="flex items-center gap-2 font-semibold">
+                      <CodeOutlined className="text-red-500" />
+                      <span>{t.name}</span>
+                      {t.isDefault && (
+                        <span className="text-[11px] text-red-500 font-bold">
+                          (Mẫu mặc định)
+                        </span>
+                      )}
+                    </div>
+                  ),
+                })),
+              ]}
+            />
+          </Card>
+
           <Alert
             message={
               <span className="font-bold text-sm text-red-800 dark:text-red-200">

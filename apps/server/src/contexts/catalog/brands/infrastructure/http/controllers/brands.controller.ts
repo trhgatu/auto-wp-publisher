@@ -1,17 +1,17 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
-import { WordPressService } from '../../../../jobs/services/wordpress.service';
-import { PrismaService } from 'src/shared/infrastructure/prisma/prisma.service';
+import { WpBrandService } from '@catalog/integrations';
+import { PrismaService } from '@shared/infrastructure/prisma/prisma.service';
 
 @Controller('brands')
 export class BrandsController {
   constructor(
-    private readonly wpService: WordPressService,
+    private readonly wpBrandService: WpBrandService,
     private readonly prisma: PrismaService,
   ) {}
 
   @Get('wp')
   async getWpBrands() {
-    return this.wpService.getBrands();
+    return this.wpBrandService.getBrands();
   }
 
   @Get('mappings')

@@ -13,6 +13,12 @@
     "rootDir": "src",
     "baseUrl": "./",
     "paths": {
+      "@catalog/*": [
+        "src/contexts/catalog/*"
+      ],
+      "@shared/*": [
+        "src/shared/*"
+      ],
       "@prisma-generated/*": [
         "src/shared/infrastructure/prisma/generated/*"
       ]
