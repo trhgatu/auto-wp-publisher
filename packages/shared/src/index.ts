@@ -21,6 +21,7 @@ export const ImportProductSchema = z.object({
   galleryImageUrls: z.string().optional(),
   tags: z.string().optional(),
   brand: z.string().optional(),
+  templateId: z.string().optional(),
 });
 
 export type ImportProductDto = z.infer<typeof ImportProductSchema>;

@@ -1,6 +1,6 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetDashboardStatsQuery } from './get-dashboard-stats.query';
-import { PrismaService } from 'src/shared/infrastructure/prisma/prisma.service';
+import { PrismaService } from '@shared/infrastructure/prisma/prisma.service';
 import { JobStatus } from '@prisma/client';
 
 @QueryHandler(GetDashboardStatsQuery)

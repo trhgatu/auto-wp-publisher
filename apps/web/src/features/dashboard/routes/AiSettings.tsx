@@ -33,11 +33,23 @@ export const AiSettings = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const textareaRef = useRef<any>(null);
 
+  const [models, setModels] = useState<{ label: string; value: string }[]>([]);
+
   const fetchSettings = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("/ai-settings");
-      form.setFieldsValue(response.data);
+      const [settingsRes, modelsRes] = await Promise.all([
+        axios.get("/ai-settings"),
+        axios.get("/ai-settings/models"),
+      ]);
+      form.setFieldsValue(settingsRes.data);
+      if (
+        modelsRes.data &&
+        Array.isArray(modelsRes.data) &&
+        modelsRes.data.length > 0
+      ) {
+        setModels(modelsRes.data);
+      }
     } catch (err) {
       console.error(err);
       notify("Lỗi", "Không thể tải cấu hình AI.", "error");
@@ -68,8 +80,8 @@ export const AiSettings = () => {
 
   const handleResetDefault = () => {
     form.setFieldsValue({
-      systemPrompt: `Bạn là một chuyên gia viết nội dung mô tả sản phẩm tối ưu SEO cho cửa hàng phụ tùng ô tô.
-Hãy viết một mô tả sản phẩm chi tiết, chuyên nghiệp và cuốn hút bằng ngôn ngữ tiếng Việt (HTML format, chỉ sử dụng các thẻ cơ bản như <p>, <h3>, <ul>, <li>, <strong>, <em>, không viết thẻ <html> hay <body>).
+      systemPrompt: `Bạn là một chuyên gia viết nội dung mô tả sản phẩm phụ tùng ô tô tối ưu SEO chuyên sâu.
+Hãy viết một bài mô tả sản phẩm ĐẦY ĐỦ, CHI TIẾT và CHUYÊN NGHIỆP bằng tiếng Việt với độ dài khoảng 600 - 800 từ (định dạng HTML chuẩn, chỉ sử dụng thẻ <p>, <h3>, <ul>, <li>, <strong>, <em>, tuyệt đối không dùng thẻ <html> hay <body>).
 
 Thông tin sản phẩm:
 - Tên sản phẩm: {title}
@@ -77,17 +89,20 @@ Thông tin sản phẩm:
 - Chất liệu: {material}
 - Dòng xe tương thích: {carModels}
 - Kích thước: {dimensions}
-- Mô tả ngắn/Ghi chú: {shortDescription}
-- Từ khóa chính SEO (Focus Keyword): {focusKeyword}
+- Ghi chú: {shortDescription}
+- Từ khóa SEO chính: {focusKeyword}
 
-Yêu cầu bài viết để tối ưu hóa SEO trên WordPress:
-1. Có tiêu đề và đoạn giới thiệu sản phẩm lôi cuốn.
-2. BẮT BUỘC sử dụng từ khóa chính "{focusKeyword}" ngay ở phần đầu tiên của bài viết (trong 50 từ đầu tiên).
-3. Lặp lại từ khóa chính "{focusKeyword}" khoảng 3-5 lần một cách tự nhiên xuyên suốt bài viết (trong các tiêu đề h3 hoặc đoạn văn).
-4. Viết mô tả sản phẩm có độ dài tối thiểu là 650 từ để đảm bảo tối ưu hóa RankMath/Yoast SEO.
-5. Nêu bật ưu điểm và đặc tính nổi bật của sản phẩm.
-6. Cung cấp hướng dẫn sử dụng hoặc lưu ý tương thích dòng xe rõ ràng (nếu có).
-7. Định dạng HTML rõ ràng, dễ đọc, không chứa markdown (như \`\`\`html).`,
+Bắt buộc triển khai bài viết theo 5 phần chi tiết sau để đạt tối thiểu 600 - 800 từ:
+1. <h3>1. Tổng quan & Vai trò của {title}</h3>
+   Viết đoạn văn phân tích tầm quan trọng của sản phẩm trong vận hành ô tô. BẮT BUỘC chứa từ khóa "{focusKeyword}" ngay ở 50 từ đầu tiên.
+2. <h3>2. Thông số kỹ thuật & Chất liệu cấu thành</h3>
+   Phân tích chi tiết chất liệu {material}, độ bền, tiêu chuẩn sản xuất và độ chịu nhiệt/chịu lực.
+3. <h3>3. Dòng xe tương thích & Ưu điểm vượt trội</h3>
+   Trình bày rõ tương thích với {carModels}, khớp form zin 100%, chống mài mòn và tiết kiệm chi phí sửa chữa dài hạn.
+4. <h3>4. Hướng dẫn lắp đặt & Thời điểm cần thay thế</h3>
+   Cung cấp các dấu hiệu cho thấy cần bảo dưỡng/thay thế phụ tùng và lưu ý khi thao tác lắp đặt.
+5. <h3>5. Cam kết chất lượng & Chính sách đổi trả</h3>
+   Khẳng định chất lượng hàng mới 100%, bảo hành uy tín và hỗ trợ đổi trả nếu có lỗi sản xuất.`,
       temperature: 0.7,
       modelName: "gemini-2.5-flash",
     });
@@ -174,21 +189,25 @@ Yêu cầu bài viết để tối ưu hóa SEO trên WordPress:
                     required
                   >
                     <Select
-                      options={[
-                        {
-                          label: "Gemini 2.5 Flash (Khuyên dùng - Nhanh, Rẻ)",
-                          value: "gemini-2.5-flash",
-                        },
-                        {
-                          label:
-                            "Gemini 2.5 Pro (Thông minh hơn - Tối ưu nhất)",
-                          value: "gemini-2.5-pro",
-                        },
-                        {
-                          label: "Gemini 1.5 Flash",
-                          value: "gemini-1.5-flash",
-                        },
-                      ]}
+                      placeholder="Chọn AI Model..."
+                      options={
+                        models.length > 0
+                          ? models
+                          : [
+                              {
+                                label: "Gemini 2.5 Flash (Khuyên dùng)",
+                                value: "gemini-2.5-flash",
+                              },
+                              {
+                                label: "Gemini 2.0 Flash",
+                                value: "gemini-2.0-flash",
+                              },
+                              {
+                                label: "Gemini 1.5 Flash",
+                                value: "gemini-1.5-flash-latest",
+                              },
+                            ]
+                      }
                     />
                   </Form.Item>
                 </Col>

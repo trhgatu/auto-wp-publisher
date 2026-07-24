@@ -27,12 +27,15 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
     >,
   ) {}
 
-  async execute(command: BulkCreateProductsCommand): Promise<string[]> {
+  async execute(
+    command: BulkCreateProductsCommand,
+  ): Promise<Record<number, string>> {
     const products = command.data as ImportProductDto[];
-    const ids: string[] = [];
+    const idsMap: Record<number, string> = {};
     const newlyCreatedIds = new Set<string>();
 
-    for (const data of products) {
+    for (let i = 0; i < products.length; i++) {
+      const data = products[i];
       try {
         const htmlContent = this.generateWPContent(data);
         // 1. Try to find existing product by Name/Title
@@ -67,6 +70,9 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
           product.category = data.category ?? product.category;
           product.brand = data.brand ?? product.brand;
           product.tags = data.tags ?? product.tags;
+          if (data.templateId) {
+            product.templateId = data.templateId;
+          }
           // Set to pending so it gets re-published to WP with new links
           product.markAsPending();
         } else {
@@ -94,6 +100,7 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
             data.category ?? null,
             data.brand ?? null,
             data.tags ?? null,
+            data.templateId ?? null,
           );
           product.markAsCreated();
         }
@@ -113,7 +120,7 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
             },
           );
         }
-        ids.push(productId);
+        idsMap[i] = productId;
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : String(err);
         this.logger.error(
@@ -124,9 +131,9 @@ export class BulkCreateProductsHandler implements ICommandHandler<BulkCreateProd
     }
 
     this.logger.log(
-      `Bulk processed ${ids.length}/${products.length} products (Created/Updated).`,
+      `Bulk processed ${Object.keys(idsMap).length}/${products.length} products (Created/Updated).`,
     );
-    return ids;
+    return idsMap;
   }
 
   private generateWPContent(data: ImportProductDto): string {

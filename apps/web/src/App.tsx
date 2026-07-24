@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MainLayout } from "./components/Layout/MainLayout";
 import { JobsList, CreateJob, JobDetail } from "./features/jobs";
 import { Dashboard, AiSettings, WpSettings } from "./features/dashboard";
+import { TemplatesPage } from "./features/templates";
 import { ApiHistoryList } from "./features/api-history";
 import { NotificationProvider } from "./providers/NotificationProvider";
 import { SocketProvider } from "./providers/SocketProvider";
@@ -22,6 +23,7 @@ function App() {
                   <Route path="jobs/:id" element={<JobDetail />} />
                   <Route path="create" element={<CreateJob />} />
                   <Route path="api-history" element={<ApiHistoryList />} />
+                  <Route path="templates" element={<TemplatesPage />} />
                   <Route path="ai-settings" element={<AiSettings />} />
                   <Route path="websites" element={<WpSettings />} />
                   <Route path="*" element={<Navigate to="/" replace />} />

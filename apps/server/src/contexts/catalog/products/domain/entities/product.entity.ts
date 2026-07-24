@@ -31,6 +31,7 @@ export class Product extends AggregateRoot<IEvent> {
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
     public deletedAt: Date | null = null,
+    public templateId: string | null = null,
   ) {
     super();
   }
@@ -54,6 +55,7 @@ export class Product extends AggregateRoot<IEvent> {
     category: string | null = null,
     brand: string | null = null,
     tags: string | null = null,
+    templateId: string | null = null,
   ): Product {
     return new Product(
       ProductId.create(id),
@@ -81,6 +83,8 @@ export class Product extends AggregateRoot<IEvent> {
       null,
       new Date(),
       new Date(),
+      null,
+      templateId,
     );
   }
 

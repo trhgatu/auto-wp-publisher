@@ -45,33 +45,36 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
   const { data: wpBrands = [] } = useBrands();
   const { data: savedMappingsBrands = [] } = useBrandMappings();
 
-  // Reset store when modal closes
   useEffect(() => {
     if (!isOpen) {
       reset();
     }
   }, [isOpen, reset]);
 
-  // Derived Data for Sub-components
   const categoryOptions = useMemo(() => {
     const sorted: { label: string; value: string; depth: number }[] = [];
+
     const visit = (parentId: number, depth: number) => {
-      wpCategories
-        .filter((c) => c.parent === parentId)
-        .forEach((c) => {
-          sorted.push({
-            label: c.name,
-            value: String(c.id),
-            depth,
-          });
-          visit(c.id, depth + 1);
+      const children = wpCategories.filter((c) => c.parent === parentId);
+      children.forEach((c, index) => {
+        const isLast = index === children.length - 1;
+        const indent = depth > 0 ? "\u00A0\u00A0".repeat(depth) : "";
+        const branch = depth > 0 ? (isLast ? "└── " : "├── ") : "";
+        const icon = depth === 0 ? "📂 " : "📁 ";
+
+        sorted.push({
+          label: `${indent}${branch}${icon}${c.name}`,
+          value: String(c.id),
+          depth,
         });
+        visit(c.id, depth + 1);
+      });
     };
     visit(0, 0);
 
     wpCategories.forEach((c) => {
       if (!sorted.find((s) => s.value === String(c.id))) {
-        sorted.push({ label: c.name, value: String(c.id), depth: 0 });
+        sorted.push({ label: `📂 ${c.name}`, value: String(c.id), depth: 0 });
       }
     });
 
@@ -133,6 +136,9 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
         await upsertBrandMappingsMutation.mutateAsync(brandMappingsToSave);
       }
 
+      const { rowFeaturedFile, rowGalleryFiles, selectedTemplateId } =
+        useImportStore.getState();
+
       const finalData = data.map((product) => {
         const mappedCat = categoryMapping[product.category || ""];
         const finalCat = Array.isArray(mappedCat)
@@ -148,10 +154,9 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
           ...product,
           category: finalCat,
           brand: finalBrand,
+          templateId: selectedTemplateId || undefined,
         };
       });
-
-      const { rowFeaturedFile, rowGalleryFiles } = useImportStore.getState();
       const hasFeaturedFiles = Object.values(rowFeaturedFile).some(
         (file) => file !== null,
       );
@@ -168,44 +173,39 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
       if (hasFiles) {
         const hideLoading = message.loading("Đang tải ảnh lên WordPress...", 0);
 
-        const allIndices = Array.from(
-          new Set([
-            ...Object.keys(rowFeaturedFile).map(Number),
-            ...Object.keys(rowGalleryFiles).map(Number),
-          ]),
+        const uploadPromises = Object.entries(createdIds).map(
+          async ([indexStr, id]) => {
+            const index = Number(indexStr);
+            if (!id) return;
+
+            const featuredFile = rowFeaturedFile[index];
+            const galleryFiles = rowGalleryFiles[index] || [];
+
+            try {
+              // 1. Upload featured image if it exists
+              if (featuredFile) {
+                await uploadImage(featuredFile, id, "imageUrl");
+              }
+
+              // 2. Upload gallery images
+              for (const file of galleryFiles) {
+                await uploadImage(file, id, "gallery");
+              }
+
+              // 3. Dispatch job to worker now that images are uploaded for all products
+              await publishJob(id);
+            } catch (uploadErr) {
+              console.error(
+                `Failed to upload images or publish job ${id}:`,
+                uploadErr,
+              );
+            }
+          },
         );
-
-        const uploadPromises = allIndices.map(async (index) => {
-          const id = createdIds[index];
-          if (!id) return;
-
-          const featuredFile = rowFeaturedFile[index];
-          const galleryFiles = rowGalleryFiles[index] || [];
-
-          try {
-            // 1. Upload featured image if it exists
-            if (featuredFile) {
-              await uploadImage(featuredFile, id, "imageUrl");
-            }
-
-            // 2. Upload gallery images
-            for (const file of galleryFiles) {
-              await uploadImage(file, id, "gallery");
-            }
-
-            // 3. Dispatch job to worker now that images are uploaded!
-            await publishJob(id);
-          } catch (uploadErr) {
-            console.error(
-              `Failed to upload images or publish job ${id}:`,
-              uploadErr,
-            );
-          }
-        });
 
         await Promise.all(uploadPromises);
         hideLoading();
-        message.success("Đã tải ảnh lên WordPress và hoàn tất import!");
+        message.success("Đã tải ảnh lên và đẩy tất cả bài viết vào hàng chờ!");
       }
 
       onSuccess?.();

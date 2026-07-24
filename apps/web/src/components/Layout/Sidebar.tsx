@@ -7,6 +7,7 @@ import {
   HistoryOutlined,
   RobotOutlined,
   SettingOutlined,
+  CodeOutlined,
 } from "@ant-design/icons";
 import { useTheme } from "../../hooks/useTheme";
 
@@ -116,6 +117,11 @@ export const Sidebar = ({ collapsed, onCollapse }: SidebarProps) => {
                 icon: <SettingOutlined />,
                 label: "Cấu hình",
                 children: [
+                  {
+                    key: "/templates",
+                    icon: <CodeOutlined />,
+                    label: <Link to="/templates">Mẫu bài viết</Link>,
+                  },
                   {
                     key: "/ai-settings",
                     icon: <RobotOutlined />,

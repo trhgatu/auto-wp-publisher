@@ -12,15 +12,19 @@ import {
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CreateProductCommand } from '../../../application/commands/create-product/create-product.command';
-import { BulkCreateProductsCommand } from '../../../application/commands/bulk-create-products/bulk-create-products.command';
-import { GetProductsQuery } from '../../../application/queries/get-products/get-products.query';
-import { GetProductByIdQuery } from '../../../application/queries/get-product-by-id/get-product-by-id.query';
-import { GetDashboardStatsQuery } from '../../../application/queries/get-dashboard-stats/get-dashboard-stats.query';
-import { TrashProductCommand } from '../../../application/commands/trash-product/trash-product.command';
-import { RestoreProductCommand } from '../../../application/commands/restore-product/restore-product.command';
-import { PermanentlyDeleteProductCommand } from '../../../application/commands/permanently-delete-product/permanently-delete-product.command';
-import { GetProductsBySkusQuery } from '../../../application/queries/get-products-by-skus/get-products-by-skus.query';
+import {
+  CreateProductCommand,
+  BulkCreateProductsCommand,
+  TrashProductCommand,
+  RestoreProductCommand,
+  PermanentlyDeleteProductCommand,
+  TrashAllProductsCommand,
+  PermanentlyDeleteAllProductsCommand,
+  GetProductsQuery,
+  GetProductByIdQuery,
+  GetDashboardStatsQuery,
+  GetProductsBySkusQuery,
+} from '@catalog/products/application';
 import { ProductResponse } from '../responses/product.response';
 import {
   ImportProductSchema,
@@ -28,10 +32,10 @@ import {
   BulkImportProductDto,
   BulkImportProductSchema,
 } from '@repo/shared';
-import { ZodValidationPipe } from 'src/shared/infrastructure/pipes/zod-validation.pipe';
+import { ZodValidationPipe } from '@shared/infrastructure/pipes/zod-validation.pipe';
 import { z } from 'zod';
-import { PrismaService } from 'src/shared/infrastructure/prisma/prisma.service';
-import { MediaUploadService } from '../../../../jobs/services/media-upload.service';
+import { PrismaService } from '@shared/infrastructure/prisma/prisma.service';
+import { MediaUploadService } from '@catalog/integrations';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 
@@ -111,10 +115,11 @@ export class ProductsController {
     )
     data: BulkImportProductDto,
     @Query('delayQueue') delayQueue?: string,
-  ): Promise<string[]> {
-    return this.commandBus.execute<BulkCreateProductsCommand, string[]>(
-      new BulkCreateProductsCommand(data, delayQueue === 'true'),
-    );
+  ): Promise<Record<number, string>> {
+    return this.commandBus.execute<
+      BulkCreateProductsCommand,
+      Record<number, string>
+    >(new BulkCreateProductsCommand(data, delayQueue === 'true'));
   }
 
   @Post(':id/publish')
@@ -149,21 +154,35 @@ export class ProductsController {
 
   @Post('trash-all')
   async trashAllProducts(): Promise<void> {
-    await this.prisma.product.updateMany({
-      where: { deletedAt: null },
-      data: { deletedAt: new Date() },
-    });
+    await this.commandBus.execute(new TrashAllProductsCommand());
   }
 
   @Post('permanent-delete-all')
   async permanentlyDeleteAllProducts(): Promise<void> {
-    await this.prisma.product.deleteMany({
-      where: { deletedAt: { not: null } },
-    });
+    await this.commandBus.execute(new PermanentlyDeleteAllProductsCommand());
   }
 
   @Post('upload-image')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: {
+        files: 1,
+        fileSize: 10 * 1024 * 1024,
+      },
+      fileFilter: (req, file, callback) => {
+        if (!file.mimetype.startsWith('image/')) {
+          return callback(
+            new HttpException(
+              'Chỉ hỗ trợ tải lên tệp tin hình ảnh.',
+              HttpStatus.BAD_REQUEST,
+            ),
+            false,
+          );
+        }
+        callback(null, true);
+      },
+    }),
+  )
   async uploadTempImage(
     @UploadedFile()
     file: {
@@ -189,7 +208,26 @@ export class ProductsController {
   }
 
   @Post(':id/upload-image')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: {
+        files: 1,
+        fileSize: 10 * 1024 * 1024,
+      },
+      fileFilter: (req, file, callback) => {
+        if (!file.mimetype.startsWith('image/')) {
+          return callback(
+            new HttpException(
+              'Chỉ hỗ trợ tải lên tệp tin hình ảnh.',
+              HttpStatus.BAD_REQUEST,
+            ),
+            false,
+          );
+        }
+        callback(null, true);
+      },
+    }),
+  )
   async uploadImage(
     @Param('id') id: string,
     @UploadedFile()
@@ -203,12 +241,6 @@ export class ProductsController {
       );
     }
 
-    const uploadedUrl = await this.mediaUploadService.uploadToWordPress(
-      file.buffer,
-      file.originalname,
-      file.mimetype,
-    );
-
     const product = await this.prisma.product.findUnique({
       where: { id },
     });
@@ -216,6 +248,12 @@ export class ProductsController {
     if (!product) {
       throw new HttpException('Không tìm thấy sản phẩm.', HttpStatus.NOT_FOUND);
     }
+
+    const uploadedUrl = await this.mediaUploadService.uploadToWordPress(
+      file.buffer,
+      file.originalname,
+      file.mimetype,
+    );
 
     if (type === 'gallery') {
       const currentGallery = product.galleryImageUrls

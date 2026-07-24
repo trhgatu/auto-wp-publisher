@@ -1,6 +1,6 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetProductByIdQuery } from './get-product-by-id.query';
-import { PrismaService } from 'src/shared/infrastructure/prisma/prisma.service';
+import { PrismaService } from '@shared/infrastructure/prisma/prisma.service';
 import { NotFoundException } from '@nestjs/common';
 
 @QueryHandler(GetProductByIdQuery)
