@@ -31,5 +31,7 @@ COPY --from=installer /app .
 EXPOSE 3000
 EXPOSE 5555
 
-# Force sync database (bỏ qua lịch sử migration bị lỗi trên production)
-CMD ["sh", "-c", "cd packages/database && npx prisma db push --accept-data-loss && cd ../.. && node apps/server/dist/src/main"]
+# Apply pending migrations non-destructively, then start the API.
+# `migrate deploy` never drops data (unlike `db push --accept-data-loss`);
+# it only runs committed migrations from prisma/migrations.
+CMD ["sh", "-c", "cd packages/database && npx prisma migrate deploy && cd ../.. && node apps/server/dist/src/main"]
