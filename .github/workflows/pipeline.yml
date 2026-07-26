@@ -41,6 +41,9 @@ jobs:
       - name: TypeScript Check
         run: pnpm run check-types
 
+      - name: Run Tests
+        run: pnpm run test
+
       - name: Turbo Build Test
         run: pnpm turbo run build
 

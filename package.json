@@ -10,6 +10,7 @@
         "db:generate": "pnpm -F @repo/database db:generate",
         "db:push": "pnpm -F @repo/database db:push",
         "lint": "turbo run lint",
+        "test": "turbo run test",
         "format": "prettier --write \"**/*.{ts,tsx,md}\"",
         "check-types": "turbo run check-types",
         "prepare": "husky",
