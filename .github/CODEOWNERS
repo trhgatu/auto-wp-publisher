@@ -1,0 +1,15 @@
+# Code owners — automatically requested for review on matching paths.
+# See https://docs.github.com/articles/about-code-owners
+
+# Default owner for everything in the repo.
+*                       @trhgatu
+
+# Backend (NestJS / DDD)
+/apps/server/           @trhgatu
+
+# Frontend (React / Vite)
+/apps/web/              @trhgatu
+
+# Shared packages, database schema and CI/CD
+/packages/              @trhgatu
+/.github/               @trhgatu

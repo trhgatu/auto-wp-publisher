@@ -132,5 +132,32 @@ sequenceDiagram
 
 ---
 
+## 🏢 Chuẩn Enterprise & Vận hành
+
+Dự án được chuẩn hoá theo các thực hành enterprise nhằm đảm bảo an toàn, dễ vận hành và dễ mở rộng:
+
+### Bảo mật & Cấu hình
+* **Env validation**: toàn bộ biến môi trường được kiểm tra bằng **Zod** khi khởi động (fail-fast). Xem danh sách đầy đủ trong [`.env.example`](./.env.example).
+* **Helmet + Compression**: gắn security headers và nén gzip cho mọi response.
+* **CORS theo allow-list**: cấu hình qua `CORS_ORIGINS` (mặc định `*` sẽ tắt credentials; production nên đặt danh sách origin cụ thể).
+* **Rate limiting**: giới hạn request qua `@nestjs/throttler` (`RATE_LIMIT_TTL`, `RATE_LIMIT_MAX`), bỏ qua WebSocket.
+* **Migration an toàn**: Docker chạy `prisma migrate deploy` thay cho `db push --accept-data-loss`.
+
+### Observability & Tài liệu API
+* **Health check**: `GET /health` (kiểm tra DB) — dùng cho container orchestrator / uptime monitor.
+* **Swagger/OpenAPI**: `GET /api/v1/docs`.
+* **Request logging**: interceptor ghi lại method, path, status code và độ trễ.
+
+### Kiểm thử & CI
+* **Unit tests** với Jest (`pnpm test`) cho domain, config và infrastructure.
+* **CI pipeline** chạy `lint → check-types → test → build` trên mỗi PR.
+
+### Quy ước phát triển
+* **Conventional Commits** được enforce qua Husky `commit-msg` (commitlint).
+* **lint-staged** tự động format/lint code khi commit.
+* Xem [`CONTRIBUTING.md`](./CONTRIBUTING.md) để biết quy trình đầy đủ và [`SECURITY.md`](./SECURITY.md) cho chính sách bảo mật.
+
+---
+
 ## 📝 Giấy phép
 Dự án được phát triển và vận hành bởi **trhgatu**.
