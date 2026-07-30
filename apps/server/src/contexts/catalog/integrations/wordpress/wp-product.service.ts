@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { WpApiClient } from './wp-api.client';
 import { WpCategoryService } from './wp-category.service';
 import { WpBrandService } from './wp-brand.service';
+import { MediaUploadService } from '../media/media-upload.service';
 
 export interface PublishProductParams {
   title: string;
@@ -30,6 +31,7 @@ export class WpProductService {
     private readonly client: WpApiClient,
     private readonly categoryService: WpCategoryService,
     private readonly brandService: WpBrandService,
+    private readonly mediaUploadService: MediaUploadService,
   ) {}
 
   async publishProduct(
@@ -158,6 +160,75 @@ export class WpProductService {
         imagesHtml;
     }
 
+    const resolveWpImage = async (
+      url: string,
+    ): Promise<{ id?: number; src?: string }> => {
+      const trimmedUrl = url.trim();
+      const cachedId = this.mediaUploadService.getAttachmentIdByUrl(trimmedUrl);
+      if (cachedId) {
+        this.logger.log(
+          `📌 Linked image directly from cache to WordPress Media ID: ${cachedId}`,
+        );
+        return { id: cachedId };
+      }
+
+      try {
+        const filename = trimmedUrl.split('/').pop()?.split('?')[0];
+        if (filename) {
+          const cleanFilename = filename.replace(/\.[^/.]+$/, '');
+          const settings = await this.client.getSettings();
+          const wpBaseUrl = settings.apiUrl
+            .replace(/\/$/, '')
+            .replace(/\/wp\/v2\/?$/, '')
+            .replace(/\/wp-json\/?$/, '');
+          const searchRes = await this.client.fetch(
+            `${wpBaseUrl}/wp-json/wp/v2/media?search=${encodeURIComponent(cleanFilename)}&per_page=5`,
+          );
+          if (searchRes.ok) {
+            const mediaList = (await searchRes.json()) as {
+              id: number;
+              source_url: string;
+              status?: string;
+            }[];
+            const matched = mediaList.find(
+              (m) =>
+                (m.source_url === trimmedUrl ||
+                  m.source_url.includes(cleanFilename)) &&
+                m.status !== 'trash',
+            );
+            if (matched?.id) {
+              this.logger.log(
+                `📌 Linked image "${cleanFilename}" directly to WordPress Media ID: ${matched.id}`,
+              );
+              return { id: matched.id, src: trimmedUrl };
+            }
+          }
+        }
+      } catch (err) {
+        this.logger.warn(
+          `Could not resolve media ID for URL ${trimmedUrl}: ${String(err)}`,
+        );
+      }
+      return { src: trimmedUrl };
+    };
+
+    const resolvedProductImages: { id?: number; src?: string }[] = [];
+
+    if (imageUrl && this.client.isValidUrl(imageUrl)) {
+      resolvedProductImages.push(await resolveWpImage(imageUrl));
+    }
+
+    if (galleryImageUrls) {
+      const gUrls = galleryImageUrls
+        .split(',')
+        .map((url) => url.trim())
+        .filter((url) => url !== '' && this.client.isValidUrl(url));
+
+      for (const gUrl of gUrls) {
+        resolvedProductImages.push(await resolveWpImage(gUrl));
+      }
+    }
+
     const requestBody = {
       name: title,
       type: 'simple',
@@ -230,7 +301,7 @@ export class WpProductService {
               { key: '_product_video_url', value: videoUrl },
               { key: 'product_video_url', value: videoUrl },
               { key: '_dt_product_video_url', value: videoUrl },
-              { key: 'dt_product_video_url', value: videoUrl },
+              { key: 'dt_product_video_size', value: '900x900' },
               { key: '_product_video_size', value: '900x900' },
               { key: 'product_video_size', value: '900x900' },
               { key: '_dt_product_video_size', value: '900x900' },
@@ -239,24 +310,13 @@ export class WpProductService {
             ]
           : []),
       ],
-      images: [
-        ...(imageUrl && this.client.isValidUrl(imageUrl)
-          ? [{ src: imageUrl.trim() }]
-          : []),
-        ...(galleryImageUrls
-          ? galleryImageUrls
-              .split(',')
-              .map((url) => url.trim())
-              .filter((url) => url !== '' && this.client.isValidUrl(url))
-              .map((url) => ({ src: url }))
-          : []),
-      ],
+      images: resolvedProductImages,
       status: 'publish',
       manage_stock: false,
       stock_status: 'instock',
     };
 
-    const response = await this.client.fetch(
+    let response = await this.client.fetch(
       endpoint,
       {
         method: isUpdate ? 'PUT' : 'POST',
@@ -266,7 +326,32 @@ export class WpProductService {
       60000,
     );
 
-    const responseText = await response.text();
+    let responseText = await response.text();
+
+    if (
+      !response.ok &&
+      responseText.includes('woocommerce_product_invalid_image_id')
+    ) {
+      this.logger.warn(
+        '⚠️ Detected invalid WooCommerce image ID error. Evicting stale media caches and retrying publish...',
+      );
+      this.mediaUploadService.clearAllCaches();
+
+      requestBody.images = requestBody.images.map((img) =>
+        img.src ? { src: img.src } : img,
+      );
+
+      response = await this.client.fetch(
+        endpoint,
+        {
+          method: isUpdate ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody),
+        },
+        60000,
+      );
+      responseText = await response.text();
+    }
 
     if (!response.ok) {
       this.logger.error(

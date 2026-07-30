@@ -137,3 +137,61 @@ export const parseExcelFile = (
 
   return mappedData.filter((d): d is ImportProductDto => d !== null);
 };
+
+export const downloadSampleExcelTemplate = () => {
+  const sampleData = [
+    {
+      "Tên sản phẩm": "Lọc gió động cơ Toyota Camry 2.5Q 2018-2023",
+      "Mã phụ tùng (SKU)": "17801-0H050",
+      "Danh mục": "Lọc gió",
+      "Thương hiệu": "Toyota",
+      "Dòng xe": "Camry 2018-2023",
+      "Giá bán": "180000",
+      "Mô tả ngắn":
+        "Lọc gió động cơ cao cấp lọc sạch bụi bẩn bảo vệ động cơ xe Camry",
+      "Kích thước": "240 x 220 x 50 mm",
+      "Chất liệu": "Sợi tổng hợp cao cấp",
+      "Link Shopee": "https://shopee.vn/product/sample-1",
+      "Link Lazada": "",
+      "Link TikTok": "",
+      "Link Video": "",
+    },
+    {
+      "Tên sản phẩm": "Lọc gió động cơ Toyota Vios 1.5 2014-2022",
+      "Mã phụ tùng (SKU)": "17801-0M020",
+      "Danh mục": "Lọc gió",
+      "Thương hiệu": "Toyota",
+      "Dòng xe": "Vios 2014-2022",
+      "Giá bán": "150000",
+      "Mô tả ngắn":
+        "Lọc gió động cơ Vios hàng chuẩn OEM lọc sạch không khí nạp",
+      "Kích thước": "230 x 180 x 42 mm",
+      "Chất liệu": "Giấy lọc chuyên dụng",
+      "Link Shopee": "https://shopee.vn/product/sample-2",
+      "Link Lazada": "",
+      "Link TikTok": "",
+      "Link Video": "",
+    },
+    {
+      "Tên sản phẩm": "Lọc xăng Toyota Innova 2.0 2008-2016",
+      "Mã phụ tùng (SKU)": "23300-0C010",
+      "Danh mục": "Lọc xăng",
+      "Thương hiệu": "Toyota",
+      "Dòng xe": "Innova 2008-2016",
+      "Giá bán": "250000",
+      "Mô tả ngắn":
+        "Lọc xăng nhiên liệu Innova lọc sạch cặn bẩn béc phun kim phun",
+      "Kích thước": "80 x 80 x 130 mm",
+      "Chất liệu": "Hợp kim & Màng lọc",
+      "Link Shopee": "",
+      "Link Lazada": "",
+      "Link TikTok": "",
+      "Link Video": "",
+    },
+  ];
+
+  const ws = XLSX.utils.json_to_sheet(sampleData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Mau_Import_Phu_Tung");
+  XLSX.writeFile(wb, "File_Mau_Import_SanPham_AutoWP.xlsx");
+};
