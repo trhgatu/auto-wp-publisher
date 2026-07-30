@@ -116,6 +116,7 @@ export class ProductsController {
     data: BulkImportProductDto,
     @Query('delayQueue') delayQueue?: string,
   ): Promise<Record<number, string>> {
+    this.mediaUploadService.clearAllCaches();
     return this.commandBus.execute<
       BulkCreateProductsCommand,
       Record<number, string>

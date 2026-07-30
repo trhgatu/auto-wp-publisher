@@ -182,7 +182,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
             const galleryFiles = rowGalleryFiles[index] || [];
 
             try {
-              // 1. Upload featured image if it exists
+              // 1. Upload featured image if it exists (Backend deduplicates WordPress uploads & updates DB for this product ID)
               if (featuredFile) {
                 await uploadImage(featuredFile, id, "imageUrl");
               }

@@ -15,10 +15,10 @@ const { Sider } = Layout;
 
 interface SidebarProps {
   collapsed: boolean;
-  onCollapse: (collapsed: boolean) => void;
+  onCollapse?: (collapsed: boolean) => void;
 }
 
-export const Sidebar = ({ collapsed, onCollapse }: SidebarProps) => {
+export const Sidebar = ({ collapsed }: SidebarProps) => {
   const location = useLocation();
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -55,8 +55,8 @@ export const Sidebar = ({ collapsed, onCollapse }: SidebarProps) => {
       collapsedWidth={72}
       theme={isDark ? "dark" : "light"}
       collapsible
+      trigger={null}
       collapsed={collapsed}
-      onCollapse={onCollapse}
       style={{
         height: "100vh",
         position: "fixed",
@@ -70,29 +70,17 @@ export const Sidebar = ({ collapsed, onCollapse }: SidebarProps) => {
       className={isDark ? "bg-[#1F1F1F]" : "bg-white"}
     >
       <div
-        className={`h-16 flex items-center px-5 border-b transition-colors overflow-hidden ${
+        className={`h-16 flex items-center justify-center px-4 border-b transition-all overflow-hidden ${
           isDark ? "border-[#303030] bg-[#1F1F1F]" : "border-[#ECECEC] bg-white"
         }`}
       >
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded bg-[#C62828] flex items-center justify-center flex-shrink-0">
-            <DatabaseOutlined className="text-base text-white" />
-          </div>
-          {!collapsed && (
-            <div className="flex flex-col">
-              <span
-                className={`text-sm font-bold tracking-tight leading-none ${
-                  isDark ? "text-white" : "text-[#262626]"
-                }`}
-              >
-                AUTO WP
-              </span>
-              <span className="text-[9px] font-bold text-[#C62828] tracking-wider uppercase mt-0.5">
-                Publisher
-              </span>
-            </div>
-          )}
-        </div>
+        <img
+          src="https://phutungoto123.vn/wp-content/uploads/2025/07/logo-Huynh-Phat-1.png"
+          alt="Huỳnh Phát Auto"
+          className={`object-contain transition-all duration-300 ${
+            collapsed ? "h-8 w-8" : "h-10 max-w-[170px] w-auto"
+          }`}
+        />
       </div>
 
       <div

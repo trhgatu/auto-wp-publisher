@@ -4,12 +4,19 @@ import {
   MoonOutlined,
   BellOutlined,
   UserOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
 } from "@ant-design/icons";
 import { useTheme } from "../../hooks/useTheme";
 
 const { Header: AntdHeader } = Layout;
 
-export const Header = () => {
+interface HeaderProps {
+  collapsed: boolean;
+  onToggle: () => void;
+}
+
+export const Header = ({ collapsed, onToggle }: HeaderProps) => {
   const { theme, setTheme } = useTheme();
 
   const isDark =
@@ -21,7 +28,7 @@ export const Header = () => {
   return (
     <AntdHeader
       style={{
-        padding: "0 32px",
+        padding: "0 24px",
         borderBottom: "1px solid var(--antd-color-border)",
         height: 64,
         display: "flex",
@@ -30,13 +37,28 @@ export const Header = () => {
         position: "fixed",
         top: 0,
         right: 0,
-        left: 0,
+        left: collapsed ? 72 : 240,
         zIndex: 40,
         background: "var(--antd-color-bg-container)",
-        transition: "background 0.2s, border 0.2s",
+        transition: "left 0.2s, background 0.2s, border 0.2s",
       }}
     >
-      <div className="flex items-center gap-4"></div>
+      <div className="flex items-center gap-3">
+        <Button
+          type="text"
+          shape="circle"
+          icon={
+            collapsed ? (
+              <MenuUnfoldOutlined style={{ fontSize: "18px" }} />
+            ) : (
+              <MenuFoldOutlined style={{ fontSize: "18px" }} />
+            )
+          }
+          onClick={onToggle}
+          title={collapsed ? "Mở rộng menu" : "Thu gọn menu"}
+          style={{ color: "var(--antd-color-text)" }}
+        />
+      </div>
 
       <div className="flex items-center gap-4">
         <Input

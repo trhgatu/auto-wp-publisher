@@ -5,9 +5,13 @@ import {
   LinkOutlined,
   FileTextOutlined,
   FileExcelOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import { useImportStore } from "../../hooks/useImportStore";
-import { parseExcelFile } from "../../utils/excelParser";
+import {
+  parseExcelFile,
+  downloadSampleExcelTemplate,
+} from "../../utils/excelParser";
 import { useNotification } from "../../../../hooks/useNotification";
 
 export const UploadStep: React.FC = () => {
@@ -122,6 +126,30 @@ export const UploadStep: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col items-center justify-start p-10 max-h-full overflow-y-auto bg-white dark:bg-[#141414]">
+      {/* Download Sample Template Banner */}
+      <div className="w-full max-w-lg mb-6 p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/60 dark:bg-emerald-950/20 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-3">
+          <FileExcelOutlined className="text-2xl text-emerald-600 dark:text-emerald-400" />
+          <div>
+            <h4 className="text-xs font-bold text-emerald-950 dark:text-emerald-200 m-0">
+              Bạn chưa có file Excel theo chuẩn?
+            </h4>
+            <p className="text-[11px] text-emerald-700 dark:text-emerald-400 m-0">
+              Tải file Excel mẫu để điền dữ liệu sản phẩm chuẩn xác nhất.
+            </p>
+          </div>
+        </div>
+
+        <Button
+          type="primary"
+          icon={<DownloadOutlined />}
+          onClick={downloadSampleExcelTemplate}
+          className="font-bold text-xs bg-emerald-600 hover:bg-emerald-500 border-none shadow-sm"
+        >
+          Tải File Mẫu (.xlsx)
+        </Button>
+      </div>
+
       {/* Tabs */}
       <Segmented
         options={[

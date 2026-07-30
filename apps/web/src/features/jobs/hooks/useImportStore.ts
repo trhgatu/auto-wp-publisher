@@ -17,7 +17,6 @@ interface ImportState {
   rowGalleryFiles: Record<number, File[]>;
   selectedTemplateId: string | null;
 
-  // Actions
   setStep: (step: Step) => void;
   setData: (data: ImportProductDto[]) => void;
   setIsDragging: (isDragging: boolean) => void;
@@ -28,6 +27,13 @@ interface ImportState {
   setRowFeaturedFile: (index: number, file: File | null) => void;
   setRowGalleryFiles: (index: number, files: File[]) => void;
   addRowGalleryFile: (index: number, file: File) => void;
+  applyFeaturedFileToCategory: (
+    categoryName: string,
+    file: File | null,
+  ) => void;
+  applyGalleryFilesToCategory: (categoryName: string, files: File[]) => void;
+  applyFeaturedFileToAll: (file: File | null) => void;
+  applyGalleryFilesToAll: (files: File[]) => void;
   setSelectedTemplateId: (id: string | null) => void;
   reset: () => void;
 }
@@ -72,6 +78,42 @@ export const useImportStore = create<ImportState>((set) => ({
           [index]: [...currentFiles, file],
         },
       };
+    }),
+  applyFeaturedFileToCategory: (categoryName, file) =>
+    set((state) => {
+      const nextFeatured = { ...state.rowFeaturedFile };
+      state.data.forEach((item, idx) => {
+        if ((item.category || "").trim() === categoryName.trim()) {
+          nextFeatured[idx] = file;
+        }
+      });
+      return { rowFeaturedFile: nextFeatured };
+    }),
+  applyGalleryFilesToCategory: (categoryName, files) =>
+    set((state) => {
+      const nextGallery = { ...state.rowGalleryFiles };
+      state.data.forEach((item, idx) => {
+        if ((item.category || "").trim() === categoryName.trim()) {
+          nextGallery[idx] = [...files];
+        }
+      });
+      return { rowGalleryFiles: nextGallery };
+    }),
+  applyFeaturedFileToAll: (file) =>
+    set((state) => {
+      const nextFeatured = { ...state.rowFeaturedFile };
+      state.data.forEach((_, idx) => {
+        nextFeatured[idx] = file;
+      });
+      return { rowFeaturedFile: nextFeatured };
+    }),
+  applyGalleryFilesToAll: (files) =>
+    set((state) => {
+      const nextGallery = { ...state.rowGalleryFiles };
+      state.data.forEach((_, idx) => {
+        nextGallery[idx] = [...files];
+      });
+      return { rowGalleryFiles: nextGallery };
     }),
   setSelectedTemplateId: (selectedTemplateId) => set({ selectedTemplateId }),
   reset: () =>

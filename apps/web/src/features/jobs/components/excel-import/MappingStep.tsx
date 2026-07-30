@@ -140,13 +140,13 @@ export const MappingStep: React.FC<MappingStepProps> = ({
                 <Row gutter={[24, 16]} align="middle">
                   <Col xs={24} md={8}>
                     <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
                         Danh mục Excel
                       </p>
-                      <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 m-0 truncate">
-                        {excelCat}
+                      <h4 className="text-base font-bold text-slate-800 dark:text-slate-100 m-0 truncate">
+                        📂 {excelCat}
                       </h4>
-                      <p className="text-[10px] text-slate-500 mt-2 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed font-medium">
                         {useImportStore
                           .getState()
                           .data.filter((d) => d.category === excelCat)
@@ -161,17 +161,18 @@ export const MappingStep: React.FC<MappingStepProps> = ({
                   </Col>
 
                   <Col xs={24} md={2} className="text-center hidden md:block">
-                    <ArrowRightOutlined className="text-slate-300 text-lg" />
+                    <ArrowRightOutlined className="text-slate-300 text-xl" />
                   </Col>
 
                   <Col xs={24} md={14} className="space-y-4">
                     <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                        Danh mục wordpress
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                        Danh mục WordPress
                       </p>
                       <Select
                         mode="multiple"
                         showSearch
+                        size="large"
                         optionFilterProp="label"
                         style={{ width: "100%" }}
                         placeholder="Chọn danh mục WP..."
@@ -190,12 +191,13 @@ export const MappingStep: React.FC<MappingStepProps> = ({
                     </div>
 
                     <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                        Thương hiệu wordpress
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                        Thương hiệu WordPress
                       </p>
                       <Select
                         mode="multiple"
                         showSearch
+                        size="large"
                         optionFilterProp="label"
                         style={{ width: "100%" }}
                         placeholder="Chọn thương hiệu WP..."

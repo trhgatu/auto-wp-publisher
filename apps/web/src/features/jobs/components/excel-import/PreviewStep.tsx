@@ -1,10 +1,6 @@
 import React from "react";
-import { Table, Button, Tag, Upload } from "antd";
-import {
-  ArrowRightOutlined,
-  UndoOutlined,
-  UploadOutlined,
-} from "@ant-design/icons";
+import { Table, Button, Tag, Upload, Tooltip, message } from "antd";
+import { ArrowRightOutlined, UndoOutlined } from "@ant-design/icons";
 import {
   useImportStore,
   selectUniqueExcelCategories,
@@ -166,45 +162,63 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
 
   const columns = [
     {
-      title: "Tên sản phẩm",
+      title: (
+        <span className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+          Tên sản phẩm
+        </span>
+      ),
       dataIndex: "title",
       key: "title",
-      width: 250,
+      width: 280,
       render: (text: string) => (
-        <span className="text-xs font-medium">{text}</span>
+        <span className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-snug block">
+          {text}
+        </span>
       ),
     },
     {
-      title: "Mã hàng",
+      title: (
+        <span className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+          Mã hàng (SKU)
+        </span>
+      ),
       dataIndex: "partNumbers",
       key: "partNumbers",
-      width: 110,
+      width: 130,
       align: "center" as const,
       render: (text: string) => (
-        <span className="font-mono text-[10px] text-slate-500">
+        <span className="font-mono text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded border border-slate-200 dark:border-slate-700 inline-block">
           {text || "-"}
         </span>
       ),
     },
     {
-      title: "Dòng xe",
+      title: (
+        <span className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+          Dòng xe
+        </span>
+      ),
       dataIndex: "carModels",
       key: "carModels",
-      width: 150,
+      width: 160,
       render: (text: string) => (
-        <span className="text-[10px] text-slate-600 dark:text-slate-400">
+        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
           {text || "-"}
         </span>
       ),
     },
     {
-      title: "Mô tả ngắn",
+      title: (
+        <span className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+          Mô tả ngắn
+        </span>
+      ),
       dataIndex: "shortDescription",
       key: "shortDescription",
-      width: 200,
+      width: 220,
       render: (text: string) => (
         <span
-          className="text-[10px] text-slate-400 truncate block max-w-[200px]"
+          className="text-xs text-slate-600 dark:text-slate-400 truncate block max-w-[220px]"
           title={text}
         >
           {text || "-"}
@@ -212,23 +226,33 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
       ),
     },
     {
-      title: "Chất liệu",
+      title: (
+        <span className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+          Chất liệu
+        </span>
+      ),
       dataIndex: "material",
       key: "material",
-      width: 100,
+      width: 120,
       align: "center" as const,
       render: (text: string) => (
-        <span className="text-[10px] text-slate-500">{text || "-"}</span>
+        <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+          {text || "-"}
+        </span>
       ),
     },
     {
-      title: "Giá bán",
+      title: (
+        <span className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+          Giá bán
+        </span>
+      ),
       dataIndex: "price",
       key: "price",
-      width: 110,
+      width: 130,
       align: "right" as const,
       render: (price: string) => (
-        <span className="font-black text-red-600 text-xs">
+        <span className="font-black text-red-600 dark:text-red-400 text-sm tracking-tight">
           {price && !isNaN(Number(price))
             ? `${Number(price).toLocaleString("vi-VN")}đ`
             : price || "-"}
@@ -236,134 +260,220 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
       ),
     },
     {
-      title: "Danh mục Excel",
+      title: (
+        <span className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+          Danh mục Excel
+        </span>
+      ),
       dataIndex: "category",
       key: "category",
-      width: 150,
+      width: 160,
       render: (cat: string) => (
-        <Tag color="default" style={{ fontWeight: "bold", fontSize: "10px" }}>
+        <Tag
+          color="blue"
+          className="text-xs font-bold py-1 px-2.5 rounded-md border-blue-200"
+        >
           {cat}
         </Tag>
       ),
     },
     {
-      title: "Thương hiệu",
+      title: (
+        <span className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+          Thương hiệu
+        </span>
+      ),
       dataIndex: "brand",
       key: "brand",
-      width: 120,
-      render: (brand: string) => (
-        <Tag color="warning" style={{ fontWeight: "bold", fontSize: "10px" }}>
-          {brand || "-"}
-        </Tag>
-      ),
+      width: 140,
+      render: (b: string) =>
+        b ? (
+          <Tag
+            color="purple"
+            className="text-xs font-bold py-1 px-2.5 rounded-md border-purple-200"
+          >
+            {b}
+          </Tag>
+        ) : (
+          <span className="text-xs text-slate-400">-</span>
+        ),
     },
     {
-      title: "Ảnh đại diện",
+      title: (
+        <span className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+          Ảnh đại diện
+        </span>
+      ),
       key: "featuredImage",
-      width: 180,
+      width: 250,
       render: (_: unknown, __: unknown, index: number) => {
         const file = rowFeaturedFile[index] || null;
+
         return (
-          <Upload
-            listType="picture"
-            maxCount={1}
-            fileList={
-              file
-                ? [
-                    {
-                      uid: "-1",
-                      name: file.name,
-                      status: "done",
-                      url: getBlobUrl(file),
-                    },
-                  ]
-                : []
-            }
-            beforeUpload={(newFile) => {
-              setRowFeaturedFile(index, newFile);
-              return false;
-            }}
-            onRemove={() => {
-              if (file) {
-                const url = blobUrlsRef.current.get(file);
-                if (url) {
-                  URL.revokeObjectURL(url);
-                  blobUrlsRef.current.delete(file);
-                }
+          <div className="space-y-2 py-1">
+            <Upload
+              listType="picture"
+              maxCount={1}
+              fileList={
+                file
+                  ? [
+                      {
+                        uid: "-1",
+                        name: file.name,
+                        status: "done",
+                        url: getBlobUrl(file),
+                      },
+                    ]
+                  : []
               }
-              setRowFeaturedFile(index, null);
-            }}
-          >
-            {!file && (
-              <Button size="small" icon={<UploadOutlined />}>
-                Chọn ảnh
-              </Button>
+              beforeUpload={(newFile) => {
+                setRowFeaturedFile(index, newFile);
+                return false;
+              }}
+              onRemove={() => {
+                if (file) {
+                  const url = blobUrlsRef.current.get(file);
+                  if (url) {
+                    URL.revokeObjectURL(url);
+                    blobUrlsRef.current.delete(file);
+                  }
+                }
+                setRowFeaturedFile(index, null);
+              }}
+            >
+              {!file && (
+                <Button size="middle" className="font-semibold text-xs">
+                  Chọn ảnh chính
+                </Button>
+              )}
+            </Upload>
+
+            {file && data.length > 1 && (
+              <div className="pt-1">
+                <Tooltip
+                  title={`Áp dụng ảnh đại diện này cho tất cả ${data.length} sản phẩm trong lô hàng`}
+                >
+                  <Button
+                    size="small"
+                    type="primary"
+                    ghost
+                    className="text-xs font-bold text-blue-700 border-blue-400 bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-700 text-left truncate max-w-[230px] h-7 shadow-xs"
+                    onClick={() => {
+                      useImportStore.getState().applyFeaturedFileToAll(file);
+                      message.success(
+                        `Đã gán ảnh đại diện cho tất cả ${data.length} sản phẩm trong lô hàng`,
+                      );
+                    }}
+                  >
+                    Áp dụng ảnh này cho tất cả ({data.length} sp)
+                  </Button>
+                </Tooltip>
+              </div>
             )}
-          </Upload>
+          </div>
         );
       },
     },
     {
-      title: "Thư viện ảnh",
+      title: (
+        <span className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+          Thư viện ảnh
+        </span>
+      ),
       key: "galleryImages",
-      width: 220,
+      width: 260,
       render: (_: unknown, __: unknown, index: number) => {
         const files = rowGalleryFiles[index] || [];
+
         return (
-          <Upload
-            listType="picture"
-            multiple
-            fileList={files.map((file, i) => ({
-              uid: `${i}`,
-              name: file.name,
-              status: "done",
-              url: getBlobUrl(file),
-            }))}
-            beforeUpload={(file) => {
-              addRowGalleryFile(index, file);
-              return false; // Prevent auto-upload
-            }}
-            onRemove={(fileToRemove) => {
-              const originalFile = files.find(
-                (f) => f.name === fileToRemove.name,
-              );
-              if (originalFile) {
-                const url = blobUrlsRef.current.get(originalFile);
-                if (url) {
-                  URL.revokeObjectURL(url);
-                  blobUrlsRef.current.delete(originalFile);
+          <div className="space-y-2 py-1">
+            <Upload
+              listType="picture"
+              multiple
+              fileList={files.map((file, i) => ({
+                uid: `${i}`,
+                name: file.name,
+                status: "done",
+                url: getBlobUrl(file),
+              }))}
+              beforeUpload={(file) => {
+                addRowGalleryFile(index, file);
+                return false; // Prevent auto-upload
+              }}
+              onRemove={(fileToRemove) => {
+                const originalFile = files.find(
+                  (f) => f.name === fileToRemove.name,
+                );
+                if (originalFile) {
+                  const url = blobUrlsRef.current.get(originalFile);
+                  if (url) {
+                    URL.revokeObjectURL(url);
+                    blobUrlsRef.current.delete(originalFile);
+                  }
                 }
-              }
-              const updatedFiles = files.filter(
-                (f) => f.name !== fileToRemove.name,
-              );
-              setRowGalleryFiles(index, updatedFiles);
-            }}
-          >
-            <Button size="small" icon={<UploadOutlined />}>
-              Chọn ảnh phụ
-            </Button>
-          </Upload>
+                const updatedFiles = files.filter(
+                  (f) => f.name !== fileToRemove.name,
+                );
+                setRowGalleryFiles(index, updatedFiles);
+              }}
+            >
+              <Button size="middle" className="font-semibold text-xs">
+                Chọn ảnh phụ
+              </Button>
+            </Upload>
+
+            {files.length > 0 && data.length > 1 && (
+              <div className="pt-1">
+                <Tooltip
+                  title={`Áp dụng bộ ảnh phụ này cho tất cả ${data.length} sản phẩm trong lô hàng`}
+                >
+                  <Button
+                    size="small"
+                    type="primary"
+                    ghost
+                    className="text-xs font-bold text-blue-700 border-blue-400 bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-700 text-left truncate max-w-[240px] h-7 shadow-xs"
+                    onClick={() => {
+                      useImportStore.getState().applyGalleryFilesToAll(files);
+                      message.success(
+                        `Đã gán bộ ảnh phụ cho tất cả ${data.length} sản phẩm trong lô hàng`,
+                      );
+                    }}
+                  >
+                    Áp dụng bộ ảnh này cho tất cả ({data.length} sp)
+                  </Button>
+                </Tooltip>
+              </div>
+            )}
+          </div>
         );
       },
     },
     {
-      title: "Trạng thái",
+      title: (
+        <span className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+          Trạng thái
+        </span>
+      ),
       key: "status",
-      width: 120,
+      width: 140,
       align: "center" as const,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      render: (record: any) => {
+      render: (record: { partNumbers?: string }) => {
         const exists = existingProducts.find(
           (ex) => ex.sku === record.partNumbers,
         );
         return exists ? (
-          <Tag color="blue" style={{ fontWeight: "bold", fontSize: "10px" }}>
-            Đã có (Update)
+          <Tag
+            color="blue"
+            className="text-xs font-bold py-1 px-2.5 rounded-md border-blue-200"
+          >
+            Cập nhật
           </Tag>
         ) : (
-          <Tag color="green" style={{ fontWeight: "bold", fontSize: "10px" }}>
-            Mới (Import)
+          <Tag
+            color="green"
+            className="text-xs font-bold py-1 px-2.5 rounded-md border-green-200"
+          >
+            Tạo mới
           </Tag>
         );
       },
@@ -378,8 +488,8 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
           columns={columns}
           rowKey={(_, idx) => idx?.toString() || ""}
           pagination={{ pageSize: 10, showSizeChanger: false }}
-          size="small"
-          scroll={{ x: 1100, y: "calc(85vh - 280px)" }}
+          size="middle"
+          scroll={{ x: 1300, y: "calc(85vh - 280px)" }}
         />
       </div>
 
