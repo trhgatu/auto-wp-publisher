@@ -11,7 +11,7 @@ export const MainLayout = () => {
 
   return (
     <Layout hasSider style={{ minHeight: "100vh" }}>
-      <Sidebar collapsed={collapsed} onCollapse={setCollapsed} />
+      <Sidebar collapsed={collapsed} />
       <Layout
         style={{
           marginLeft: collapsed ? 72 : 240,
@@ -19,7 +19,10 @@ export const MainLayout = () => {
           transition: "margin-left 0.2s",
         }}
       >
-        <Header />
+        <Header
+          collapsed={collapsed}
+          onToggle={() => setCollapsed(!collapsed)}
+        />
         <Content
           style={{ padding: "88px 32px 32px 32px", overflow: "initial" }}
         >

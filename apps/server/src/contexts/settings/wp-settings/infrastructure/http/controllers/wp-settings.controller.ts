@@ -23,7 +23,10 @@ export class WpSettingsController {
       });
     }
 
-    return setting;
+    return {
+      ...setting,
+      appPassword: setting.appPassword ? '********' : '',
+    };
   }
 
   @Post()
@@ -32,23 +35,38 @@ export class WpSettingsController {
     body: {
       apiUrl: string;
       username: string;
-      appPassword: string;
+      appPassword?: string;
     },
   ) {
-    return this.prisma.wpSetting.upsert({
+    const existing = await this.prisma.wpSetting.findUnique({
+      where: { id: 'default' },
+    });
+
+    let finalPassword = body.appPassword;
+    if (!finalPassword || finalPassword === '********') {
+      finalPassword =
+        existing?.appPassword || process.env.WP_APP_PASSWORD || '';
+    }
+
+    const updated = await this.prisma.wpSetting.upsert({
       where: { id: 'default' },
       update: {
         apiUrl: body.apiUrl,
         username: body.username,
-        appPassword: body.appPassword,
+        appPassword: finalPassword,
       },
       create: {
         id: 'default',
         apiUrl: body.apiUrl,
         username: body.username,
-        appPassword: body.appPassword,
+        appPassword: finalPassword,
       },
     });
+
+    return {
+      ...updated,
+      appPassword: updated.appPassword ? '********' : '',
+    };
   }
 
   @Post('test')
@@ -57,14 +75,23 @@ export class WpSettingsController {
     body: {
       apiUrl: string;
       username: string;
-      appPassword: string;
+      appPassword?: string;
     },
   ) {
+    let passwordToTest = body.appPassword;
+    if (!passwordToTest || passwordToTest === '********') {
+      const existing = await this.prisma.wpSetting.findUnique({
+        where: { id: 'default' },
+      });
+      passwordToTest =
+        existing?.appPassword || process.env.WP_APP_PASSWORD || '';
+    }
+
     const wpBaseUrl = body.apiUrl.replace(/\/$/, '');
     const wcApiUrl = `${wpBaseUrl.replace(/\/wp\/v2\/?$/, '')}/wc/v3`;
     const authHeader =
       'Basic ' +
-      Buffer.from(`${body.username}:${body.appPassword}`).toString('base64');
+      Buffer.from(`${body.username}:${passwordToTest}`).toString('base64');
 
     const response = await fetch(`${wcApiUrl}/products/categories?per_page=1`, {
       headers: { Authorization: authHeader },
