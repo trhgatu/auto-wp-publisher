@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '@shared/infrastructure/prisma/prisma.service';
 
-@Controller('settings/wordpress')
+@Controller('wp-settings')
 export class WpSettingsController {
   constructor(private readonly prisma: PrismaService) {}
 
