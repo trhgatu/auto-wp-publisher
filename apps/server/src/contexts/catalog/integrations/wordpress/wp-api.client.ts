@@ -43,8 +43,8 @@ export class WpApiClient {
 
   async getAuthHeader(): Promise<string> {
     const settings = await this.getSettings();
-    const wpUser = settings.username;
-    const wpPass = settings.appPassword;
+    const wpUser = (settings.username || '').trim();
+    const wpPass = (settings.appPassword || '').trim();
 
     if (!wpUser || !wpPass) {
       throw new Error(
@@ -80,10 +80,57 @@ export class WpApiClient {
       ...(options.headers || {}),
     };
 
-    return fetch(url, {
+    const response = await fetch(url, {
       ...options,
       headers,
       signal: AbortSignal.timeout(timeoutMs),
     });
+
+    if (response.status === 401) {
+      const settings = await this.getSettings();
+      const username = (settings.username || '').trim();
+      const password = (settings.appPassword || '').trim();
+
+      // Fallback 1: Try password without spaces if spaces present
+      if (password.includes(' ')) {
+        const altPassword = password.replace(/\s+/g, '');
+        const altAuthHeader =
+          'Basic ' +
+          Buffer.from(`${username}:${altPassword}`).toString('base64');
+        const altResponse = await fetch(url, {
+          ...options,
+          headers: {
+            ...headers,
+            Authorization: altAuthHeader,
+          },
+          signal: AbortSignal.timeout(timeoutMs),
+        });
+        if (altResponse.ok) {
+          return altResponse;
+        }
+      }
+
+      // Fallback 2: Try URL basic auth if web server strips Authorization header
+      try {
+        const urlObj = new URL(url);
+        if (!urlObj.username && username && password) {
+          urlObj.username = username;
+          urlObj.password = password;
+          const urlResponse = await fetch(urlObj.toString(), {
+            ...options,
+            signal: AbortSignal.timeout(timeoutMs),
+          });
+          if (urlResponse.ok) {
+            return urlResponse;
+          }
+        }
+      } catch (err) {
+        this.logger.warn(
+          `Could not parse URL for basic auth fallback: ${String(err)}`,
+        );
+      }
+    }
+
+    return response;
   }
 }
